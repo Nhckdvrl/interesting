@@ -18,7 +18,15 @@ def _fmt_numina(ex):
             " " + ex["solution"].strip())
 
 
-FORMATTERS = {"gsm8k": _fmt_gsm8k, "numina": _fmt_numina}
+def _fmt_dolly(ex):
+    ctx = ex.get("context", "").strip()
+    q = ex["instruction"].strip()
+    prompt = (f"Instruction: {q}\nInput: {ctx}\nResponse:" if ctx
+              else f"Instruction: {q}\nResponse:")
+    return prompt, " " + ex["response"].strip()
+
+
+FORMATTERS = {"gsm8k": _fmt_gsm8k, "numina": _fmt_numina, "dolly": _fmt_dolly}
 
 
 CACHE_DIR = os.path.expanduser("~/.cache/nora_repo_sft")
@@ -53,6 +61,12 @@ def _build_sft(tokenizer, task="gsm8k", n_train=4000, n_eval=400, max_len=512,
     if task == "gsm8k":
         ds = load_dataset("openai/gsm8k", "main")
         tr, te = ds["train"], ds["test"]
+    elif task == "dolly":
+        # a non-reasoning instruction-following contrast to the math tasks
+        d = load_dataset("databricks/databricks-dolly-15k", split="train")
+        d = d.shuffle(seed=1234)
+        te = d.select(range(n_eval))
+        tr = d.select(range(n_eval, min(len(d), n_eval + n_train)))
     elif task == "numina":
         # single large SFT pool; a disjoint held-out slice serves as eval.
         d = load_dataset("AI-MO/NuminaMath-CoT", split="train")
