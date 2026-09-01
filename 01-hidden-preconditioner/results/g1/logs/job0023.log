@@ -1,0 +1,2 @@
+/home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_panel.py --tag g1 --cond kaimingspec_flatdiag --lr 0.0001 --seed 0 --gauge_seed 0 --steps 300
+
