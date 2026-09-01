@@ -1,0 +1,7 @@
+# fvcrc20:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_panel.py --tag g1b --cond kaiming --lr 6e-05 --seed 0 --steps 300
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+[kaiming_lr6e-05_s0] 196 adapters, 10.09M trainable params
+[kaiming_lr6e-05_s0] base=0.8318 final_eval=0.4542 (150s)

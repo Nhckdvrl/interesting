@@ -64,6 +64,46 @@ def hadamard(n, device="cpu", dtype=torch.float64):
     return H / (n ** 0.5)
 
 
+def block_orthogonal(n, k, generator=None, device="cpu", dtype=torch.float64,
+                     permute=True):
+    """Orthogonal matrix that mixes coordinates only within blocks of size k,
+    optionally composed with a random permutation.
+
+    k = 1  -> a pure (signed) permutation.  AdamW is EXACTLY covariant under
+              permutations and sign flips, because m/sqrt(v) is applied
+              elementwise: this is the zero-dose control.
+    k = n  -> a full random rotation, the maximum dose.
+    Intermediate k gives a dose-response ladder in "how many coordinates get
+    mixed together", while every rung is an exact function-preserving gauge.
+    """
+    assert n % k == 0
+    if k == 1:
+        blocks = torch.sign(torch.randn(n, generator=generator, device=device,
+                                        dtype=dtype))
+        blocks[blocks == 0] = 1.0
+        R = torch.diag(blocks)
+    else:
+        R = torch.block_diag(*[random_orthogonal(k, generator, device, dtype)
+                               for _ in range(n // k)])
+    if permute:
+        perm = torch.randperm(n, generator=generator, device=device)
+        R = R[:, perm]
+    return R
+
+
+def make_R(kind, n, generator=None, device="cpu", dtype=torch.float64):
+    """Gauge ladder.  'perm' | 'block<k>' | 'rand' | 'hadamard'."""
+    if kind == "perm":
+        return block_orthogonal(n, 1, generator, device, dtype)
+    if kind.startswith("block"):
+        return block_orthogonal(n, int(kind[5:]), generator, device, dtype)
+    if kind in ("rand", "random"):
+        return random_orthogonal(n, generator, device, dtype)
+    if kind == "hadamard":
+        return hadamard(n, device, dtype)
+    raise ValueError(kind)
+
+
 def _layers(model):
     return model.model.layers
 

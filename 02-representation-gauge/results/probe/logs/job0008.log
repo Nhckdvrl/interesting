@@ -1,0 +1,15 @@
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/02-representation-gauge/src/run_dose.py --tag probe --method full --optimizer adamw --lr 1e-05 --gauge none --steps 200 --eval_every 100
+
+    step 0/200 loss=0.6461 (1s)
+    step 20/200 loss=0.6244 (14s)
+    step 40/200 loss=0.3850 (27s)
+    step 60/200 loss=0.5579 (40s)
+    step 80/200 loss=0.4254 (52s)
+    step 100/200 loss=0.6486 (65s)
+    step 120/200 loss=0.4029 (84s)
+    step 140/200 loss=0.4637 (97s)
+    step 160/200 loss=0.4586 (110s)
+    step 180/200 loss=0.5207 (123s)
+    step 199/200 loss=0.5384 (135s)
+[full_adamw_noneg0_lr1e-05_s0] base=0.553113 final=0.501226 (141s)

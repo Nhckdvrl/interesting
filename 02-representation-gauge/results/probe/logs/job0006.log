@@ -1,0 +1,15 @@
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/02-representation-gauge/src/run_dose.py --tag probe --method lora --optimizer sgd --lr 0.1 --gauge none --steps 200 --eval_every 100
+
+    step 0/200 loss=0.6461 (1s)
+    step 20/200 loss=0.6320 (12s)
+    step 40/200 loss=0.3968 (24s)
+    step 60/200 loss=0.5709 (35s)
+    step 80/200 loss=0.4494 (47s)
+    step 100/200 loss=0.6489 (58s)
+    step 120/200 loss=0.4137 (77s)
+    step 140/200 loss=0.4647 (88s)
+    step 160/200 loss=0.4725 (100s)
+    step 180/200 loss=0.5267 (111s)
+    step 199/200 loss=0.5371 (122s)
+[lora_sgd_noneg0_lr0.1_s0] base=0.553113 final=0.504807 (129s)

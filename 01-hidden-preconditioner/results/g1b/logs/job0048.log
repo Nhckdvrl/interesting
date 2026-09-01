@@ -1,0 +1,16 @@
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_panel.py --tag g1b_r4a32 --cond kaiming --lr 0.0001 --seed 0 --r 4 --alpha 32 --steps 300
+
+[kaiming_lr0.0001_s0] 196 adapters, 2.52M trainable params
+    step 0/300 loss=1.1660 (0s)
+    step 30/300 loss=0.4499 (6s)
+    step 60/300 loss=0.5040 (12s)
+    step 90/300 loss=0.4001 (18s)
+    step 120/300 loss=0.4234 (24s)
+    step 150/300 loss=0.4498 (30s)
+    step 180/300 loss=0.3678 (37s)
+    step 210/300 loss=0.3897 (43s)
+    step 240/300 loss=0.4030 (50s)
+    step 270/300 loss=0.3619 (56s)
+    step 299/300 loss=0.3893 (62s)
+[kaiming_lr0.0001_s0] base=0.8318 final_eval=0.4487 (63s)

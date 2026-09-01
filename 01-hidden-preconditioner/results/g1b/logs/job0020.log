@@ -1,0 +1,5 @@
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_panel.py --tag g1b --cond kaimingspec_flatdiag --lr 0.0002 --seed 0 --steps 300
+
+[kaimingspec_flatdiag_lr0.0002_s0] 196 adapters, 10.09M trainable params
+[kaimingspec_flatdiag_lr0.0002_s0] base=0.8318 final_eval=0.4433 (64s)

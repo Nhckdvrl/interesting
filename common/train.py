@@ -138,6 +138,9 @@ def train(model, adapters, params, train_loader, eval_loader, cfg, device="cuda"
         opt.step()
         if callback is not None:
             callback(t, model, adapters)
+        if t % max(steps // 10, 1) == 0 or t == steps - 1:
+            print(f"    step {t}/{steps} loss={tot_loss/max(tot_tok,1):.4f} "
+                  f"({time.time()-t0:.0f}s)", flush=True)
         if t % log_every == 0 or t == steps - 1:
             log["step"].append(t)
             log["train_loss"].append(tot_loss / max(tot_tok, 1))

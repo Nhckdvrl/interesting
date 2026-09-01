@@ -3,3 +3,4 @@ cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0  /home/xia
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc10' (ED25519) to the list of known hosts.
+[full_bs8_lr1e-05_s0] steps=4096 accum=1 base=0.5518 final=0.48606 (976s)
