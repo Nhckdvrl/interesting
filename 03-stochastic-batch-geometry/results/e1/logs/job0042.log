@@ -1,0 +1,18 @@
+# fvcrc15:3 (a100)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/03-stochastic-batch-geometry/src/run_batch.py --tag e1_r128 --method lora --bs 128 --lr 0.003 --seed 0 --r 128 --alpha 32 --task numina --n_train 40000 --n_eval 512 --max_len 512 --budget 32768 --micro_bs 16 --model Qwen/Qwen3-0.6B-Base
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc15' (ED25519) to the list of known hosts.
+    step 0/256 loss=0.5707 (4s)
+    step 25/256 loss=0.5780 (92s)
+    step 50/256 loss=0.6643 (188s)
+    step 75/256 loss=0.6159 (284s)
+    step 100/256 loss=0.5929 (380s)
+    step 125/256 loss=0.5571 (477s)
+    step 150/256 loss=0.5876 (573s)
+    step 175/256 loss=0.5290 (669s)
+    step 200/256 loss=0.4731 (766s)
+    step 225/256 loss=0.5483 (862s)
+    step 250/256 loss=0.4686 (958s)
+    step 255/256 loss=0.5537 (983s)
+[lora_bs128_lr0.003_s0] steps=256 accum=8 base=0.5518 final=0.50640 (990s)

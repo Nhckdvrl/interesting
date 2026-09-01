@@ -14,6 +14,27 @@ from common.data import build_sft, FixedOrderLoader
 from common.train import load_model, train, eval_loss
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+ACACHE = os.path.expanduser("~/.cache/nora_repo_A0")
+
+
+def cached_make_A(kind, r, d_in, seed_key, ref_A, g):
+    """The Schur-Horn constructions are O(d_in) python-level Givens rotations;
+    cache them on disk since every job with the same (kind, r, d_in, seed)
+    rebuilds the identical matrix."""
+    if "flatdiag" not in kind:
+        return make_A(kind, r, d_in, g, "cpu", ref_A=ref_A)
+    os.makedirs(ACACHE, exist_ok=True)
+    key = hashlib.md5(f"{kind}|{r}|{d_in}|{seed_key}".encode()).hexdigest()
+    f = os.path.join(ACACHE, key + ".pt")
+    if os.path.exists(f):
+        try:
+            return torch.load(f)
+        except Exception:
+            pass
+    A = make_A(kind, r, d_in, g, "cpu", ref_A=ref_A)
+    tmp = f + f".tmp{os.getpid()}"
+    torch.save(A, tmp); os.replace(tmp, f)
+    return A
 
 
 def build_factory(kind, r, seed, gauge_seed=0, device="cpu"):
@@ -33,7 +54,7 @@ def build_factory(kind, r, seed, gauge_seed=0, device="cpu"):
                 int(hashlib.md5(f"gauge{gauge_seed}:{name}".encode()).hexdigest()[:12], 16))
             A = make_A("left_gauge", r_, d_in, g2, device, ref_A=base)
         else:
-            A = make_A(kind, r_, d_in, g, device, ref_A=base)
+            A = cached_make_A(kind, r_, d_in, f"{seed}:{name}", base, g)
         st = p_stats(A, s=1.0)
         st.pop("spec_top4", None)
         stats_store[name] = st

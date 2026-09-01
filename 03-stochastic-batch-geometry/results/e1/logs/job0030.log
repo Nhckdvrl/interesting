@@ -13,3 +13,6 @@ Warning: Permanently added 'fvcrc10' (ED25519) to the list of known hosts.
     step 175/256 loss=0.5041 (566s)
     step 200/256 loss=0.4592 (648s)
     step 225/256 loss=0.5388 (730s)
+    step 250/256 loss=0.4621 (811s)
+    step 255/256 loss=0.5432 (831s)
+[full_bs128_lr3e-06_s0] steps=256 accum=8 base=0.5518 final=0.49699 (836s)

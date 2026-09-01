@@ -12,3 +12,7 @@ Warning: Permanently added 'fvcrc15' (ED25519) to the list of known hosts.
     step 612/1024 loss=6.0032 (578s)
     step 714/1024 loss=5.9533 (677s)
     step 816/1024 loss=6.0851 (774s)
+    step 918/1024 loss=5.8116 (873s)
+    step 1020/1024 loss=5.8307 (971s)
+    step 1023/1024 loss=5.9810 (981s)
+[lora_bs32_lr0.01_s0] steps=1024 accum=2 base=0.5518 final=5.73891 (987s)

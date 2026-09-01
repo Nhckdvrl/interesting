@@ -1,0 +1,16 @@
+# LOCAL:3 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_panel.py --tag g1c --cond geomspec_flatdiag0.3 --lr 0.0003 --seed 0 --steps 300
+
+[geomspec_flatdiag0.3_lr0.0003_s0] 196 adapters, 10.09M trainable params
+    step 0/300 loss=1.1660 (0s)
+    step 30/300 loss=0.4524 (6s)
+    step 60/300 loss=0.5072 (12s)
+    step 90/300 loss=0.4014 (18s)
+    step 120/300 loss=0.4260 (24s)
+    step 150/300 loss=0.4524 (29s)
+    step 180/300 loss=0.3694 (36s)
+    step 210/300 loss=0.3969 (42s)
+    step 240/300 loss=0.3951 (48s)
+    step 270/300 loss=0.3573 (54s)
+    step 299/300 loss=0.3929 (59s)
+[geomspec_flatdiag0.3_lr0.0003_s0] base=0.8318 final_eval=0.4468 (60s)

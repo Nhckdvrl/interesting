@@ -57,6 +57,7 @@ def main():
     ap.add_argument("--bs", type=int, default=16)
     ap.add_argument("--n_batches", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--every_layer", type=int, default=6)
     ap.add_argument("--out", default=os.path.join(
         REPO, "01-hidden-preconditioner", "results", "grad_capture.json"))
     a = ap.parse_args()
@@ -67,7 +68,9 @@ def main():
     targets = ("q_proj", "k_proj", "v_proj", "o_proj",
                "gate_proj", "up_proj", "down_proj")
     mods = {n: m for n, m in model.named_modules()
-            if isinstance(m, nn.Linear) and n.split(".")[-1] in targets}
+            if isinstance(m, nn.Linear) and n.split(".")[-1] in targets
+            and int(n.split("layers.")[1].split(".")[0]) % a.every_layer == 0}
+    print("adapted modules sampled:", len(mods))
     for p in model.parameters():
         p.requires_grad_(False)
     for m in mods.values():

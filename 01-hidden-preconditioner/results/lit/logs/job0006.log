@@ -1,0 +1,7 @@
+# fvcrc11:2 (a100)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit --cond nora --lr 3e-05 --match trace --steps 300 
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc11' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (1s)
+    step 30/300 loss=0.4653 (27s)

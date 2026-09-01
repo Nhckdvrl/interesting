@@ -1,0 +1,130 @@
+"""Faithful re-implementations of the published LoRA initializers, so they can
+be placed inside the matched-control framework of topic 01.
+
+The organising dichotomy this file exists to test:
+
+  * **B_0 = 0 family** (vanilla LoRA, NoRA, EVA, ETF/frame, gradient-subspace
+    without the residual correction, ...).  By Gate-0 theorem T1 these differ
+    *only* through P_0 = s^2 A_0^T A_0, and under SGD their entire merged
+    trajectory is a function of P_0 alone.  Two members with the same P_0 are
+    the same run; a member is fully described by a handful of P-statistics.
+
+  * **B_0 != 0 family** (PiSSA, OLoRA, LoRA-One).  These start the adapter at a
+    nonzero dW and subtract the same amount from the frozen base weight, so the
+    initial function is unchanged but B_0 != 0.  They are the only way out of
+    the P_0 equivalence class, because grad_A = s B^T G is nonzero at step 1.
+
+Every initializer here is trace-matchable: `match_trace` rescales A_0 (and
+compensates B_0) so that tr P equals a reference value, which removes the
+update-magnitude confound identified in Gate 1.
+"""
+import math
+import torch
+import torch.nn as nn
+
+from .pinit import kaiming_A, normalize_columns, make_A
+
+
+# ---------------------------------------------------------------- helpers
+
+def _topr_svd(M, r):
+    # fp32 on whatever device M lives on: these are up to 3072x1024 and a fp64
+    # CPU SVD for all 196 adapted modules would dominate the run time.
+    U, S, Vh = torch.linalg.svd(M.float(), full_matrices=False)
+    return U[:, :r], S[:r], Vh[:r]
+
+
+def rescale_A(A, target_tr):
+    """Scale A so that tr(A^T A) = target_tr."""
+    cur = float(A.pow(2).sum())
+    return A * math.sqrt(target_tr / max(cur, 1e-30))
+
+
+# ---------------------------------------------------------------- B0 = 0 family
+
+def init_eva(X_cov, r, d_in, trace):
+    """EVA (NeurIPS 2025): rows of A_0 are the top-r principal directions of the
+    layer's *input activations*.  X_cov is the (d_in, d_in) uncentred second
+    moment of the inputs."""
+    evals, evecs = torch.linalg.eigh(X_cov.float())
+    A = evecs[:, -r:].T.contiguous()               # (r, d_in), orthonormal rows
+    return rescale_A(A, trace)
+
+
+def init_gradsubspace(G, r, trace):
+    """LoRA-One / gradient-subspace initialisation with B_0 = 0: rows of A_0 are
+    the top-r right singular vectors of the one-step full-weight gradient."""
+    _, _, Vh = _topr_svd(G, r)
+    return rescale_A(Vh.contiguous(), trace)
+
+
+def init_etf(r, d_in, generator, trace, iters=60):
+    """Approximate equiangular tight frame in the sense used by the LoRA
+    dynamics literature: the d_in *columns* of A (vectors in R^r) have equal
+    norms and minimal mutual coherence.  Alternating projection between
+    (unit-norm columns) and (tight frame, i.e. A A^T proportional to I)."""
+    A = torch.randn(r, d_in, generator=generator, dtype=torch.float64)
+    A = A.to(torch.float64)
+    for _ in range(iters):
+        A = normalize_columns(A, target_norm=1.0)          # equal column norms
+        U, S, Vh = torch.linalg.svd(A, full_matrices=False)
+        A = U @ Vh * math.sqrt(d_in / r)                   # tight frame
+    A = normalize_columns(A, target_norm=1.0)
+    return rescale_A(A, trace)
+
+
+# ---------------------------------------------------------------- B0 != 0 family
+
+def init_pissa(W, r, s, minor=False):
+    """PiSSA: adapter carries the principal (or minor) r singular triplets of W,
+    and the same amount is removed from the frozen base weight.
+    Returns (A0, B0) with s * B0 @ A0 = U_r S_r V_r^T."""
+    U, S, Vh = torch.linalg.svd(W.float(), full_matrices=False)
+    if minor:
+        U, S, Vh = U[:, -r:], S[-r:], Vh[-r:]
+    else:
+        U, S, Vh = U[:, :r], S[:r], Vh[:r]
+    sq = S.clamp_min(0).sqrt()
+    A0 = (torch.diag(sq) @ Vh) / math.sqrt(s)
+    B0 = (U @ torch.diag(sq)) / math.sqrt(s)
+    return A0, B0
+
+
+def init_olora(W, r, s):
+    """OLoRA: QR of the base weight; the leading r columns of Q and rows of R
+    initialise the adapter, and the product is removed from the base weight."""
+    Q, R = torch.linalg.qr(W.float())
+    B0 = Q[:, :r] / math.sqrt(s)
+    A0 = R[:r] / math.sqrt(s)
+    return A0, B0
+
+
+def init_lora_one(G, r, s, W=None, b0_rel=0.01):
+    """LoRA-One (ICML 2025) style: the adapter is initialised on the one-step
+    full-gradient subspace with a NONZERO product, so that s*B0@A0 is aligned
+    with the top-r part of -G.
+
+    The published scaling is tied to the paper's step-size analysis; here the
+    magnitude is made an explicit, sweepable knob:
+        ||s B0 A0||_F = b0_rel * ||W||_F ,
+    so that the *subspace* (which is what the method claims) and the *scale*
+    (the confound identified in Gate 1) can be varied independently."""
+    U, S, Vh = _topr_svd(-G, r)
+    scale = 1.0
+    if W is not None:
+        cur = float(S.pow(2).sum().sqrt())
+        scale = b0_rel * float(W.float().norm()) / max(cur, 1e-30)
+    sq = (S * scale).clamp_min(0).sqrt()
+    A0 = (torch.diag(sq) @ Vh) / math.sqrt(s)
+    B0 = (U @ torch.diag(sq)) / math.sqrt(s)
+    return A0, B0
+
+
+# ---------------------------------------------------------------- collection
+
+ZERO_B = ["kaiming", "gaussian", "nora", "nora_unit", "kaimingspec_flatdiag",
+          "flatspec_flatdiag", "left_gauge", "etf", "eva", "gradsub"] + \
+         [f"geomspec_flatdiag{d}" for d in (0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3)]
+NONZERO_B = ["pissa", "pissa_minor", "olora", "lora_one"]
+NEEDS_GRAD = {"gradsub", "lora_one"}
+NEEDS_ACT = {"eva"}

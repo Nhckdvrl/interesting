@@ -20,7 +20,8 @@ import torch.nn as nn
 
 class LoRALinear(nn.Module):
     def __init__(self, base: nn.Linear, r: int, alpha: float, A0: torch.Tensor,
-                 scaling: str = "standard", train_A: bool = True):
+                 scaling: str = "standard", train_A: bool = True,
+                 B0: torch.Tensor = None, subtract_from_base: bool = False):
         super().__init__()
         self.base = base
         for p in self.base.parameters():
@@ -38,8 +39,18 @@ class LoRALinear(nn.Module):
         dt = base.weight.dtype
         self.lora_A = nn.Parameter(A0.to(device=base.weight.device, dtype=torch.float32),
                                    requires_grad=train_A)
-        self.lora_B = nn.Parameter(torch.zeros(d_out, r, device=base.weight.device,
-                                               dtype=torch.float32))
+        if B0 is None:
+            B0 = torch.zeros(d_out, r)
+        self.lora_B = nn.Parameter(B0.to(device=base.weight.device,
+                                         dtype=torch.float32))
+        if subtract_from_base:
+            # PiSSA / OLoRA / LoRA-One style: the adapter starts at a NONZERO
+            # dW and the same amount is removed from the frozen base weight, so
+            # the initial *function* is unchanged while B_0 != 0.  This is the
+            # only way an initializer can leave the P_0 equivalence class.
+            with torch.no_grad():
+                dw = self.s * (self.lora_B.float() @ self.lora_A.float())
+                base.weight.data -= dw.to(base.weight.dtype)
         self.register_buffer("A0", self.lora_A.detach().clone(), persistent=False)
         self._compute_dtype = dt
 
@@ -68,7 +79,8 @@ DEFAULT_TARGETS = ("q_proj", "k_proj", "v_proj", "o_proj",
 
 def apply_lora(model, r, alpha, a_factory, targets=DEFAULT_TARGETS,
                scaling="standard", train_A=True, layer_filter=None):
-    """a_factory(name, r, d_in, d_out) -> A0 tensor (r, d_in)."""
+    """a_factory(name, r, d_in, d_out) -> A0 (r, d_in), or a dict
+    {A: ..., B: ..., subtract: bool} for nonzero-B initializers."""
     to_patch = []
     for name, mod in model.named_modules():
         if isinstance(mod, nn.Linear) and name.split(".")[-1] in targets:
@@ -78,8 +90,13 @@ def apply_lora(model, r, alpha, a_factory, targets=DEFAULT_TARGETS,
     adapters = {}
     for name, mod in to_patch:
         d_out, d_in = mod.weight.shape
-        A0 = a_factory(name, r, d_in, d_out)
-        new = LoRALinear(mod, r, alpha, A0, scaling=scaling, train_A=train_A)
+        out = a_factory(name, r, d_in, d_out)
+        if isinstance(out, dict):
+            A0, B0, sub = out["A"], out.get("B"), out.get("subtract", False)
+        else:
+            A0, B0, sub = out, None, False
+        new = LoRALinear(mod, r, alpha, A0, scaling=scaling, train_A=train_A,
+                         B0=B0, subtract_from_base=sub)
         parent, attr = _get_parent(model, name)
         setattr(parent, attr, new)
         adapters[name] = new
