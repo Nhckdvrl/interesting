@@ -1,113 +1,222 @@
 # 01 — Hidden Preconditioner — STATUS
 
 Last update: 2026-09-02
+Model: Qwen3-0.6B-Base · task: GSM8K SFT (300 steps, AdamW, r=16, α=32, all 7
+linear module types, 196 adapters) unless stated · fp32 weights and compute for
+the audit; bf16 for the earlier matched panels.
 
-## Gate 0 — theory / synthetic (`src/gate0_feasible_region.py`, CPU)
+---
 
-**F1. The feasible region of P is constructively parameterised.** A Bendel–Mickey
-sweep of Givens rotations on the *columns* of `A` (cost `O(d_in·r)`) realises any
-Schur–Horn-feasible pair (spectrum λ, diagonal d) exactly: spectrum error ≤2e-16,
-relative diagonal error ≤5e-9 at every size tested up to `r=64, d_in=2048`. This
-is the tool that makes every matched control in this project exact rather than
-approximate.
+## Summary of what is established
 
-**F2. Crosstalk magnitude is not an independent knob — killed at Gate 0.** Since
-`tr P = Σλ = Σd`, `‖P‖_F² = Σλ²`, `‖diag P‖² = Σd²`,
+| channel of `P = s²A₀ᵀA₀` | causal? | evidence |
+|---|---|---|
+| **scale in the data metric**, `tr(PΣ_x)` | **yes — dominant** | `r = +0.973` between best-tuned loss and `log tr(PΣ)` across all B₀=0 methods |
+| **effective rank**, `r_eff(P)` (and its data-metric version) | **yes — second channel** | `r = +0.978` within the data-agnostic family; verified first-order law |
+| **diagonal balance** (NoRA's mechanism) | **no** | inside the provably content-free null |
+| **crosstalk magnitude** | not a free parameter | killed analytically at Gate 0 |
+| **frame / ETF geometry, unit norms** | **no** | inside the null |
+| **`B₀ ≠ 0`** | yes — leaves the equivalence class entirely | the only methods that separate after full matching |
+| **`tr P` (parameter-space scale)** | **no**, not on its own | rank 4/16/64 vary `tr P` 16× and lie on one loss(LR) curve |
 
-    c(P)² = ‖P − Diag P‖_F² / ‖P‖_F² = 1 − Σd²/Σλ²
+---
 
-is a *deterministic function of (λ, d)*. Six independent draws with matched
-(λ, d) gave `c(P) = 0.993156961279` to 12 digits while their `P` matrices differ
-by `‖P₀−P₁‖/‖P₀‖ = 1.40`. Moreover, with a flat diagonal `Σλ² ≥ (tr P)²/r`, so
+## Gate 0 — theory (`src/gate0_feasible_region.py`, CPU)
 
-    c(P) ∈ [ √(1 − r/d_in), 1 ]   — [0.9910, 1] for r=16, d_in=896.
+**F1. The feasible region of `P` is constructively parameterised.** Givens
+rotations on the *columns* of `A` (Bendel–Mickey, `O(d_in·r)`) realise any
+Schur–Horn-feasible (spectrum λ, diagonal d) exactly: spectrum error ≤2e-16,
+relative diagonal error ≤5e-9 up to `r=64, d_in=2048`. Every matched control in
+this project is therefore exact, not approximate.
 
-The pre-registered statistic §3.3 is therefore *pinned* in the realistic
-`r ≪ d_in` regime and cannot be a causal knob. Experiment family B can only be a
-crosstalk-**pattern** experiment; magnitude changes must be routed through the
-spectrum. (NoRA's BIMI experiment was, necessarily, also a pattern experiment.)
+**F2. Crosstalk magnitude is not an independent knob — killed at Gate 0.**
+`tr P = Σλ = Σd`, `‖P‖_F² = Σλ²`, `‖diag P‖² = Σd²`, so
+`c(P)² = 1 − Σd²/Σλ²` is a *deterministic function of (λ,d)*. Six draws at
+matched (λ,d) gave `c(P) = 0.993156961279` to 12 digits while their `P` differed
+by `‖P₀−P₁‖/‖P₀‖ = 1.40`. With a flat diagonal, `c(P) ∈ [√(1−r/d_in), 1]` =
+[0.9910, 1] at r=16, d_in=896. The pre-registered statistic §3.3 is *pinned* in
+the realistic regime; family B can only be a crosstalk-**pattern** experiment.
 
-**F3–F5. T1 is much stronger than first-order.** If `rank(A)=r`, then
-`A₁ᵀA₁ = A₂ᵀA₂ ⟺ A₂ = QA₁` with `Q ∈ O(r)` (polar uniqueness; verified
-constructively, `‖A₂ − Q̂A₁‖ = 1.4e-15`). Under plain SGD with `B₀=0` the pair
-`(A,B) → (QA, BQᵀ)` is preserved **for all time**, so the merged trajectory
-`s·B_t A_t` is identical:
+**F3–F6. T1 is far stronger than first-order.** For `rank(A)=r`,
+`A₁ᵀA₁ = A₂ᵀA₂ ⟺ A₂ = QA₁`, `Q ∈ O(r)` (polar uniqueness; verified
+constructively, `‖A₂−Q̂A₁‖ = 1.4e-15`). Under plain SGD with `B₀=0` the pair
+`(A,B) → (QA, BQᵀ)` is preserved **for all time**: 30 steps, relative trajectory
+difference ≤3.2e-15 at every LR, versus 0.7–1.1 for a different `P₀`.
 
-    30 steps, relative trajectory difference ≤ 3.2e-15 at every LR tested,
-    versus 0.7–1.1 for a genuinely different P₀.
+> **Under SGD, "which initialisation method" is unidentifiable given `P₀` — not
+> just at step 1, ever.** AdamW breaks it (`m/√v` is elementwise), which turns a
+> random left-`O(r)` rotation of `A₀` into a control that changes **no**
+> P-statistic yet perturbs training: a provably content-free null, far tighter
+> than a seed change.
 
-→ **Under SGD, "which initialisation method" is unidentifiable given P₀.** Not
-just at step 1 — ever.
+---
 
-**F6. AdamW breaks it, giving a zero-content null.** `m/√v` is elementwise and
-not equivariant under `A → QA`. Two initialisations with *identical* P₀ diverge
-by 29–36% relative in `ΔW` after 30 Adam steps, versus 130–139% for genuinely
-different P₀. So a random left-`O(r)` rotation of `A₀` is a control that changes
-**no** pre-registered P-statistic yet perturbs Adam training — a far tighter null
-than a seed change.
+## The measurement floor
 
-## Gate 1a — matched panel (`results/g1`, 52 runs, Qwen3-0.6B-Base / GSM8K / 300 steps / AdamW / r=16 α=32, 4 LRs × 3 seeds)
+`left_gauge` (A₀ → QA₀) is bit-identical in `P₀`, `tr P`, `r_eff`, `diag`,
+crosstalk, `tr(PΣ)`, `tr(PC_g)` and `cos(G,GP)` — confirmed numerically
+(`cos_sgd = 0.10813` for both kaiming and left_gauge, to 5 digits) — while
+`cos_adam` differs (0.0624 vs 0.0614). Its run-to-run spread is the yardstick:
+**null sd = 1.0e-4 at lr 3e-5, up to 2.6e-3 near the LR edge.**
 
-| condition | best eval loss | tr P | diag imbalance | effect vs kaiming |
-|---|---|---|---|---|
-| kaiming (vanilla LoRA) | **0.44302** @3e-4 | 5.33 | 5.0e-2 | — |
-| `left_gauge` (P₀ *identical*) | 0.44364 | 5.33 | 5.0e-2 | **the null**: sd 1e-4…2.6e-3 |
-| `nora` (trace-matched) | 0.44374 | 5.33 | 8e-32 | −0.5σ … +2.4σ, sign unstable |
-| `kaimingspec_flatdiag` (trace **and** spectrum matched) | 0.44455 | 5.33 | 3e-21 | −0.3σ … +5.0σ |
-| `nora_unit` (literal unit columns) | 0.45061 @3e-5 | 1462.9 | 4e-32 | worse after LR tuning |
+---
 
-`nora_unit` has 274× the trace and 10× the realised `‖ΔW‖`; its apparent gain at a
-shared LR is entirely a one-decade shift of the LR axis, and at its own best LR
-it is *worse* than vanilla LoRA.
+## Gate 1a/1b — matched panels (`results/g1`, `g1b*`, 115 runs)
 
-## Gate 1b — dense LR sweep + spectrum/rank/α interventions (`results/g1b*`, 63 runs)
-
-Best-tuned loss, all at exactly matched `tr P = 21.33` (r=16, α=32):
+Best-tuned loss at exactly matched `tr P = 21.33` (r=16, α=32, 8 LRs):
 
 | condition | r_eff(P) | diag imbalance | best loss |
 |---|---|---|---|
-| kaiming | 15.80 | 5.0e-2 | **0.44236** |
+| kaiming (vanilla LoRA) | 15.80 | 5.0e-2 | **0.44236** |
 | `flatspec_flatdiag` | 16.00 | 3e-21 | 0.44326 |
-| `kaimingspec_flatdiag` | 15.80 | 3e-21 | 0.44329 |
-| `nora` | 15.81 | 8e-32 | 0.44348 |
+| `kaimingspec_flatdiag` (trace **and** spectrum matched) | 15.80 | 3e-21 | 0.44329 |
+| `nora` (trace-matched) | 15.81 | 8e-32 | 0.44348 |
 | `geomspec_flatdiag0.5` | **3.00** | 1e-20 | **0.44522** |
+| `nora_unit` (literal unit columns, tr P ×274) | 15.81 | 4e-32 | 0.44773 |
 
-`geomspec_flatdiag0.5` is worse at **every one of the 8 learning rates**
-(+0.002…+0.003 nats in the stable region), and the penalty survives matching on
-the realised `‖ΔW‖` (+0.0035 at matched update norm). Every other statistic —
-trace, diagonal, crosstalk magnitude, nominal rank — is held fixed by
-construction.
+`nora_unit`'s apparent gain at a shared LR is a one-decade shift of the LR axis
+(‖ΔW‖ ×10); at its own best LR it is *worse* than vanilla LoRA.
+
+`tr P` is **not** a universal collapse coordinate: r=4/16/64 at α=32 vary `tr P`
+16× yet lie on one loss(LR) curve (rms 1.1e-3), whereas α=8 vs α=128 at r=16 do
+not (rms 1.3e-2 / 1.8e-2; α=128 gives the single best run in the panel, 0.43891).
+
+---
+
+## Gate 1c — the r_eff dose–response (`results/g1c`, 72 runs)
+
+Ladder of 11 initialisations with **exactly matched trace, exactly flat
+diagonal, identical nominal rank r=16, identical crosstalk magnitude**, varying
+only the spectrum so that `r_eff(P)` sweeps 16.00 → 1.86:
+
+* the penalty is monotone and present at **every one of 4 learning rates**;
+* best-tuned loss vs `1/√r_eff`: **Pearson r = +0.947**, slope +0.0073 nats;
+* it persists at 3× training length (900 steps: +0.0044, larger than at 300).
+
+### The first-order law behind it (`src/grad_capture.py`)
+
+For SGD, `ΔW₁ = −ηGP`, so the loss decrease per unit update norm is
+`cos(G,GP)`. For a `P` whose eigenvectors are unrelated to the gradient,
+
+    cos(G, GP) = √( r_eff(P) / d_in ).
+
+Measured on real Qwen3 gradients over the whole ladder, `cos_sgd/√r_eff` =
+0.0281 ± 0.0007 — **2.5% CV across an 8.6× range of r_eff**.
+
+Adam's first step is `−lr·s·sign(GAᵀ)A`, *not* `−ηGP`; the measured
+`cos_adam` falls only 2.05× while `cos_sgd` falls 2.67× over the same ladder,
+i.e. Adam partially compensates, which is why the trained penalty is 0.003 and
+not the ~0.01 a naive SGD reading would predict.
+
+---
+
+## The literature audit (`results/lit`, 228 runs)
+
+Every published initializer re-implemented (`common/initializers.py`) and run as
+a sample in P-space against the vanilla reference (3 seeds), the `left_gauge`
+null (3 gauges), and exact synthetic controls, over 5–7 learning rates, under
+three matching conventions. **Correctness gate: in fp32 every condition starts
+from a bit-identical function — `base_eval_loss = 0.82531` for all, including
+PiSSA/OLoRA/LoRA-One whose base-weight subtraction is exact only above bf16.**
+
+### Matched `tr P` — best-tuned loss
+
+| condition | group | r_eff | r_eff^Σ | tr(PΣ) | ‖B₀‖ | best |
+|---|---|---|---|---|---|---|
+| kaiming | agnostic | 15.79 | 6.51 | 1.00 | 0 | 0.44317 |
+| left_gauge (null) | agnostic | 15.79 | 6.51 | 1.00 | 0 | 0.44270 |
+| nora | agnostic | 15.80 | 6.48 | 1.00 | 0 | 0.44284 |
+| nora_unit | agnostic | 15.80 | 6.48 | 1.00 | 0 | 0.44249 |
+| etf | agnostic | 16.00 | 6.67 | 1.02 | 0 | 0.44298 |
+| flatspec_flatdiag | agnostic | 16.00 | 6.30 | 1.05 | 0 | 0.44277 |
+| geomspec_flatdiag0.5 | agnostic | 3.00 | 2.38 | 1.16 | 0 | 0.44550 |
+| eva | data-aware | 16.00 | 4.01 | **54.5** | 0 | 0.45104 |
+| gradsub (LoRA-One subspace) | data-aware | 16.00 | 3.26 | **42.0** | 0 | 0.45175 |
+| pissa | B₀≠0 | 15.51 | 3.16 | 4.6 | 10.3 | 0.45098 |
+| pissa_minor | B₀≠0 | 14.11 | 3.99 | 5.7 | 0.7 | 0.44999 |
+| olora | B₀≠0 | 11.30 | 2.51 | 12.5 | 6.7 | 0.45054 |
+| lora_one | B₀≠0 | 5.59 | 1.75 | **88.9** | 0.2 | 0.45669 |
+
+**The six data-agnostic B₀=0 methods span 0.44249–0.44317 — a range of 0.00069,
+entirely inside the `left_gauge` null.** NoRA, ETF/frame optimisation, unit
+column norms, exact diagonal flattening at matched spectrum and a perfectly flat
+spectrum are all mutually indistinguishable from vanilla LoRA after LR tuning.
+
+Within that family the one statistic that predicts is the effective rank:
+`loss vs 1/√r_eff`, **r = +0.978** (n=7); `loss vs 1/cos_adam`, r = +0.973.
+
+### Matched `tr(PΣ)` — the data metric
+
+At matched `tr P`, EVA carries **54.5×** the activation-weighted trace and
+**72.8×** the gradient-weighted trace of a vanilla draw; the gradient subspace
+carries 42×/103×; LoRA-One 89×/449×. Matching `tr(PΣ)` instead moves them most
+of the way onto the vanilla curve:
+
+| condition | best (matched tr P) | best (matched tr PΣ) |
+|---|---|---|
+| eva | 0.45104 | 0.44618 |
+| gradsub | 0.45175 | 0.44503 |
+| pissa_minor | 0.44999 | 0.44671 |
+| vanilla cluster | 0.4425–0.4432 | 0.4426–0.4429 |
+
+The residual (+0.002 for gradsub) is of the size predicted by their reduced
+**data-metric effective rank** `r_eff^Σ = (tr AΣAᵀ)²/‖AΣAᵀ‖_F²` (3.26 vs 6.51):
+`0.0073·(1/√3.26 − 1/√6.51) = 0.0012` predicted, 0.0023 observed.
+
+Across all B₀=0 methods, `loss vs log tr(PΣ)`: **r = +0.973**.
+
+---
 
 ## Interpretation
 
-1. **Diagonal balance, NoRA's claimed mechanism, is inert.** Once `tr P` is
-   matched, flattening `diag P` — by NoRA's own operator, or exactly at matched
-   spectrum, or with a perfectly flat spectrum — moves the tuned loss by at most
-   ~3× the gauge null, and if anything makes it slightly *worse*.
-2. **The causal content of P is in its spectrum, not its diagonal.** Collapsing
-   `r_eff(P)` from 16 → 3 at matched trace and flat diagonal is a consistent,
-   monotone, ~10σ penalty. This is a *positive* result and it identifies a
-   different feature of the same object NoRA discovered.
-3. **`tr P` is not a universal collapse coordinate.** `r=4/16/64` at α=32 vary
-   `tr P` by 16× yet lie on one loss(LR) curve (rms 1.1e-3), whereas α=8 vs
-   α=128 at r=16 do not (rms 1.3e-2 / 1.8e-2, and α=128 gives the single best
-   run in the panel, 0.43891). So the effective step scale under Adam is not
-   `tr P`, and "magnitude" needs a sharper definition than LoRAM's.
+1. **NoRA's mechanism does not survive.** Equalising `diag P` — by NoRA's own
+   operator, at exactly matched spectrum, or with a perfectly flat spectrum — is
+   inside a provably content-free null. The literal unit-norm version's gain is
+   a learning-rate shift.
+2. **`P` acts on data, so the causal scale is `tr(PΣ_x)`, not `tr P`.** This is
+   the loophole every data-aware initializer exploits: at matched `tr P` they are
+   40–110× amplifications of the data-metric scale. It reconciles NoRA (a
+   parameter-space normaliser), LoRAM (magnitude), and EVA/LoRA-DA/LoRA-One
+   (data-aware subspaces) inside one object.
+3. **The second and only other channel is effective rank**, with an exact
+   first-order law verified on real gradients, and it must be measured in the
+   metric that acts (`r_eff^Σ`), not in parameter space.
+4. **`B₀ = 0` is the boundary of the equivalence class.** Only PiSSA, OLoRA and
+   LoRA-One escape it, because `∇_A = sBᵀG ≠ 0` at step 1.
+5. **Method identity adds nothing after conditioning on (data-metric scale,
+   effective rank, `B₀≠0`).**
 
-## Unresolved
+This is Branch A ∪ Branch C of the pre-registered survival tree, with a
+predictive law rather than a debunk — the condition the README set for Branch A
+to be promotable.
 
-* The `√r_eff` first-order prediction (see `src/grad_capture.py`) is an **SGD**
-  statement: under Adam the first step is `−lr·s·sign(GAᵀ)A`, not `−ηGP`. The
-  measured Adam penalty (ratio 0.93 in early descent efficiency) is far smaller
-  than the isotropic SGD prediction (0.44). Whether the r_eff mechanism is
-  quantitatively SGD-theoretic and merely *attenuated* by Adam is being tested.
-* Whether the r_eff penalty persists at 3× training length.
-* Why α and r are not interchangeable at fixed `s = α/r`.
+---
+
+## Falsified
+
+* NoRA's diagonal-balance mechanism (Branch B) — inside the null.
+* Crosstalk magnitude as a causal knob — impossible by construction.
+* `tr P` / `‖ΔW‖` as a universal collapse coordinate — fails across α.
+* The isotropic SGD prediction that low `r_eff` should cost ~2.3× descent
+  efficiency in trained loss — Adam attenuates it to ~0.003 nats.
+
+## Unresolved / in flight
+
+* Four cells (eva, gradsub, pissa, olora, lora_one at published or `tr P` scale)
+  have their LR optimum **at the edge of the grid**; an extension down to 3e-6
+  and up to 2e-3 is running (`results/lit`, +186 runs). Their "best-tuned" values
+  above are therefore upper bounds on their performance.
+* Whether the SGD r_eff effect is genuinely smaller than the AdamW one: the SGD
+  ladder (`results/g1d`, `g1e_long`, 133 runs) gives slope +0.0007 at 300 steps
+  and +0.0049 at 900 steps against AdamW's +0.0073, but the SGD LR grid is coarse
+  and divergence-limited. **Not resolved at present precision.**
+* Breadth: a second task (dolly instruction-following) is running
+  (`results/lit_dolly`, 168 runs); a second model size is not yet done.
 
 ## Next experiments
 
-* `panel_g1c` — r_eff dose–response ladder (16 → 1.86) at matched trace and flat
-  diagonal, 4 LRs, 3 seeds at 4 rungs, plus a 900-step persistence check.
-* `grad_capture` — the cheap init-time predictor: `cos(G, GP)` vs
-  `cos(G, sign(GAᵀ)A)`, testing `cos_sgd = √(r_eff/d_in)` on real gradients.
-* r_eff ladder under **SGD**, where the theory is exact.
+1. Finish the LR-tail extension so every method's optimum is interior.
+2. Breadth: dolly (running) and Qwen3-1.7B-Base for the decisive rows.
+3. A direct test of the prescription: does vanilla LoRA at
+   `lr × √(tr(PΣ)_method/tr(PΣ)_vanilla)` reproduce the data-aware
+   initializer's whole loss curve?

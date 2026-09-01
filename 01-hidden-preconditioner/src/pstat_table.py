@@ -115,11 +115,23 @@ def main():
                     B = B / k
             tp, ta, tg = wt(A); bp, ba, bg = wt(base)
             Ad = A.float().cuda()
+            # effective rank of P measured in the DATA and GRADIENT metrics:
+            #   r_eff^Sigma = (tr P Sigma)^2 / tr(P Sigma P Sigma)
+            #               = (tr M)^2 / ||M||_F^2   with M = A Sigma A^T  (r x r)
+            # This is the natural generalisation of r_eff(P): P acts on data, so
+            # the number of directions it effectively spans should be counted
+            # with the data (or gradient) weighting, not the identity.
+            M_act = Ad @ Sig @ Ad.T
+            M_grd = (Gc @ Ad.T).T @ (Gc @ Ad.T)
+            def erank(M):
+                t = float(torch.diagonal(M).sum())
+                return t * t / (float((M * M).sum()) + 1e-30)
             GP = (Gc @ Ad.T) @ Ad
             U = torch.sign(Gc @ Ad.T) @ Ad
             gn = Gc.norm()
             stt = p_stats(A, s=1.0)
             row = dict(r_eff=stt["eff_rank"], diag_imb=stt["diag_imbalance"],
+                       r_eff_act=erank(M_act), r_eff_grad=erank(M_grd),
                        rel_trP=tp / bp, rel_act=ta / ba, rel_grad=tg / bg,
                        cos_sgd=float((Gc * GP).sum() / (gn * GP.norm() + 1e-30)),
                        cos_adam=float((Gc * U).sum() / (gn * U.norm() + 1e-30)),
@@ -128,7 +140,8 @@ def main():
                 acc.setdefault(k2, []).append(v)
         rows[cond] = {k2: st.mean(v) for k2, v in acc.items()}
         r = rows[cond]
-        print(f"  {cond:22s} r_eff={r['r_eff']:6.2f} trP={r['rel_trP']:7.2f} "
+        print(f"  {cond:22s} r_eff={r['r_eff']:6.2f} rS={r['r_eff_act']:6.2f} "
+              f"rG={r['r_eff_grad']:6.2f} trP={r['rel_trP']:7.2f} "
               f"trPS={r['rel_act']:8.2f} trPCg={r['rel_grad']:9.2f} "
               f"cos_sgd={r['cos_sgd']:.5f} cos_adam={r['cos_adam']:.5f} "
               f"B0={r['B0']:6.2f}")

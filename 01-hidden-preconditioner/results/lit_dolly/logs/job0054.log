@@ -1,0 +1,7 @@
+# LOCAL:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit_dolly --cond nora --lr 0.0001 --match trace --task dolly --model Qwen/Qwen3-0.6B-Base --steps 300 --n_train 6000
+
+    step 0/300 loss=2.3626 (0s)
+    step 30/300 loss=2.4254 (11s)
+    step 60/300 loss=2.4595 (23s)
+    step 90/300 loss=1.6267 (36s)

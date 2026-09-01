@@ -1,0 +1,17 @@
+# fvcrc10:3 (a100)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit --cond lora_one --lr 0.0005 --match trace --steps 300 
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc10' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (1s)
+    step 30/300 loss=0.6324 (49s)
+    step 60/300 loss=0.6585 (99s)
+    step 90/300 loss=0.5117 (149s)
+    step 120/300 loss=0.5411 (197s)
+    step 150/300 loss=0.5620 (246s)
+    step 180/300 loss=0.4418 (305s)
+    step 210/300 loss=0.5029 (353s)
+    step 240/300 loss=0.5050 (401s)
+    step 270/300 loss=0.4538 (448s)
+    step 299/300 loss=0.4651 (495s)
+[lora_one_lr0.0005_s0] base=0.83113 final=0.51921 (505s)
