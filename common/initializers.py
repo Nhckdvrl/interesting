@@ -19,6 +19,8 @@ compensates B_0) so that tr P equals a reference value, which removes the
 update-magnitude confound identified in Gate 1.
 """
 import math
+import os
+
 import torch
 import torch.nn as nn
 
@@ -58,7 +60,30 @@ def init_gradsubspace(G, r, trace):
     return rescale_A(Vh.contiguous(), trace)
 
 
+ETF_CACHE = os.path.expanduser("~/.cache/nora_repo_etf")
+
+
 def init_etf(r, d_in, generator, trace, iters=60):
+    """Disk-cached wrapper: the alternating projection is 60 fp64 SVDs per
+    module in python and dominates the run time of an `etf` job."""
+    import hashlib
+    os.makedirs(ETF_CACHE, exist_ok=True)
+    seed = int(torch.randint(0, 2 ** 62, (1,), generator=generator))
+    key = hashlib.md5(f"etf|{r}|{d_in}|{iters}|{seed}".encode()).hexdigest()
+    f = os.path.join(ETF_CACHE, key + ".pt")
+    if os.path.exists(f):
+        try:
+            return rescale_A(torch.load(f), trace)
+        except Exception:
+            pass
+    g2 = torch.Generator().manual_seed(seed)
+    A = _init_etf_raw(r, d_in, g2, 1.0, iters)
+    tmp = f + f".tmp{os.getpid()}"
+    torch.save(A, tmp); os.replace(tmp, f)
+    return rescale_A(A, trace)
+
+
+def _init_etf_raw(r, d_in, generator, trace, iters=60):
     """Approximate equiangular tight frame in the sense used by the LoRA
     dynamics literature: the d_in *columns* of A (vectors in R^r) have equal
     norms and minimal mutual coherence.  Alternating projection between

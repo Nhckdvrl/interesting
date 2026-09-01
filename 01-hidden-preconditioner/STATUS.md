@@ -51,13 +51,30 @@ difference ≤3.2e-15 at every LR, versus 0.7–1.1 for a different `P₀`.
 
 ---
 
-## The measurement floor
+## The measurement floor, verified end to end on the real model
 
-`left_gauge` (A₀ → QA₀) is bit-identical in `P₀`, `tr P`, `r_eff`, `diag`,
-crosstalk, `tr(PΣ)`, `tr(PC_g)` and `cos(G,GP)` — confirmed numerically
+`left_gauge` (A₀ → QA₀, Q ∈ O(r)) is bit-identical in `P₀`, `tr P`, `r_eff`,
+`diag`, crosstalk, `tr(PΣ)`, `tr(PC_g)` and `cos(G,GP)` — confirmed numerically
 (`cos_sgd = 0.10813` for both kaiming and left_gauge, to 5 digits) — while
-`cos_adam` differs (0.0624 vs 0.0614). Its run-to-run spread is the yardstick:
-**null sd = 1.0e-4 at lr 3e-5, up to 2.6e-3 near the LR edge.**
+`cos_adam` differs (0.0624 vs 0.0614), exactly as the theory requires.
+
+Run on Qwen3-0.6B-Base in **fp32**, same ordered minibatches, 100 steps
+(`results/sgdnull32`, `results/adamnull32`):
+
+| optimizer | step 0 | final eval spread across identical-`P₀` inits |
+|---|---|---|
+| SGD, lr 0.1 | bit-identical | **1.5e-6 nats** |
+| AdamW, lr 2e-4 | bit-identical | **2.7e-4 nats** |
+
+A factor of **180**. This is the theorem verified on a real transformer: under
+SGD the whole trajectory depends on `A₀` only through `P₀`; under AdamW there is
+a real channel of ≈2.7e-4 nats that carries **zero** preconditioner information.
+**2.7e-4 nats is therefore the correct yardstick for any claimed LoRA
+initialisation effect in the standard AdamW setting**, and the six data-agnostic
+`B₀=0` initializers in the audit span 6.9e-4 — the same order.
+
+(In bf16 the same check drifts to ~1e-3 by step 15 from rounding alone, which is
+why the audit is run in fp32 and why the bf16 panels' nulls are inflated.)
 
 ---
 
