@@ -5,3 +5,13 @@ Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
     step 0/500 loss=0.6461 (1s)
     step 50/500 loss=0.3438 (33s)
+    step 100/500 loss=0.6494 (72s)
+    step 150/500 loss=0.4084 (112s)
+    step 200/500 loss=0.3974 (151s)
+    step 250/500 loss=0.4492 (191s)
+    step 300/500 loss=0.5283 (230s)
+    step 350/500 loss=0.5161 (270s)
+    step 400/500 loss=0.4639 (309s)
+    step 450/500 loss=0.5990 (349s)
+    step 499/500 loss=0.6348 (388s)
+[full_sgd_block256g0_lr0.001_s0] base=0.553113 final=0.501221 (394s)

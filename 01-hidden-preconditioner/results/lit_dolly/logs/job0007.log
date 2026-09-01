@@ -1,0 +1,3 @@
+# LOCAL:3 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit_dolly --cond etf --lr 1e-05 --match trace --task dolly --model Qwen/Qwen3-0.6B-Base --steps 300 --n_train 6000
+

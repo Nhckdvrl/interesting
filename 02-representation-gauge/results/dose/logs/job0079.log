@@ -3,3 +3,15 @@ cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0  /home/xia
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+    step 0/500 loss=0.6461 (1s)
+    step 50/500 loss=0.3439 (34s)
+    step 100/500 loss=0.6497 (73s)
+    step 150/500 loss=0.4089 (113s)
+    step 200/500 loss=0.3978 (153s)
+    step 250/500 loss=0.4486 (193s)
+    step 300/500 loss=0.5276 (233s)
+    step 350/500 loss=0.5157 (273s)
+    step 400/500 loss=0.4641 (314s)
+    step 450/500 loss=0.5994 (354s)
+    step 499/500 loss=0.6345 (393s)
+[full_sgd_hadamardg0_lr0.001_s0] base=0.553113 final=0.501110 (400s)
