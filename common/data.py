@@ -13,14 +13,53 @@ def _fmt_gsm8k(ex):
     return prompt, completion
 
 
-FORMATTERS = {"gsm8k": _fmt_gsm8k}
+def _fmt_numina(ex):
+    return (f"Question: {ex['problem'].strip()}\nAnswer:",
+            " " + ex["solution"].strip())
+
+
+FORMATTERS = {"gsm8k": _fmt_gsm8k, "numina": _fmt_numina}
+
+
+CACHE_DIR = os.path.expanduser("~/.cache/nora_repo_sft")
 
 
 def build_sft(tokenizer, task="gsm8k", n_train=4000, n_eval=400, max_len=512,
               seed=0):
+    """Tokenised, completion-masked SFT pairs.  Cached on disk because the same
+    (task, n, max_len, seed, tokenizer) tuple is rebuilt by every panel job."""
+    import pickle, hashlib
+    key = hashlib.md5(
+        f"{task}|{n_train}|{n_eval}|{max_len}|{seed}|"
+        f"{tokenizer.name_or_path}|{len(tokenizer)}".encode()).hexdigest()
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    cf = os.path.join(CACHE_DIR, key + ".pkl")
+    if os.path.exists(cf):
+        try:
+            with open(cf, "rb") as f:
+                return pickle.load(f)
+        except Exception:
+            pass
+    out = _build_sft(tokenizer, task, n_train, n_eval, max_len, seed)
+    tmp = cf + f".tmp{os.getpid()}"
+    with open(tmp, "wb") as f:
+        pickle.dump(out, f)
+    os.replace(tmp, cf)
+    return out
+
+
+def _build_sft(tokenizer, task="gsm8k", n_train=4000, n_eval=400, max_len=512,
+               seed=0):
     if task == "gsm8k":
         ds = load_dataset("openai/gsm8k", "main")
         tr, te = ds["train"], ds["test"]
+    elif task == "numina":
+        # single large SFT pool; a disjoint held-out slice serves as eval.
+        d = load_dataset("AI-MO/NuminaMath-CoT", split="train")
+        d = d.select(range(min(len(d), n_train + n_eval + 20000)))
+        d = d.shuffle(seed=1234)
+        te = d.select(range(n_eval))
+        tr = d.select(range(n_eval, len(d)))
     else:
         raise ValueError(task)
     fmt = FORMATTERS[task]

@@ -1,0 +1,4 @@
+/home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_panel.py --tag g1 --cond kaiming --lr 0.001 --seed 2 --gauge_seed 0 --steps 300
+
+[kaiming_lr0.001_s2] 196 adapters, 10.09M trainable params
+[kaiming_lr0.001_s2] base=0.8318 final_eval=0.5168 (65s)

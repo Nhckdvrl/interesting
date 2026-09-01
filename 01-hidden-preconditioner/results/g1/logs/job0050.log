@@ -1,0 +1,4 @@
+/home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_panel.py --tag g1 --cond kaimingspec_flatdiag --lr 0.001 --seed 1 --gauge_seed 0 --steps 300
+
+[kaimingspec_flatdiag_lr0.001_s1] 196 adapters, 10.09M trainable params
+[kaimingspec_flatdiag_lr0.001_s1] base=0.8318 final_eval=0.5151 (64s)

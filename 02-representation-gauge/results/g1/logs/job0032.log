@@ -1,0 +1,3 @@
+/home/xiang/interesting/.venv/bin/python /home/xiang/interesting/02-representation-gauge/src/run_gauge_pair.py --tag g1 --gauge residual --gauge_seed 2 --init kaiming --mode coupled_oracle --optimizer sgd --lr 0.03 --steps 200
+
+[residual2_kaiming_coupled_oracle_sgd_lr0.03_s0] base=0.831127 final=0.484571 (91s)

@@ -192,7 +192,8 @@ def make_A(kind, r, d_in, generator, device, dtype=torch.float64, ref_A=None,
     kaiming draw with the same seed) used by the matched controls so that every
     condition in a matched panel comes from the *same* random state."""
     if kind == "kaiming":
-        return kaiming_A(r, d_in, generator, device, dtype)
+        return ref_A if ref_A is not None else kaiming_A(r, d_in, generator,
+                                                         device, dtype)
 
     if kind == "gaussian":
         return gaussian_A(r, d_in, generator, device, dtype, std=kw.get("std"))
@@ -237,6 +238,17 @@ def make_A(kind, r, d_in, generator, device, dtype=torch.float64, ref_A=None,
         # against which every method effect must be compared.
         Q = _rand_orth(r, r, generator, device, dtype)
         return Q @ base
+
+    if kind.startswith("geomspec_flatdiag"):
+        # heavily decaying spectrum at matched trace and flat diagonal:
+        # collapses effective rank (r_eff) by ~5x while every other
+        # pre-registered statistic is matched.  Suffix gives the decay, e.g.
+        # geomspec_flatdiag0.6
+        decay = float(kind.replace("geomspec_flatdiag", "") or 0.6)
+        tr = float(base.pow(2).sum())
+        lam = spectrum_shape("geometric", r, tr, device, dtype, decay=decay)
+        return A_with_spectrum_and_diagonal(r, d_in, lam, tr / d_in, generator,
+                                            device, dtype)
 
     if kind == "rotated":
         # A -> A R with R Haar orthogonal: identical spectrum & crosstalk

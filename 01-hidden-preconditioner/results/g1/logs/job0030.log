@@ -1,0 +1,4 @@
+/home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_panel.py --tag g1 --cond left_gauge --lr 0.0003 --seed 0 --gauge_seed 2 --steps 300
+
+[left_gauge_lr0.0003_s0_g2] 196 adapters, 10.09M trainable params
+[left_gauge_lr0.0003_s0_g2] base=0.8318 final_eval=0.4437 (65s)

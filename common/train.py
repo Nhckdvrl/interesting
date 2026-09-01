@@ -12,6 +12,16 @@ from .lora import apply_lora, lora_parameters, LoRALinear, DEFAULT_TARGETS
 from .pstats import p_stats
 
 
+AMP = [contextlib.nullcontext()]
+
+
+def set_amp(mode):
+    """mode: 'none' (weights carry the compute dtype) or 'bf16' (fp32 master
+    weights, bf16 matmuls).  FullFT and LoRA must use the SAME setting."""
+    AMP[0] = (torch.autocast("cuda", torch.bfloat16) if mode == "bf16"
+              else contextlib.nullcontext())
+
+
 def load_model(model_id, dtype=torch.bfloat16, device="cuda", attn="sdpa"):
     tok = AutoTokenizer.from_pretrained(model_id)
     if tok.pad_token_id is None:
@@ -29,7 +39,8 @@ def eval_loss(model, loader, n_batches, device):
     tot, ntok = 0.0, 0
     for i in range(n_batches):
         b = {k: v.to(device) for k, v in loader.get(i).items()}
-        out = model(input_ids=b["input_ids"], attention_mask=b["attention_mask"])
+        with AMP[0]:
+            out = model(input_ids=b["input_ids"], attention_mask=b["attention_mask"])
         logits = out.logits[:, :-1].float()
         labels = b["labels"][:, 1:]
         mask = labels != -100
@@ -111,7 +122,9 @@ def train(model, adapters, params, train_loader, eval_loader, cfg, device="cuda"
             b = {k: v.to(device, non_blocking=True)
                  for k, v in train_loader.get(bi).items()}
             bi += 1
-            out = model(input_ids=b["input_ids"], attention_mask=b["attention_mask"])
+            with AMP[0]:
+                out = model(input_ids=b["input_ids"],
+                            attention_mask=b["attention_mask"])
             logits = out.logits[:, :-1].float()
             labels = b["labels"][:, 1:]
             mask = labels != -100
