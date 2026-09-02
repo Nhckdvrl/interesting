@@ -7,6 +7,34 @@
 > *frame*, so every frame is a free degree of freedom that the initialisation
 > literature has been setting by accident.
 
+## Draft abstract
+
+> LoRA's `Delta W = s B A` carries an exact `O(r)` symmetry: `(A, B) -> (QA, BQ^T)`
+> leaves the function unchanged. We show that whether this symmetry is
+> **vacuous or a real degree of freedom is decided by the optimizer's norm
+> geometry.** SGD and Muon descend in orthogonally invariant norms -- Frobenius
+> and spectral -- and their *entire trajectories* are gauge-covariant, so two
+> gauge-related initialisations are literally the same run in rotated
+> coordinates. AdamW descends in the elementwise `l_inf` geometry, whose
+> symmetry group is only the signed permutations, so for AdamW the frame is a
+> genuine `r(r-1)/2`-dimensional coordinate of the initialisation.
+>
+> We make it measurable. On one gauge orbit -- every invariant of the metric
+> triple `(AA^T, A Sigma A^T, A C_g A^T)` held to 1.5e-8 and only the frame
+> moving -- SGD's tuned loss spreads by **1e-5** nats and Muon's by **2.6e-4**,
+> while AdamW's spreads by **2.2e-3**, monotonically at every learning rate.
+> The effect is **structurally zero at rank 1**, where `O(1)` *is* AdamW's own
+> symmetry group, and grows with `r(r-1)/2` thereafter.
+>
+> The consequence for the initialisation literature is direct. Measured without
+> training, 23 published initializer configurations span this coordinate by
+> **4.3x**, systematically -- data-aware methods concentrate gradient energy,
+> frame-based methods spread it -- and no paper reports it. The frame moves a
+> single method by **2.5x the median gap between adjacent methods in their own
+> ranking**. Rotating any of six published initializers to the gradient-metric
+> eigenframe helps or is neutral **6 of 6**, at zero cost: the initial
+> function, the preconditioner and all nine invariants are preserved to 1e-15.
+
 ## 1. The question
 
 LoRA writes `Delta W = s B A`. A large literature proposes ways to choose `A`
