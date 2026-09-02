@@ -1,3 +1,19 @@
+> **This topic is now one half of a single result.** Topic 01 found the same
+> structure at LoRA's *adapter* gauge `O(r)` that this topic found at the
+> *backbone* gauge `O(d)`: SGD flat, AdamW monotone in the dose, and a
+> signed-permutation rung that is an exact zero-dose control because that is
+> precisely AdamW's own symmetry group.
+>
+> The unified statement is in `paper/NARRATIVE.md`: **which reparameterisation
+> symmetries the optimizer respects decides what an initialisation is.** SGD
+> (Frobenius norm) and Muon (spectral norm) descend in orthogonally invariant
+> geometries and are exactly covariant under both gauges; AdamW (elementwise
+> max norm) is covariant under neither, so for AdamW the frame is a real
+> degree of freedom at both levels.
+>
+> This file remains the topic-02 record. Its measurements stand; what has
+> changed is that they are no longer a separate finding.
+
 # 02 — Representation Gauge — STATUS
 
 Last update: 2026-09-02
