@@ -10,13 +10,31 @@ Three topics were registered from the Normalized LoRA (NoRA) mother paper.
 Topics **01** and **02** converged on a single object and are now one line of
 work; topic **03** is a scoped non-reproduction. The line is:
 
-> LoRA initialisation looks like a huge design space, but two exact symmetries
-> and the data metric collapse it to a small **intrinsic state space**. Every
-> published initializer is a point in it, and where the point sits — not which
-> paper proposed it — predicts what training does.
+> Neural-network parameterisations carry exact reparameterisation symmetries,
+> and **which of them the optimizer respects decides what an initialisation
+> is.** SGD and Muon respect LoRA's `O(r)` adapter gauge exactly -- two
+> gauge-related initialisations are literally the same run in rotated
+> coordinates -- so they can only see gauge *invariants*. AdamW descends in the
+> elementwise `l_inf` geometry, whose symmetry group is only the signed
+> permutations, so it can also see the **frame**. The frame is therefore a free
+> degree of freedom that the whole initialisation literature has been setting
+> by accident, and it is worth as much as the differences those papers report.
 
-The state is `M_x = A Σ_x Aᵀ`, the rank-space Gram in the data metric, with
-coordinates `(S, D, ρ)` = (scale, spectral dimension, task alignment).
+Measured on one gauge orbit of the vanilla draw -- every invariant identical to
+1.5e-8, only the frame moving:
+
+| optimizer | norm | orthogonally invariant | spread |
+|---|---|---|---|
+| SGD | Frobenius | yes | 0.00001 nats |
+| Muon | spectral | yes | 0.00026 nats |
+| AdamW | elementwise max | **no** | **0.00222 nats** (8.2x the null) |
+
+and the effect is **structurally zero at rank 1** -- where `O(1)` *is* the
+signed-permutation group -- growing with `r(r-1)/2` thereafter.
+
+The invariant part of the state is the `O(r)`-conjugacy class of the metric
+triple `(A Aᵀ, A Σ Aᵀ, A C_g Aᵀ)`, for which we give a complete order-`<=2`
+basis; Schur-Horn bounds the frame's reachable range given the invariants.
 
 ## Where to read, in order
 
@@ -27,6 +45,10 @@ coordinates `(S, D, ρ)` = (scale, spectral dimension, task alignment).
 | `01-hidden-preconditioner/STATUS.md` | topic-01 record: what was run, what it showed, what was falsified |
 | `02-representation-gauge/STATUS.md` | topic-02 record |
 | `03-stochastic-batch-geometry/STATUS.md` | topic-03 record (non-reproduction, scoped) |
+| `paper/POSITION.md` | what is ours and what is already known (LoRA-RITE, Balanced LoRA, FedRot-LoRA all treat the gauge as a defect to remove; we treat it as a coordinate to set) |
+| `01-hidden-preconditioner/PREDICTIONS_frame.md` | predictions committed before the gauge-frame panel ran. One of them was falsified in sign, and the file is unedited |
+| `01-hidden-preconditioner/PREDICTIONS_mechanism.md` | predictions committed before the mechanism panel ran; the named matrix was wrong |
+| `paper/8b_predictions.md` | predictions committed before any 8B training |
 | `README.md`, `0*/README.md` | the original registrations — the pre-registered questions and kill criteria |
 
 ## Reproducing the numbers
