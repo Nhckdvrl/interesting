@@ -1,39 +1,17 @@
-# LOCAL:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag frame --steps 300 --grad_clip 1e9 --cond kaiming --lr 0.00025
+# fvcrc20:3 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag frame --cond frame0.5 --lr 0.01 --steps 300 --grad_clip 1e9 --optimizer matprec --warmup 0
 
-[W903 01:47:10.416392286 CUDA[W903 01:47:34.894788892 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1119879168 bytes (free: 148766720, total: 101971591168).
-[W903 01:47:34.903783857 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1119879168 bytes (free: 150863872, total: 101971591168).
-Traceback (most recent call last):
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
-    main()
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 324, in main
-    base_eval = eval_loss(model, tel, args.eval_batches, "cuda")
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
-    return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 43, in eval_loss
-    out = model(input_ids=b["input_ids"], attention_mask=b["attention_mask"])
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/utils/generic.py", line 918, in wrapper
-    output = func(self, *args, **kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 494, in forward
-    logits = self.lm_head(hidden_states[:, slice_indices, :])
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 134, in forward
-    return F.linear(input, self.weight, self.bias)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.04 GiB. GPU 0 has a total capacity of 94.97 GiB of which 143.88 MiB is free. Process 25307 has 7.55 GiB memory in use. Process 556413 has 80.21 GiB memory in use. Process 556618 has 3.49 GiB memory in use. Including non-PyTorch memory, this process has 3.53 GiB memory in use. Of the allocated memory 2.35 GiB is allocated by PyTorch, and 508.52 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (2s)
+    step 30/300 loss=0.4600 (51s)
+    step 60/300 loss=0.5162 (101s)
+    step 90/300 loss=0.4123 (151s)
+    step 120/300 loss=0.4396 (201s)
+    step 150/300 loss=0.4683 (252s)
+    step 180/300 loss=0.3836 (305s)
+    step 210/300 loss=0.4072 (355s)
+    step 240/300 loss=0.4145 (404s)
+    step 270/300 loss=0.3796 (454s)
+    step 299/300 loss=0.4020 (488s)
+[frame0.5_lr0.01_s0_matprec] base=0.83113 final=0.46054 (490s)
