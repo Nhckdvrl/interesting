@@ -152,6 +152,14 @@ lr = 0.1    0.46642  0.46643  0.46643  0.46643   ... kaiming 0.46642
 Spread **1e-5 nats**. These are one trajectory in rotated coordinates. Even the
 diverged `lr = 0.3` runs agree to five figures.
 
+**Muon is blind too, and not because it is broken.** From an untrained base of
+0.83113, the three optimizers reach 0.44329 (AdamW), 0.44622 (Muon) and 0.46641
+(SGD) on the same panel: Muon is within 0.003 nats of AdamW and well ahead of
+SGD, i.e. a working optimizer whose spread across the frames is nonetheless
+0.00026 nats. Its Newton-Schulz iteration runs in float32 here, because the
+reference bfloat16 breaks the exact equivariance by 7-9% -- worth reporting on
+its own, since it means stock Muon is only *approximately* gauge-covariant.
+
 **AdamW, monotone at every learning rate:**
 
 ```
