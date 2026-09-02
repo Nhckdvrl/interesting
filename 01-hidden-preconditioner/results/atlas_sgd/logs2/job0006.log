@@ -1,0 +1,16 @@
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_atlas.py --tag atlas_sgd --matchW 0.1 --lr 0.2 --a_lr_ratio 1 --S 1 --rho ref --steps 300 --optimizer sgd --momentum 0 --warmup 0 --grad_clip 1e9
+
+  reusing cached atlas point (196 modules)
+    step 0/300 loss=1.1613 (0s)
+    step 30/300 loss=15.5262 (12s)
+    step 60/300 loss=6.3059 (24s)
+    step 90/300 loss=5.5933 (35s)
+    step 120/300 loss=5.2955 (47s)
+    step 150/300 loss=5.3582 (59s)
+    step 180/300 loss=5.2302 (73s)
+    step 210/300 loss=5.3945 (85s)
+    step 240/300 loss=5.2160 (97s)
+    step 270/300 loss=5.0759 (108s)
+    step 299/300 loss=5.1982 (119s)
+[S1_Dref_MW0.1_lr0.2_s0] S_rel=1.000 D=6.38 W/W0=0.11 Rg/Rg0=1.00 trP=0.604 base=0.83113 final=5.20339 (122s)
