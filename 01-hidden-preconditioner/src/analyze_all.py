@@ -17,7 +17,8 @@ PANELS = [("frame", "Qwen3-0.6B", "gsm8k"), ("q8b", "Qwen3-8B", "gsm8k"),
           ("dolly_frame", "Qwen3-0.6B", "dolly"),
           ("task_metamath", "Qwen3-0.6B", "metamath"),
           ("task_codefeedback", "Qwen3-0.6B", "codefeedback"),
-          ("long", "Qwen3-0.6B (1000 steps)", "gsm8k")]
+          ("long", "Qwen3-0.6B (1000 steps)", "gsm8k"),
+          ("frame_bf16", "Qwen3-0.6B (bf16)", "gsm8k")]
 
 
 def cell(tag):
