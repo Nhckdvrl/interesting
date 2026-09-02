@@ -97,6 +97,13 @@ def make_optimizer(params, kind, lr, wd=0.0, betas=(0.9, 0.999), eps=1e-8,
         return torch.optim.AdamW(params, lr=lr, weight_decay=wd, betas=betas, eps=eps)
     if kind == "sgd":
         return torch.optim.SGD(params, lr=lr, weight_decay=wd, momentum=momentum)
+    if kind == "muon":
+        # steepest descent under the SPECTRAL norm, which is orthogonally
+        # invariant -- so Muon, like SGD and unlike AdamW, is exactly covariant
+        # under the adapter gauge.
+        from common.muon import Muon
+        return Muon(params, lr=lr, wd=wd,
+                    momentum=momentum if momentum else 0.95)
     raise ValueError(kind)
 
 

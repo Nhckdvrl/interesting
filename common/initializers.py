@@ -155,7 +155,7 @@ NEEDS_GRAD = {"gradsub", "lora_one"}
 NEEDS_ACT = {"eva"}
 
 
-def init_frame(A0, G, t):
+def init_frame(A0, G, t, Sigma=None):
     """Walk the exact gauge orbit of a given A_0, from one extreme of the
     Adam-visible coordinate to the other.
 
@@ -173,6 +173,8 @@ def init_frame(A0, G, t):
     Gd = G.double().to(A.device)
     if str(t) == "opt":          # the actual argmax, not the flat-diagonal proxy
         Q, _ = max_l1_frame(Gd @ A.T)
+    elif Sigma is not None:      # ladder in the ACTIVATION metric instead
+        Q = frame_ladder(A @ Sigma.double().to(A.device) @ A.T, [float(t)])[0]
     else:
         Q = frame_ladder(A @ (Gd.T @ Gd) @ A.T, [float(t)])[0]
     return Q.to(A.device) @ A
