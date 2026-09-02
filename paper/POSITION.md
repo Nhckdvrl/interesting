@@ -48,7 +48,7 @@ literature is already setting it -- by accident.
    invariants but not determined by them.
 
 3. **The zoo varies it by 4.3x without knowing.** Measured with no training on
-   23 published initializer configurations: data-aware methods sit low
+   20 published initializer configurations (11 distinct methods): data-aware methods sit low
    (LoRA-One 0.086, gradsub 0.152, PiSSA 0.273, EVA 0.285), frame-based ones
    high (BiMI 0.328, flat-diagonal 0.356, ETF 0.357, NoRA 0.366, Kaiming
    0.366). The whole NoRA

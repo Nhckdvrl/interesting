@@ -27,7 +27,7 @@
 > symmetry group, and grows with `r(r-1)/2` thereafter.
 >
 > The consequence for the initialisation literature is direct. Measured without
-> training, 23 published initializer configurations span this coordinate by
+> training, 20 published initializer configurations (11 distinct methods) span this coordinate by
 > **4.3x**, systematically -- data-aware methods concentrate gradient energy,
 > frame-based methods spread it -- and no paper reports it. The frame moves a
 > single method by **2.5x the median gap between adjacent methods in their own
@@ -94,7 +94,7 @@ invariants without being *determined* by them.
 
 ## 3. The measurement: the literature varies the frame by 4.3x, unknowingly
 
-Measured with no training on 23 published initializer configurations
+Measured with no training on 20 published initializer configurations (11 distinct methods)
 (`results/second_order.json`), using
 `Lambda_1 = ||G A^T||_1^2 / (d_out r ||G A^T||_F^2)`, the exact ratio of
 AdamW's first-order descent rate to SGD's:
