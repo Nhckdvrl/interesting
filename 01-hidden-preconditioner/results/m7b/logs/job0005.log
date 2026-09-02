@@ -1,27 +1,0 @@
-# fvcrc15:3 (a100)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag m7b --cond left_gauge --lr 3e-05 --gauge_seed 3 --match trace --model mistralai/Mistral-7B-v0.3 --task metamath --dtype bfloat16 --amp none --r 32 --alpha 64 --steps 800 --bs 16 --micro_bs 4 --probe_bs 2 --max_len 512 --n_train 60000 --n_eval 512 --eval_batches 24 --acc_n 200 --acc_bs 32 --warmup 20 --sched cosine
-
-Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
-Warning: Permanently added 'fvcrc15' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 98.55it/s]
-  base GSM8K acc = 0.0750
-    step 0/800 loss=0.7096 (1s)
-    step 80/800 loss=0.3049 (176s)
-rc/run_lit.py", line 314, in <module>
-    main()
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 294, in main
-    base_acc, _ = gsm8k_accuracy(model, tok, acc_set, bs=args.acc_bs,
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/.venv-a100/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
-    return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/evaluate.py", line 64, in gsm8k_accuracy
-    pad_token_id=tok.pad_token_id)
-^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/evaluate.py", line 37, in extract_pred
-    if m:
-          
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/evaluate.py", line 22, in _norm
-    if len(x) > 40:           # a runaway digit string overflows float()
-                                   ^^^^^^
-OverflowError: cannot convert float infinity to integer
