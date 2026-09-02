@@ -49,6 +49,27 @@ def main(tag="q8b"):
             edge = "*" if min(cur, key=cur.get) in (lo[0], lo[-1]) else " "
             print(f"{c:>9s} | " + " ".join(f"{cur.get(l, float('nan')):9.5f}"
                                            for l in lrs) + f" | {b:9.5f}{edge}")
+        # A partial panel produces conditions with DISJOINT learning-rate
+        # grids, and comparing one condition's worst rung to another's best is
+        # not a comparison.  Refuse to report verdicts until every condition
+        # covers the same rungs and each tuned value is interior.
+        shared = set.intersection(*[set(cur) for _, cur in rows])
+        full = all(set(cur) >= set(lrs) for _, cur in rows)
+        interior = all(min(cur, key=cur.get) not in (min(cur), max(cur))
+                       for _, cur in rows)
+        if not (len(rows) >= 2 and full and interior):
+            missing = [f"{c}:{sorted(set(lrs) - set(cur))}" for c, cur in rows
+                       if set(lrs) - set(cur)]
+            print(f"  INCOMPLETE -- no verdict yet."
+                  + (f"  missing {', '.join(missing)}" if missing else "")
+                  + ("" if interior else "  (a tuned value is at a grid edge)"))
+            if len(shared) >= 2:
+                b2 = {c: min(cur[l] for l in shared) for c, cur in rows}
+                sp2 = max(b2.values()) - min(b2.values())
+                print(f"  provisional, over the {len(shared)} shared rungs "
+                      f"only: spread {sp2:.5f} nats, best "
+                      f"{min(b2, key=b2.get)}")
+            continue
         if len(best) >= 2:
             sp = max(best.values()) - min(best.values())
             print(f"  spread {sp:.5f} nats = {sp/NULL:.1f}x the 0.6B null")
