@@ -248,6 +248,9 @@ def main():
         elif c == "eva":
             key = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
             A = IN.init_eva(ACT[key].cuda(), r, d_in, ref_tr).cpu().double()
+        elif c.startswith("signperm"):
+            A = IN.init_signperm(base.double(),
+                                 seed=int(c[8:] or 0)).cpu().double()
         elif c.startswith("framex"):          # ladder in the activation metric
             _k = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
             A = IN.init_frame(base.cuda(), G[name].cuda(), float(c[6:]),

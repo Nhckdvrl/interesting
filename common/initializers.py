@@ -155,6 +155,27 @@ NEEDS_GRAD = {"gradsub", "lora_one"}
 NEEDS_ACT = {"eva"}
 
 
+def init_signperm(A0, seed=0):
+    """A -> Pi A with Pi a signed permutation.
+
+    This is the honest noise floor for an AdamW frame measurement.  AdamW is
+    EXACTLY covariant under signed permutations of A's rows -- they permute and
+    flip the columns of grad_B, and m/sqrt(v) is elementwise -- so two runs
+    related this way are the same run, and any difference between them is
+    floating-point reduction order compounded over training.
+
+    The quantity previously used as "the null", a RANDOM gauge move
+    (`left_gauge`), is not that: it is a small dose of the very effect being
+    measured.  It happens to land near this floor, but the two mean different
+    things and only this one bounds noise.
+    """
+    r = A0.shape[0]
+    g = torch.Generator().manual_seed(seed)
+    perm = torch.randperm(r, generator=g)
+    sgn = (torch.randint(0, 2, (r, 1), generator=g).double() * 2 - 1)
+    return (A0[perm] * sgn.to(A0.device)).to(A0.dtype)
+
+
 def init_frame(A0, G, t, Sigma=None):
     """Walk the exact gauge orbit of a given A_0, from one extreme of the
     Adam-visible coordinate to the other.
