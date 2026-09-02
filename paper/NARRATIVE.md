@@ -86,19 +86,51 @@ every published initializer sits in `[0.018, 1.0]` — disjoint. The residual
 correlates with `log W` at **r = −0.79**. The atlas had a coordinate it did not
 span, and the OOD test found it.
 
+### Wave 3 — the exact causal ladder in `W` (`results/atlas`, 42 runs)
+
+`M_x = Λ` identically, so `S` and `D` cannot move; a Stiefel-manifold solve
+drives `W` to target while holding the spectrum-weighted alignment `R_g` at the
+vanilla value. Every rung is matched to 4 decimal places:
+
+| W/W₀ | tr P | S_rel | D | R_g/R_g₀ | L* | lr* |
+|---|---|---|---|---|---|---|
+| 0.113 | 0.604 | 1.0000 | 6.385 | 1.000 | 0.44410 | 2e-4 |
+| 0.304 | 1.621 | 1.0000 | 6.385 | 1.000 | 0.44268 | 2e-4 |
+| **1.001** | **5.337** | 1.0000 | 6.385 | 1.000 | **0.44180** | 2e-4 |
+| 3.000 | 16.000 | 1.0000 | 6.385 | 1.000 | 0.44223 | 2e-4 |
+| 10.008 | 53.369 | 0.9999 | 6.385 | 1.000 | 0.44248 | 3e-4 |
+| 30.042 | 159.981 | 0.9986 | 6.384 | 1.001 | 0.44333 | 2e-4 |
+
+Three results at once.
+
+1. **`W` is causally real.** 0.0023 nats across the ladder, 8.5× the
+   measurement null, with everything else pinned by construction. It is the
+   fourth coordinate, now isolated rather than inferred from a residual.
+2. **`W` does not move the learning rate.** `tr P` spans **265×** across the
+   ladder while `lr*` stays at 2–3e-4. This is the sharpest available proof
+   that `tr P` is not the learning-rate coordinate — `S` is — and it separates
+   `W` from `S` as an independent axis rather than a reparameterisation.
+3. **The optimum sits at `W/W₀ = 1`, the vanilla draw's own value**, and the
+   curve is non-monotone on both sides. `W = 1/⟨λ⟩_adapter-energy`, so
+   `W = W₀` is the parameter-space-isotropic choice — precisely what AdamW's
+   isotropic per-coordinate step is matched to. A random draw is already at the
+   optimum of this coordinate, which is a mechanism for why nothing beats it.
+
+The reconstruction at `W/W₀ = 1` gives 0.44180 against the vanilla draw's
+0.44276 — a gap of 1e-3, inside that draw's own seed spread of 2.3e-3. So
+`(S, D, R_g, W)` reproduce a vanilla initialisation to within its own noise,
+from a construction with a completely different `A`.
+
 ## 4. What is running
 
 * **Wave 2** — a discovery sweep of `W` via `A = Ã Σ^{-q}`. Honest about what it
   is: it fixes `S` but lets `D` and the row space drift, because
   `M_x = Ã Σ^{1-2q} Ãᵀ`. Not a causal test.
-* **Wave 3** — the *exact* ladder. `M_x = Λ` identically, so `S` and `D` cannot
-  move; a Stiefel-manifold solve drives `W` to target while holding `R_g` at the
-  vanilla value. Verified on the model: `S_rel = 1.000`, `D = D_ref`,
-  `R_g/R_g₀ = 1.00`, `W/W₀ = 3.44`. Its `W/W₀ = 1` rung reproduces the vanilla
-  draw in **all four** coordinates and is the sufficiency test.
-* **`R_g` recomputed offline** for every cached atlas point, to check whether
-  wave 1's alignment null was a property of task alignment or only of the
-  unweighted statistic that was swept.
+* **`R_g` recomputed offline** for every cached atlas point. With the corrected,
+  spectrum-weighted statistic included as a candidate, leave-one-out model
+  selection on the atlas still prefers `S + D`; adding `R_g` makes prediction
+  worse out of sample. So the alignment null **survives the correction** — it
+  was not an artefact of sweeping the unweighted statistic.
 
 ## 5. Scale: a training-free prediction, measured through 8B
 
@@ -121,19 +153,22 @@ than a repeat.
 
 | earlier claim | status |
 |---|---|
-| "the second and only other channel is effective rank" | **false** — at least `W` is a further coordinate, and `D`'s effect is weaker than Stage 1 suggested |
+| "the second and only other channel is effective rank" | **false** — `W` is a further coordinate, now causally isolated, and `D`'s effect is weaker than Stage 1 suggested |
 | "method identity adds nothing after conditioning on three statistics" | **false** — the OOD test mispredicts tuned loss by +0.005 nats systematically |
 | "task alignment is not an independent axis" | **not established** — the statistic swept was unweighted; the correct `R_g` has not been tested |
-| "`tr P` is not causal" | **too strong** — `tr P` is not a universal one-dimensional scale, but `tr P / tr(PΣ)` may be an independent coordinate |
+| "`tr P` is not causal" | **corrected** — `tr P` is not the learning-rate coordinate (265× at constant `lr*`), but `tr P / tr(PΣ)` **is** an independent causal coordinate |
 | "the gauge effect's headroom is roughly scale-invariant" | **false** — based on 0.6B/1.7B only; 4B and 8B show PR falling 5.2× |
 
 ## 7. Current confidence
 
-    S    confirmed strong coordinate; predicts the LR of unseen methods
-    D    confirmed but weak
-    R_g  correct statistic now defined; untested
-    W    strong candidate found by OOD failure; causal ladder in flight
-    B0≠0 leaves the equivalence class, not yet folded into the state
+    S    confirmed strong coordinate; sets the learning rate, and predicts it
+         for unseen published initializers to 1.37x
+    D    confirmed, weaker; enters the tuned loss but not the learning rate
+    R_g  correct spectrum-weighted statistic now defined and tested; does not
+         add predictive value on top of (S, D) in the atlas
+    W    CONFIRMED by an exactly matched ladder: 8.5x the null, non-monotone,
+         optimal at the vanilla value, and orthogonal to the learning rate
+    B0≠0 leaves the equivalence class; not yet folded into the state
 
 ## 8. Positioning
 

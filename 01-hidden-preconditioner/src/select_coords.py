@@ -39,7 +39,10 @@ def join(tag="atlas"):
                                                         max(p["rho"],1e-3))**2))
         out.append(dict(S=p["S"], D=p["D"], rho=p["rho"], D_g=e["D_g"],
                         Cdis=e["Cdis"], cos1=e["cos1"],
+                        R_g=e.get("R_g", float("nan")),
+                        W=e.get("W", float("nan")),
                         L=p["L_star"], lr=math.log(p["lr_star"])))
+    out = [r for r in out if not (math.isnan(r["R_g"]) or math.isnan(r["W"]))]
     return out
 
 
@@ -52,6 +55,12 @@ TR = {"S": lambda r: math.log(r["S"]),
       "invsqrtDg": lambda r: 1 / math.sqrt(r["D_g"]),
       "Cdis": lambda r: math.log(r["Cdis"]),
       "cos1": lambda r: math.log(r["cos1"]),
+      # the CORRECT alignment statistic: tr(A C_g A^T)/tr(A Sigma A^T), i.e.
+      # the row-space alignment weighted by the intrinsic spectrum, which is
+      # what enters <G, GP>.  Wave 1 swept the unweighted version.
+      "R_g": lambda r: math.log(max(r["R_g"], 1e-300)),
+      # parameter metric / data metric
+      "W": lambda r: math.log(max(r["W"], 1e-300)),
       }
 
 SETS = [
@@ -65,6 +74,12 @@ SETS = [
     ("S + D + Cdis", ["S", "S2", "invsqrtD", "Cdis"]),
     ("S + cos1", ["S", "S2", "cos1"]),
     ("S + D + cos1", ["S", "S2", "invsqrtD", "cos1"]),
+    ("S + R_g", ["S", "S2", "R_g"]),
+    ("S + D + R_g", ["S", "S2", "invsqrtD", "R_g"]),
+    ("S + W", ["S", "S2", "W"]),
+    ("S + D + W", ["S", "S2", "invsqrtD", "W"]),
+    ("S + D + R_g + W", ["S", "S2", "invsqrtD", "R_g", "W"]),
+    ("S + D + rho + W", ["S", "S2", "invsqrtD", "rho", "W"]),
 ]
 
 

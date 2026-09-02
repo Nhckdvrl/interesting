@@ -1,17 +1,17 @@
 # fvcrc20:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_atlas.py --tag atlas --S 1 --rho ref --wexp 0.15 --lr 1e-05 --seed 0 --steps 300
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_atlas.py --tag atlas --S 1 --rho ref --matchW 1 --lr 1e-05 --seed 0 --steps 300
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
     step 0/300 loss=1.1613 (1s)
-    step 30/300 loss=0.5062 (16s)
-    step 60/300 loss=0.5332 (31s)
-    step 90/300 loss=0.4283 (46s)
-    step 120/300 loss=0.4402 (62s)
-    step 150/300 loss=0.4651 (77s)
-    step 180/300 loss=0.3864 (96s)
-    step 210/300 loss=0.4095 (111s)
-    step 240/300 loss=0.4355 (126s)
-    step 270/300 loss=0.3784 (141s)
-    step 299/300 loss=0.4055 (156s)
-[S1_Dref_Rref_W0.15_lr1e-05_s0] S_rel=1.000 D=4.04 rho=12.65 trP=14.512 base=0.83113 final=0.47408 (159s)
+    step 30/300 loss=0.5192 (16s)
+    step 60/300 loss=0.5411 (31s)
+    step 90/300 loss=0.4398 (46s)
+    step 120/300 loss=0.4464 (61s)
+    step 150/300 loss=0.4682 (76s)
+    step 180/300 loss=0.3897 (94s)
+    step 210/300 loss=0.4157 (109s)
+    step 240/300 loss=0.4409 (125s)
+    step 270/300 loss=0.3825 (139s)
+    step 299/300 loss=0.4075 (154s)
+[S1_Dref_MW1_lr1e-05_s0] S_rel=1.000 D=6.38 W/W0=1.00 Rg/Rg0=1.00 trP=5.337 base=0.83113 final=0.47995 (157s)
