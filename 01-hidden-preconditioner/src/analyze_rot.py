@@ -7,6 +7,14 @@ gradient-metric eigenframe (`@frame0`), and rotated to a flat gradient-metric
 diagonal (`@frame1`).  All three have the same `B A` to 1e-15, the same
 `P = s^2 A^T A` to 1e-15, and the same nine gauge invariants, so SGD cannot
 tell them apart at all.
+
+NOTE ON THE FIRST READING.  With the original grid (1e-4 .. 5e-4) four of the
+six methods tuned to the bottom rung, and `eva@frame0` read as +0.00243 nats
+WORSE than `eva`, which was recorded as favouring the diagonal-preconditioner
+hypothesis.  Extending the grid to 2e-5 and 5e-5 gave every method an interior
+optimum and reversed that cell to -0.00079, i.e. better.  The first reading was
+a grid truncation, not a result; it is left in the commit history rather than
+quietly dropped.
 """
 import glob, json, math, os, statistics as st, sys
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
