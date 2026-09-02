@@ -23,6 +23,13 @@ POOL = {
 
 MEM_FREE_MIN = 60000   # MiB required free to claim a slot
 
+# Measured peak footprints on these panels, so thresholds stop being guesses:
+#   Qwen3-0.6B  r=16  micro_bs 16, fp32          ~12 GiB
+#   Llama-3.2-3B      micro_bs 4,  bf16 matmul   ~30 GiB
+#   Qwen3-8B    r=16  micro_bs 2,  bf16 matmul   62-70 GiB
+# The 8B figure includes the probe pass, which materialises a gradient for
+# every adapted module before moving them to CPU.
+
 
 def probe(hosts=None, mem_min=None, per_gpu=1):
     """Return list of (host, gpu, arch) slots that are currently free enough.
