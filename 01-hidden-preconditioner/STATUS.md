@@ -13,7 +13,8 @@
 > The reason the Stage-1 audit found the NoRA family mutually
 > indistinguishable is now understood rather than merely reported. Those
 > conditions differ in statistics of `P` but sit at the **same frame** as the
-> vanilla draw (`Lambda_1` 0.357-0.366 against Kaiming's 0.366), and the frame
+> vanilla draw (`Lambda_1` 0.328-0.366 against Kaiming's 0.366, and 0.356-0.366
+> excluding BiMI), and the frame
 > is the coordinate AdamW actually responds to. The audit's null result was
 > correct and its interpretation was incomplete.
 >

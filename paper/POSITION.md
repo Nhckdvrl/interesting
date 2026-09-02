@@ -50,7 +50,8 @@ literature is already setting it -- by accident.
 3. **The zoo varies it by 4.3x without knowing.** Measured with no training on
    23 published initializer configurations: data-aware methods sit low
    (LoRA-One 0.086, gradsub 0.152, PiSSA 0.273, EVA 0.285), frame-based ones
-   high (BiMI 0.328, ETF 0.357, NoRA 0.366, Kaiming 0.366). The whole NoRA
+   high (BiMI 0.328, flat-diagonal 0.356, ETF 0.357, NoRA 0.366, Kaiming
+   0.366). The whole NoRA
    family sits at vanilla's value -- which is why we measure those conditions as
    mutually indistinguishable to within 1.2x the measurement null. Published
    comparisons between these methods are partly comparisons of an unreported
