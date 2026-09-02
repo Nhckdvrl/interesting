@@ -110,7 +110,9 @@ def _layers(model):
 
 def _cfg(model):
     c = model.config
-    return c.num_attention_heads, c.num_key_value_heads, c.head_dim, c.hidden_size
+    hd = getattr(c, "head_dim", None) or c.hidden_size // c.num_attention_heads
+    nkv = getattr(c, "num_key_value_heads", None) or c.num_attention_heads
+    return c.num_attention_heads, nkv, hd, c.hidden_size
 
 
 # ------------------------------------------------------------------ G1: V/O

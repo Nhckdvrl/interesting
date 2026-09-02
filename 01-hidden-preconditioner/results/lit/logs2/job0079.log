@@ -1,0 +1,17 @@
+# fvcrc12:1 (a100)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit --cond left_gauge --lr 0.002 --match trace --steps 300 --gauge_seed 1
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc12' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (0s)
+    step 30/300 loss=0.7566 (26s)
+    step 60/300 loss=0.7659 (52s)
+    step 90/300 loss=0.5781 (78s)
+    step 120/300 loss=0.6462 (105s)
+    step 150/300 loss=0.7009 (131s)
+    step 180/300 loss=0.5797 (162s)
+    step 210/300 loss=0.6325 (188s)
+    step 240/300 loss=0.6261 (215s)
+    step 270/300 loss=0.6225 (240s)
+    step 299/300 loss=0.6338 (265s)
+[left_gauge_lr0.002_s0_g1] base=0.83113 final=0.74833 (270s)

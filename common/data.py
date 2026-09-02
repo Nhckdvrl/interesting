@@ -26,7 +26,18 @@ def _fmt_dolly(ex):
     return prompt, " " + ex["response"].strip()
 
 
-FORMATTERS = {"gsm8k": _fmt_gsm8k, "numina": _fmt_numina, "dolly": _fmt_dolly}
+def _fmt_metamath(ex):
+    return (f"Question: {ex['query'].strip()}\nAnswer:",
+            " " + ex["response"].strip())
+
+
+def _fmt_codefeedback(ex):
+    return (f"Question: {ex['query'].strip()}\nAnswer:",
+            " " + ex["answer"].strip())
+
+
+FORMATTERS = {"gsm8k": _fmt_gsm8k, "numina": _fmt_numina, "dolly": _fmt_dolly,
+              "metamath": _fmt_metamath, "codefeedback": _fmt_codefeedback}
 
 
 CACHE_DIR = os.path.expanduser("~/.cache/nora_repo_sft")
@@ -61,6 +72,15 @@ def _build_sft(tokenizer, task="gsm8k", n_train=4000, n_eval=400, max_len=512,
     if task == "gsm8k":
         ds = load_dataset("openai/gsm8k", "main")
         tr, te = ds["train"], ds["test"]
+    elif task in ("metamath", "codefeedback"):
+        # the two SFT corpora used by the mother paper (NoRA, Kang et al. 2026)
+        name = ("meta-math/MetaMathQA" if task == "metamath"
+                else "m-a-p/CodeFeedback-Filtered-Instruction")
+        d = load_dataset(name, split="train")
+        d = d.shuffle(seed=1234)
+        n = min(len(d), n_train + n_eval)
+        te = d.select(range(n_eval))
+        tr = d.select(range(n_eval, n))
     elif task == "dolly":
         # a non-reasoning instruction-following contrast to the math tasks
         d = load_dataset("databricks/databricks-dolly-15k", split="train")

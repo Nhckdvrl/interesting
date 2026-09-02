@@ -1,0 +1,15 @@
+# LOCAL:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit_dolly --cond etf --lr 0.0005 --match trace --task dolly --model Qwen/Qwen3-0.6B-Base --steps 300 --n_train 6000
+
+    step 0/300 loss=2.3626 (0s)
+    step 30/300 loss=2.4399 (10s)
+    step 60/300 loss=2.4926 (19s)
+    step 90/300 loss=1.6301 (29s)
+    step 120/300 loss=1.4935 (39s)
+    step 150/300 loss=2.0505 (49s)
+    step 180/300 loss=2.0629 (61s)
+    step 210/300 loss=1.4060 (70s)
+    step 240/300 loss=1.7023 (80s)
+    step 270/300 loss=2.2510 (90s)
+    step 299/300 loss=2.2444 (99s)
+[etf_lr0.0005_s0] base=2.12066 final=2.06381 (101s)

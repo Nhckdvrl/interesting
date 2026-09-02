@@ -1,0 +1,15 @@
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit_dolly --cond left_gauge --lr 0.0005 --match trace_act --gauge_seed 1 --task dolly --model Qwen/Qwen3-0.6B-Base --steps 300 --n_train 6000
+
+    step 0/300 loss=2.3626 (0s)
+    step 30/300 loss=2.4375 (10s)
+    step 60/300 loss=2.4968 (19s)
+    step 90/300 loss=1.6388 (28s)
+    step 120/300 loss=1.4649 (38s)
+    step 150/300 loss=2.0482 (47s)
+    step 180/300 loss=2.0687 (59s)
+    step 210/300 loss=1.4087 (68s)
+    step 240/300 loss=1.7227 (78s)
+    step 270/300 loss=2.2396 (87s)
+    step 299/300 loss=2.2362 (96s)
+[left_gauge_lr0.0005_s0_g1_mtrace_act] base=2.12066 final=2.06362 (98s)

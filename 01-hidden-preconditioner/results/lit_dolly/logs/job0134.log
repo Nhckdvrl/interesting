@@ -1,0 +1,15 @@
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit_dolly --cond kaiming --lr 0.0005 --match trace_act --seed 0 --task dolly --model Qwen/Qwen3-0.6B-Base --steps 300 --n_train 6000
+
+    step 0/300 loss=2.3626 (0s)
+    step 30/300 loss=2.4371 (11s)
+    step 60/300 loss=2.4950 (20s)
+    step 90/300 loss=1.6435 (30s)
+    step 120/300 loss=1.4675 (39s)
+    step 150/300 loss=2.0507 (49s)
+    step 180/300 loss=2.0692 (60s)
+    step 210/300 loss=1.4129 (70s)
+    step 240/300 loss=1.7240 (80s)
+    step 270/300 loss=2.2413 (90s)
+    step 299/300 loss=2.2437 (99s)
+[kaiming_lr0.0005_s0_mtrace_act] base=2.12066 final=2.06239 (101s)

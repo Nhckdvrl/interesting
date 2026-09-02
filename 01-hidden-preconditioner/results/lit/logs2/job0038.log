@@ -1,0 +1,17 @@
+# fvcrc12:1 (a100)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit --cond kaiming --lr 1e-05 --match trace --steps 300 --seed 0
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc12' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (0s)
+    step 30/300 loss=0.5006 (26s)
+    step 60/300 loss=0.5346 (52s)
+    step 90/300 loss=0.4302 (78s)
+    step 120/300 loss=0.4408 (105s)
+    step 150/300 loss=0.4649 (131s)
+    step 180/300 loss=0.3879 (162s)
+    step 210/300 loss=0.4120 (189s)
+    step 240/300 loss=0.4394 (215s)
+    step 270/300 loss=0.3809 (240s)
+    step 299/300 loss=0.4051 (265s)
+[kaiming_lr1e-05_s0] base=0.83113 final=0.47696 (270s)

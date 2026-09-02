@@ -1,0 +1,17 @@
+# fvcrc10:3 (a100)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit --cond geomspec_flatdiag0.5 --lr 3e-06 --match trace_act --steps 300 
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc10' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (1s)
+    step 30/300 loss=0.6237 (48s)
+    step 60/300 loss=0.6047 (96s)
+    step 90/300 loss=0.5050 (145s)
+    step 120/300 loss=0.5051 (194s)
+    step 150/300 loss=0.4874 (243s)
+    step 180/300 loss=0.4121 (301s)
+    step 210/300 loss=0.4373 (349s)
+    step 240/300 loss=0.4768 (396s)
+    step 270/300 loss=0.3967 (443s)
+    step 299/300 loss=0.4209 (489s)
+[geomspec_flatdiag0.5_lr3e-06_s0_mtrace_act] base=0.83113 final=0.50157 (500s)

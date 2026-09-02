@@ -1,0 +1,15 @@
+# LOCAL:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit_dolly --cond pissa --lr 0.0002 --match trace --task dolly --model Qwen/Qwen3-0.6B-Base --steps 300 --n_train 6000
+
+    step 0/300 loss=2.3626 (0s)
+    step 30/300 loss=2.5473 (11s)
+    step 60/300 loss=2.5767 (21s)
+    step 90/300 loss=1.6839 (30s)
+    step 120/300 loss=1.5962 (40s)
+    step 150/300 loss=2.1340 (50s)
+    step 180/300 loss=2.1394 (63s)
+    step 210/300 loss=1.5106 (73s)
+    step 240/300 loss=1.8034 (83s)
+    step 270/300 loss=2.3361 (93s)
+    step 299/300 loss=2.3590 (102s)
+[pissa_lr0.0002_s0] base=2.12066 final=2.14972 (104s)

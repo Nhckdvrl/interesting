@@ -230,6 +230,20 @@ def make_A(kind, r, d_in, generator, device, dtype=torch.float64, ref_A=None,
         return A_with_spectrum_and_diagonal(r, d_in, lam, tr / d_in, generator,
                                             device, dtype)
 
+    if kind == "bimi":
+        # Block Identity Matrix Initialisation, the mother paper's key control
+        # (NoRA Table 3): A = [I_r, I_r, ..., I_r, E_q] with k = b*r + q.
+        # Every column is a distinct unit basis vector, so diag(A^T A) = 1 by
+        # construction and the spectrum is (b+1) q times and b the rest --
+        # i.e. BIMI is a *flat-spectrum, flat-diagonal* member of the family,
+        # exactly like `flatspec_flatdiag`.  NoRA reports BIMI ~ random+
+        # normalisation and concludes the pattern does not matter; in the
+        # (spectrum, diagonal) coordinates of Gate 0 the two are the same point.
+        A = torch.zeros(r, d_in, device=device, dtype=dtype)
+        for j in range(d_in):
+            A[j % r, j] = 1.0
+        return A
+
     if kind == "left_gauge":
         # A -> Q A with Q in O(r):  P is IDENTICAL (bit-for-bit in exact
         # arithmetic).  By F4/F5 this is the complete P0-equivalence class, so

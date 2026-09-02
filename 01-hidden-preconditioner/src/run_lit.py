@@ -20,7 +20,8 @@ from common.pinit import make_A, kaiming_A
 from common.pstats import p_stats
 from common import initializers as IN
 from common.data import build_sft, FixedOrderLoader
-from common.train import load_model, train, eval_loss
+from common.train import load_model, train, eval_loss, set_amp
+from common.evaluate import gsm8k_accuracy, gsm8k_eval_set
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 ACACHE = os.path.expanduser("~/.cache/nora_repo_A0")
@@ -74,7 +75,7 @@ def collect_grads(model, mods, loader, n_batches, device="cuda"):
 
 
 @torch.no_grad()
-def collect_act_cov(model, mods, loader, n_batches, device="cuda"):
+def collect_act_cov(model, mods, loader, n_batches, device="cuda", on_cpu=False):
     reps = {n: m for n, m in mods.items()
             if ACT_GROUP[n.split(".")[-1]] == n.split(".")[-1]}
     cov, hooks = {}, []
@@ -82,6 +83,8 @@ def collect_act_cov(model, mods, loader, n_batches, device="cuda"):
         def hook(mod, inp, out):
             x = inp[0].detach().reshape(-1, inp[0].shape[-1]).float()
             c = x.T @ x
+            if on_cpu:
+                c = c.cpu()
             cov[n] = cov.get(n, 0) + c
         return hook
     for n, m in reps.items():
@@ -91,7 +94,7 @@ def collect_act_cov(model, mods, loader, n_batches, device="cuda"):
         model(input_ids=b["input_ids"], attention_mask=b["attention_mask"])
     for h in hooks:
         h.remove()
-    return {n: c.cpu() for n, c in cov.items()}
+    return {n: (c if c.device.type == "cpu" else c.cpu()) for n, c in cov.items()}
 
 
 def main():
@@ -122,6 +125,16 @@ def main():
                          "keeps every condition function-identical at init")
     ap.add_argument("--steps", type=int, default=300)
     ap.add_argument("--bs", type=int, default=16)
+    ap.add_argument("--micro_bs", type=int, default=0,
+                    help="0 = no accumulation (micro_bs = bs).  Needed at 7B, "
+                         "where a fp32 forward at bs=16 does not fit.")
+    ap.add_argument("--probe_bs", type=int, default=0,
+                    help="batch size for the one-shot gradient/activation "
+                         "probes; 0 = same as micro_bs")
+    ap.add_argument("--act_cov_device", default="auto",
+                    help="'cpu' keeps the d_in x d_in activation covariances "
+                         "off the GPU; at 7B the down_proj covariance alone is "
+                         "822 MB per layer")
     ap.add_argument("--optimizer", default="adamw")
     ap.add_argument("--momentum", type=float, default=0.0)
     ap.add_argument("--warmup", type=int, default=10)
@@ -133,6 +146,18 @@ def main():
     ap.add_argument("--eval_every", type=int, default=25)
     ap.add_argument("--eval_batches", type=int, default=16)
     ap.add_argument("--targets", default=",".join(DEFAULT_TARGETS))
+    ap.add_argument("--scaling", default="standard",
+                    choices=["standard", "rsqrt"],
+                    help="rsqrt = rsLoRA rank-stabilised scaling alpha/sqrt(r)")
+    ap.add_argument("--b_lr_ratio", type=float, default=1.0,
+                    help=">1 reproduces LoRA+ (larger LR on the up-projection)")
+    ap.add_argument("--amp", default="none", choices=["none", "bf16"])
+    ap.add_argument("--sched", default="constant")
+    ap.add_argument("--acc_n", type=int, default=0,
+                    help="if >0, score GSM8K exact-match accuracy on this many "
+                         "held-out problems before and after training")
+    ap.add_argument("--acc_bs", type=int, default=16)
+    ap.add_argument("--acc_max_new", type=int, default=320)
     args = ap.parse_args()
 
     cell = (f"{args.cond}_lr{args.lr:g}_s{args.seed}"
@@ -140,7 +165,11 @@ def main():
             + ("" if args.match == "trace" else f"_m{args.match}")
             + ("" if args.subtract else "_nosub")
             + (f"_{args.optimizer}" if args.optimizer != "adamw" else "")
-            + ("" if args.dtype == "float32" else f"_{args.dtype}"))
+            + ("" if args.dtype == "float32" else f"_{args.dtype}")
+            + ("" if args.scaling == "standard" else f"_{args.scaling}")
+            + ("" if args.b_lr_ratio == 1.0 else f"_bl{args.b_lr_ratio:g}")
+            + (f"_r{args.r}" if args.r != 16 else "")
+            + (f"_a{args.alpha:g}" if args.alpha != 32.0 else ""))
     outdir = os.path.join(REPO, "01-hidden-preconditioner", "results", args.tag)
     os.makedirs(outdir, exist_ok=True)
     outfile = os.path.join(outdir, cell + ".json")
@@ -148,11 +177,14 @@ def main():
         print("skip (exists)", outfile); return
 
     torch.manual_seed(args.seed)
+    set_amp(args.amp)
     model, tok = load_model(args.model, dtype=dict(
         float32=torch.float32, bfloat16=torch.bfloat16)[args.dtype])
     tr, te = build_sft(tok, args.task, args.n_train, args.n_eval, args.max_len,
                        seed=0)
-    trl = FixedOrderLoader(tr, args.bs, tok.pad_token_id, seed=0)
+    micro = args.micro_bs or args.bs
+    accum = max(args.bs // micro, 1)
+    trl = FixedOrderLoader(tr, micro, tok.pad_token_id, seed=0)
     tel = FixedOrderLoader(te, args.bs, tok.pad_token_id, seed=999)
     targets = tuple(args.targets.split(","))
     mods = {n: m for n, m in model.named_modules()
@@ -161,10 +193,18 @@ def main():
     # both probes are always collected: they are needed for the weighted-trace
     # statistics that every condition is scored on, not only for the
     # initializers that use them.
-    G = collect_grads(model, mods, trl, args.probe_batches)
-    ACT = collect_act_cov(model, mods, trl, args.probe_batches)
+    probe_bs = args.probe_bs or micro
+    probe_ld = (trl if probe_bs == micro
+                else FixedOrderLoader(tr, probe_bs, tok.pad_token_id, seed=0))
+    on_cpu = (args.act_cov_device == "cpu" or
+              (args.act_cov_device == "auto" and
+               model.config.hidden_size >= 2048))
+    G = collect_grads(model, mods, probe_ld, args.probe_batches)
+    ACT = collect_act_cov(model, mods, probe_ld, args.probe_batches,
+                          on_cpu=on_cpu)
     torch.cuda.empty_cache()
-
+    # the weighted-trace statistics stream Sigma / C_g back to the GPU one
+    # module at a time, so the probes never need to be resident together
     s = args.alpha / args.r
     pstats = {}
 
@@ -236,20 +276,34 @@ def main():
             return A.float()
         return dict(A=A.float(), B=B.float(), subtract=sub)
 
-    adapters = apply_lora(model, args.r, args.alpha, factory, targets=targets)
+    adapters = apply_lora(model, args.r, args.alpha, factory, targets=targets,
+                          scaling=args.scaling)
     params = lora_parameters(adapters)
     base_eval = eval_loss(model, tel, args.eval_batches, "cuda")
-    cfg = dict(steps=args.steps, accum=1, optimizer=args.optimizer, lr=args.lr,
-               wd=0.0, warmup=args.warmup, sched="constant",
-               grad_clip=args.grad_clip, momentum=args.momentum)
+    cfg = dict(steps=args.steps, accum=accum, optimizer=args.optimizer, lr=args.lr,
+               wd=0.0, warmup=args.warmup, sched=args.sched,
+               grad_clip=args.grad_clip, momentum=args.momentum,
+               b_lr_ratio=args.b_lr_ratio)
+    acc_set = gsm8k_eval_set(args.acc_n) if args.acc_n else None
+    base_acc = None
+    if acc_set:
+        base_acc, _ = gsm8k_accuracy(model, tok, acc_set, bs=args.acc_bs,
+                                     max_new=args.acc_max_new)
+        print(f"  base GSM8K acc = {base_acc:.4f}", flush=True)
     log = train(model, adapters, params, trl, tel, cfg, log_every=5,
                 eval_every=args.eval_every, eval_batches=args.eval_batches,
                 sample_layers=[n for n in adapters
                                if n.endswith("layers.13.mlp.down_proj")])
+    acc, samples = (gsm8k_accuracy(model, tok, acc_set, bs=args.acc_bs,
+                                   max_new=args.acc_max_new)
+                    if acc_set else (None, None))
     json.dump(dict(cell=cell, args=vars(args), base_eval_loss=base_eval,
+                   base_acc=base_acc, final_acc=acc,
+                   acc_samples=samples,
                    init_pstats=pstats, log=log), open(outfile, "w"))
-    print(f"[{cell}] base={base_eval:.5f} final={log['final_eval_loss']:.5f} "
-          f"({log['wall_time']:.0f}s)")
+    print(f"[{cell}] base={base_eval:.5f} final={log['final_eval_loss']:.5f}"
+          + (f" acc={acc:.4f} (base {base_acc:.4f})" if acc is not None else "")
+          + f" ({log['wall_time']:.0f}s)")
 
 
 if __name__ == "__main__":

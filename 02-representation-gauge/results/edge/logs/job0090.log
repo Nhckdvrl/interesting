@@ -1,0 +1,17 @@
+# fvcrc20:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/02-representation-gauge/src/run_dose.py --tag edge --method full --optimizer sgd --lr 0.005 --gauge block64 --gauge_seed 0 --seed 0 --steps 500
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+    step 0/500 loss=0.6461 (1s)
+    step 50/500 loss=0.3622 (34s)
+    step 100/500 loss=0.6645 (73s)
+    step 150/500 loss=0.4182 (113s)
+    step 200/500 loss=0.3905 (153s)
+    step 250/500 loss=0.4549 (193s)
+    step 300/500 loss=0.5343 (232s)
+    step 350/500 loss=0.5166 (272s)
+    step 400/500 loss=0.4570 (312s)
+    step 450/500 loss=0.5968 (352s)
+    step 499/500 loss=0.6392 (391s)
+[full_sgd_block64g0_lr0.005_s0] base=0.553113 final=0.500328 (397s)

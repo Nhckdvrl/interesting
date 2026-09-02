@@ -1,0 +1,15 @@
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag lit_dolly --cond olora --lr 0.0002 --match trace_act --task dolly --model Qwen/Qwen3-0.6B-Base --steps 300 --n_train 6000
+
+    step 0/300 loss=2.3626 (0s)
+    step 30/300 loss=2.5838 (10s)
+    step 60/300 loss=2.6306 (19s)
+    step 90/300 loss=1.7365 (29s)
+    step 120/300 loss=1.7025 (39s)
+    step 150/300 loss=2.2099 (48s)
+    step 180/300 loss=2.2011 (60s)
+    step 210/300 loss=1.6110 (70s)
+    step 240/300 loss=1.9209 (80s)
+    step 270/300 loss=2.3958 (89s)
+    step 299/300 loss=2.4278 (99s)
+[olora_lr0.0002_s0_mtrace_act] base=2.12066 final=2.22744 (101s)

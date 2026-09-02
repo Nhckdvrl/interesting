@@ -78,7 +78,15 @@ def adapter_diagnostics(adapters, sample_layers=None):
 
 
 def make_optimizer(params, kind, lr, wd=0.0, betas=(0.9, 0.999), eps=1e-8,
-                   momentum=0.0):
+                   momentum=0.0, b_lr_ratio=1.0, adapters=None):
+    """b_lr_ratio > 1 reproduces LoRA+ (Hayou et al., ICML 2024): the
+    up-projection B gets a larger learning rate than the down-projection A."""
+    if b_lr_ratio != 1.0 and adapters:
+        bs = {id(a.lora_B) for a in adapters.values()}
+        gb = [p for p in params if id(p) in bs]
+        ga = [p for p in params if id(p) not in bs]
+        params = [{"params": ga, "lr": lr},
+                  {"params": gb, "lr": lr * b_lr_ratio}]
     if kind == "adamw":
         return torch.optim.AdamW(params, lr=lr, weight_decay=wd, betas=betas, eps=eps)
     if kind == "sgd":
@@ -94,7 +102,10 @@ def train(model, adapters, params, train_loader, eval_loader, cfg, device="cuda"
                          wd=cfg.get("wd", 0.0),
                          betas=tuple(cfg.get("betas", (0.9, 0.999))),
                          eps=cfg.get("eps", 1e-8),
-                         momentum=cfg.get("momentum", 0.0))
+                         momentum=cfg.get("momentum", 0.0),
+                         b_lr_ratio=cfg.get("b_lr_ratio", 1.0),
+                         adapters=adapters)
+    base_lrs = [g["lr"] for g in opt.param_groups]
     steps = cfg["steps"]; accum = cfg.get("accum", 1)
     warmup = cfg.get("warmup", 0)
     sched_kind = cfg.get("sched", "constant")
@@ -114,8 +125,8 @@ def train(model, adapters, params, train_loader, eval_loader, cfg, device="cuda"
     t0 = time.time()
     bi = 0
     for t in range(steps):
-        for gparam in opt.param_groups:
-            gparam["lr"] = cfg["lr"] * lr_at(t)
+        for gparam, bl in zip(opt.param_groups, base_lrs):
+            gparam["lr"] = bl * lr_at(t)
         opt.zero_grad(set_to_none=True)
         tot_loss, tot_tok = 0.0, 0
         for _ in range(accum):
