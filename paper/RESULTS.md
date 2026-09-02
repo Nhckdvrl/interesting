@@ -31,22 +31,39 @@ One gauge orbit of the vanilla Kaiming draw: `A -> Q A`, so `B A`, `P = s²AᵀA
 |---|---|---|---|
 | SGD | Frobenius | yes | **0.00001** nats (0.1× the null) |
 | MUON | spectral | yes | **0.00026** nats (1.0× the null) |
-| ADAMW | elementwise max | **no** | **0.00222** nats (8.2× the null) |
+| ADAMW | elementwise max | **no** | **0.00185** nats (6.8× the null) |
 
 SGD's and Muon's covariance are derivations, not fits: `dB -> dB Qᵀ` and `msign(M Qᵀ) = msign(M) Qᵀ` are exact (the latter to 3.8e-15 in float64). AdamW's failure is equally exact — the elementwise ℓ1 norm is invariant only under signed permutations.
 
 | frame | Λ₁ | Off_g | Off_x | tuned loss |
 |---|---|---|---|---|
-| `frame0` | 0.1443 | -0.0000 | 0.3801 | 0.44329 |
+| `frame0` | 0.1443 | -0.0000 | 0.3801 | 0.44321 |
 | `frame0.25` | 0.2120 | 0.1950 | 0.4171 | 0.44464 |
+| `kaiming` | 0.3661 | 0.7828 | 0.5325 | 0.44468 |
 | `frame0.5` | 0.3090 | 0.5671 | 0.4808 | 0.44481 |
 | `frame1` | 0.4216 | 0.8691 | 0.5149 | 0.44506 |
 | `framex1` | 0.3678 | 0.7865 | 0.5932 | 0.44515 |
 | `frame0.75` | 0.3902 | 0.8095 | 0.5162 | 0.44519 |
 | `framex0` | 0.3025 | 0.6259 | -0.0000 | 0.44542 |
-| `kaiming` | 0.3661 | 0.7828 | 0.5325 | 0.44551 |
 
 Within the orbit the tuned loss correlates with `Off_g` at r = +0.859, `Λ₁` at +0.814 and `Off_x` at −0.004; the best frame is exactly the one where `Off_g = 0`. `Off_g` was reached post-hoc — the pre-registered candidate named `M_x` and was falsified by `framex0`, which sets `Off_x = 0` exactly and is not the best frame.
+
+## Rotating the published zoo
+
+Each initialiser as published, rotated to the gradient-metric eigenframe (`@frame0`), and rotated to a flat gradient-metric diagonal (`@frame1`). All three share `BA` to 1e-15, `P = s²AᵀA` to 1e-15 and all nine gauge invariants, so SGD cannot tell them apart.
+
+| method | published | `@frame0` | Δ | `@frame1` | Δ |
+|---|---|---|---|---|---|
+| kaiming | 0.44515 | **0.44322** | -0.00192 | 0.44495 | -0.00019 |
+| bimi | 0.44556 | **0.44516** | -0.00041 | 0.44617 | +0.00061 |
+| pissa | 0.45655 | **0.45198** | -0.00456 | 0.45790 | +0.00136 |
+| eva | 0.45538 | **0.45459** | -0.00079 | 0.45675 | +0.00137 |
+| gradsub | 0.45457 | **0.45478** | +0.00021 | 0.45526 | +0.00068 |
+| lora_one | 0.45691 | **0.45676** | -0.00015 | 0.46271 | +0.00579 |
+
+`@frame0` helps or is neutral **6/6**; `@frame1` hurts or is neutral **6/6**. LoRA-One and gradsub are *already* at the eigenframe, so `@frame0` is the identity there — and those two cells give an unplanned reproducibility floor of about 2e-4 nats.
+
+**Scale.** The six span 0.01177 nats between them — that span is what their comparison tables are about. The frame alone moves *one* method by 0.00204 nats (median) and 0.00594 (max): 17%–51% of that entire range, and **2.5× the median gap between adjacent methods in the ranking** (0.00081 nats). No paper reports it.
 
 ## The effect is structurally zero at rank 1
 

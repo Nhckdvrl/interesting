@@ -125,6 +125,45 @@ print("\nWithin the orbit the tuned loss correlates with `Off_g` at r = +0.859, 
       "candidate named `M_x` and was falsified by `framex0`, which sets "
       "`Off_x = 0` exactly and is not the best frame.")
 
+H("Rotating the published zoo")
+S = json.load(open(os.path.join(R1, "rot_summary.json")))
+MS = ["kaiming", "bimi", "pissa", "eva", "gradsub", "lora_one"]
+print("Each initialiser as published, rotated to the gradient-metric "
+      "eigenframe (`@frame0`), and rotated to a flat gradient-metric diagonal "
+      "(`@frame1`). All three share `BA` to 1e-15, `P = s²AᵀA` to 1e-15 and "
+      "all nine gauge invariants, so SGD cannot tell them apart.\n")
+print("| method | published | `@frame0` | Δ | `@frame1` | Δ |")
+print("|---|---|---|---|---|---|")
+n0 = n1 = tot = 0
+fr, pub = {}, {}
+for m in MS:
+    p_, a_, b_ = (S.get(f"{m}|published"), S.get(f"{m}|@frame0"),
+                  S.get(f"{m}|@frame1"))
+    if not (p_ and a_ and b_):
+        continue
+    d0, d1 = a_["L"] - p_["L"], b_["L"] - p_["L"]
+    n0 += d0 <= 2.7e-4; n1 += d1 >= -2.7e-4; tot += 1
+    pub[m] = p_["L"]; fr[m] = max(p_["L"], a_["L"], b_["L"]) - \
+        min(p_["L"], a_["L"], b_["L"])
+    print(f"| {m} | {p_['L']:.5f} | **{a_['L']:.5f}** | {d0:+.5f} | "
+          f"{b_['L']:.5f} | {d1:+.5f} |")
+print(f"\n`@frame0` helps or is neutral **{n0}/{tot}**; `@frame1` hurts or is "
+      f"neutral **{n1}/{tot}**. LoRA-One and gradsub are *already* at the "
+      "eigenframe, so `@frame0` is the identity there — and those two cells "
+      "give an unplanned reproducibility floor of about 2e-4 nats.\n")
+if len(pub) >= 3:
+    span = max(pub.values()) - min(pub.values())
+    adj = sorted(pub.values())
+    gaps = [adj[i + 1] - adj[i] for i in range(len(adj) - 1)]
+    mf = st.median(list(fr.values()))
+    print(f"**Scale.** The six span {span:.5f} nats between them — that span is "
+          f"what their comparison tables are about. The frame alone moves *one* "
+          f"method by {mf:.5f} nats (median) and {max(fr.values()):.5f} (max): "
+          f"{100*mf/span:.0f}%–{100*max(fr.values())/span:.0f}% of that entire "
+          f"range, and **{mf/st.median(gaps):.1f}× the median gap between "
+          f"adjacent methods in the ranking** ({st.median(gaps):.5f} nats). "
+          f"No paper reports it.")
+
 H("The effect is structurally zero at rank 1")
 D = {}
 for r in runs(os.path.join(R1, "rank")):
