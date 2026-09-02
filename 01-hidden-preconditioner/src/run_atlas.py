@@ -116,6 +116,7 @@ def main():
     ap.add_argument("--probe_bs", type=int, default=0)
     ap.add_argument("--probe_batches", type=int, default=4)
     ap.add_argument("--optimizer", default="adamw")
+    ap.add_argument("--momentum", type=float, default=0.0)
     ap.add_argument("--warmup", type=int, default=10)
     ap.add_argument("--sched", default="constant")
     ap.add_argument("--grad_clip", type=float, default=1.0)
@@ -288,7 +289,8 @@ def main():
     acc_set = gsm8k_eval_set(args.acc_n) if args.acc_n else None
     cfg = dict(steps=args.steps, accum=accum, optimizer=args.optimizer,
                lr=args.lr, wd=0.0, warmup=args.warmup, sched=args.sched,
-               grad_clip=args.grad_clip, a_lr_ratio=args.a_lr_ratio)
+               grad_clip=args.grad_clip, a_lr_ratio=args.a_lr_ratio,
+               momentum=args.momentum)
     log = train(model, adapters, params, trl, tel, cfg, log_every=5,
                 eval_every=args.eval_every, eval_batches=args.eval_batches,
                 sample_layers=sample, callback=cb)

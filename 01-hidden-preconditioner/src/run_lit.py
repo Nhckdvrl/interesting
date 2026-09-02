@@ -248,6 +248,10 @@ def main():
         elif c == "eva":
             key = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
             A = IN.init_eva(ACT[key].cuda(), r, d_in, ref_tr).cpu().double()
+        elif c.startswith("framex"):          # ladder in the activation metric
+            _k = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
+            A = IN.init_frame(base.cuda(), G[name].cuda(), float(c[6:]),
+                              Sigma=ACT[_k].cuda()).cpu().double()
         elif c.startswith("frame"):
             # pure gauge move on the vanilla draw: A -> Q(t) A_0, so P and
             # every gauge invariant are bit-identical to `kaiming` and only the

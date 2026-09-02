@@ -151,9 +151,15 @@ def main():
             elif cond == "eva":
                 key = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
                 A = IN.init_eva(ACT[key].cuda(), a.r, d_in, ref_tr).cpu().double()
+            elif cond.startswith("framex"):
+                _k = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
+                A = IN.init_frame(base.cuda(), G[name].cuda(), float(cond[6:]),
+                                  Sigma=ACT[_k].cuda()).cpu().double()
             elif cond.startswith("frame"):
+                _t = cond[5:]
                 A = IN.init_frame(base.cuda(), G[name].cuda(),
-                                  float(cond[5:])).cpu().double()
+                                  _t if _t == "opt" else
+                                  float(_t)).cpu().double()
             elif cond == "gradsub":
                 A = IN.init_gradsubspace(G[name].cuda(), a.r, ref_tr).cpu().double()
             elif cond in ("pissa", "pissa_minor"):
