@@ -53,3 +53,32 @@ If it holds, the reach is a **pre-training diagnostic**: measure it in one
 probe pass and it says whether rotating the initialisation is worth doing for
 your rank and your data, before committing any training compute. It also says
 the effect grows into exactly the rank range people now deploy.
+
+---
+
+## Outcome: falsified
+
+Measured `frame1 - frame0` at r = 128, on the grid actually run
+(5e-5, 1e-4, 2e-4, 3e-4):
+
+| lr | 1e-4 | 2e-4 | 3e-4 |
+|---|---|---|---|
+| frame1 - frame0 | **-0.00194** | -0.00458 | -0.00247 |
+
+Predicted **+0.00477**. The stated falsification bound was "below +0.002 or
+above +0.010", so this is falsified -- and not marginally: the **sign** is
+wrong at every learning rate, consistently. At r = 1 through 64 `frame1` was
+worse than `frame0`; at r = 128 it is better.
+
+The single-parameter reach law therefore does not extrapolate an octave past
+its fitted range. What it got right stands -- the effect is exactly zero at
+r = 1 and grows through r = 4, 16, 64 with R^2 = 0.975 on those four points --
+but it is a fit on that range, not a law, and this file is left as written so
+that is on the record.
+
+Note for the joint analysis, not a rescue: this is the second sign reversal
+seen, the other being Qwen3-8B, where a 4x larger probe reversed it back. Both
+reversals occur where `M_g` is estimated from proportionally less data -- 128x128
+from the same probe here, 16x16 from a quarter of the probe there. Whether that
+is the common cause is exactly what the joint analysis has to decide, and it may
+well not be.

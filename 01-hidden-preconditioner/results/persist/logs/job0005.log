@@ -1,0 +1,17 @@
+# fvcrc20:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag persist --cond frame1 --lr 0.0003 --steps 300 --grad_clip 1e9 --traj_every 20
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (1s)
+    step 30/300 loss=0.4503 (26s)
+    step 60/300 loss=0.5052 (52s)
+    step 90/300 loss=0.3998 (78s)
+    step 120/300 loss=0.4281 (104s)
+    step 150/300 loss=0.4540 (130s)
+    step 180/300 loss=0.3695 (162s)
+    step 210/300 loss=0.3948 (188s)
+    step 240/300 loss=0.3916 (214s)
+    step 270/300 loss=0.3595 (239s)
+    step 299/300 loss=0.3895 (264s)
+[frame1_lr0.0003_s0] base=0.83113 final=0.44519 (270s)
