@@ -9,9 +9,17 @@ carries information beyond its captured energy.
 This script recomputes, for every cached atlas point and with no training, a set
 of candidate fourth coordinates:
 
+    R_g   = tr(A C_g A^T)/tr(A Sigma A^T)
+                                  the LAMBDA-WEIGHTED task alignment, i.e. the
+                                  first-order descent rate per unit data-space
+                                  scale.  This -- not the unweighted captured
+                                  energy used to build wave 1 -- is the quantity
+                                  that enters <G, GP>.
     D_g   = r_eff(A C_g A^T)      spectral dimension in the GRADIENT metric
                                   (the analogue of D, which is measured in the
                                   activation metric)
+    W     = tr(A A^T)/tr(A Sigma A^T)
+                                  parameter metric over data metric
     Cdis  = r_eff of the captured-energy distribution of the row space over the
             eigenbasis of T = Sigma^{-1/2} C_g Sigma^{-1/2}, i.e. how many
             whitened-gradient directions the adapter actually spreads over
@@ -23,7 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import torch
 import torch.nn as nn
-from common.intrinsic import whiten_ops, sym_pow
+from common.intrinsic import whiten_ops, sym_pow, gradient_alignment
 from common.data import build_sft, FixedOrderLoader
 from common.train import load_model
 from run_atlas import collect_probes, ACT_GROUP, ACACHE
@@ -82,13 +90,17 @@ def main():
             A = c["A"][n].double().cuda()
             w = W[n]
             Dg = erank(A @ w["Cg"] @ A.T)
+            Rg = gradient_alignment(A, w["Sig"], w["Cg"])
+            Wm = float(A.pow(2).sum()) / (float(((A @ w["Sig"]) * A).sum())
+                                          + 1e-30)
             V = torch.linalg.qr((A @ w["Sh"]).T)[0]
             e = (w["U"].T @ V).pow(2).sum(1) * w["tau"]     # captured per T-mode
             Cdis = float(e.sum()) ** 2 / float(e.pow(2).sum() + 1e-30)
             GP = (w["G"] @ A.T) @ A
             cos1 = float((w["G"] * GP).sum() /
                          (w["G"].norm() * GP.norm() + 1e-30))
-            for k, v in (("D_g", Dg), ("Cdis", Cdis), ("cos1", cos1)):
+            for k, v in (("D_g", Dg), ("Cdis", Cdis), ("cos1", cos1),
+                         ("R_g", Rg), ("W", Wm)):
                 acc.setdefault(k, []).append(v)
         s = c["stats"][mods[0]]
         rows[os.path.basename(f)[:-3]] = dict(

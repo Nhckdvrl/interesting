@@ -27,8 +27,9 @@ import torch.nn as nn
 from common.lora import apply_lora, lora_parameters, DEFAULT_TARGETS
 from common.pinit import kaiming_A
 from common.pstats import p_stats
-from common.intrinsic import (build_A, intrinsic_state, whiten_ops, captured_of,
-                              output_state, sym_pow, metric_ratio)
+from common.intrinsic import (build_A, build_A_matched, intrinsic_state,
+                              whiten_ops, captured_of, output_state, sym_pow,
+                              metric_ratio, gradient_alignment)
 
 
 def sym_half(M):
@@ -86,6 +87,13 @@ def main():
                     help="data-space scale, RELATIVE to the vanilla draw")
     ap.add_argument("--D", type=float, default=None,
                     help="target r_eff(A Sigma A^T); default = the vanilla draw's")
+    ap.add_argument("--matchW", type=float, default=None,
+                    help="wave 3: hold S, D and the LAMBDA-WEIGHTED alignment "
+                         "R_g at the vanilla draw's values and drive "
+                         "W/W_vanilla to this target.  Unlike --wexp this is an "
+                         "exactly matched intervention: M_x = Lambda by "
+                         "construction, so S and D cannot drift.")
+    ap.add_argument("--matchW_iters", type=int, default=400)
     ap.add_argument("--wexp", type=float, default=0.5,
                     help="whitening exponent q in A = Atil Sigma^-q; sweeps the "
                          "parameter-vs-data metric ratio W")
@@ -121,7 +129,9 @@ def main():
 
     rho_s = args.rho
     cell = (f"S{args.S:g}_D{args.D if args.D is not None else 'ref'}"
-            f"_R{rho_s}" + (f"_W{args.wexp:g}" if args.wexp != 0.5 else "")
+            + (f"_MW{args.matchW:g}" if args.matchW is not None
+               else f"_R{rho_s}" + (f"_W{args.wexp:g}" if args.wexp != 0.5
+                                    else ""))
             + f"_lr{args.lr:g}_s{args.seed}")
     outdir = os.path.join(REPO, "01-hidden-preconditioner", "results", args.tag)
     os.makedirs(outdir, exist_ok=True)
@@ -161,7 +171,8 @@ def main():
     os.makedirs(ACACHE, exist_ok=True)
     ckey = hashlib.md5(
         f"{args.model}|{args.task}|{args.seed}|{args.r}|{args.S}|{args.D}|"
-        f"{rho_s}|{args.wexp}|{args.probe_batches}|{probe_bs}|{args.n_train}|"
+        f"{rho_s}|{args.wexp}|{args.matchW}|{args.matchW_iters}|"
+        f"{args.probe_batches}|{probe_bs}|{args.n_train}|"
         f"{args.max_len}".encode()).hexdigest()
     cfile = os.path.join(ACACHE, ckey + ".pt")
     CACHED = None
@@ -202,8 +213,19 @@ def main():
         V_ref = torch.linalg.qr((A_ref @ cache["S_half"]).T)[0]
         rho_ref = captured_of(V_ref, tau, U)
         rr = rho_ref if rho == "ref" else rho
-        A = build_A(args.S * S_ref, args.D if args.D is not None else D_ref,
-                    rr, r, Sig, Cg, generator=g, cache=cache, wexp=args.wexp)
+        if args.matchW is not None:
+            W_ref = metric_ratio(A_ref, Sig)
+            Rg_ref = gradient_alignment(A_ref, Sig, Cg)
+            A, _, _ = build_A_matched(
+                args.S * S_ref, args.D if args.D is not None else D_ref,
+                args.matchW * W_ref, Rg_ref, r, Sig, Cg, cache=cache,
+                generator=torch.Generator(device=Sig.device).manual_seed(h),
+                iters=args.matchW_iters)
+        else:
+            A = build_A(args.S * S_ref,
+                        args.D if args.D is not None else D_ref,
+                        rr, r, Sig, Cg, generator=g, cache=cache,
+                        wexp=args.wexp)
         s_got, d_got = intrinsic_state(A, Sig)
         V = torch.linalg.qr((A @ cache["S_half"]).T)[0]
         st = p_stats(A.cpu(), s=1.0); st.pop("spec_top4", None)
@@ -212,6 +234,8 @@ def main():
                   rho_ref=rho_ref, trP_ref=float((A_ref * A_ref).sum()),
                   W=metric_ratio(A, Sig),
                   W_ref=metric_ratio(A_ref, Sig),
+                  R_g=gradient_alignment(A, Sig, Cg),
+                  R_g_ref=gradient_alignment(A_ref, Sig, Cg),
                   A_fro=float(A.norm()))
         stats[name] = st
         SIGMA_CPU[name] = Sig.float().cpu()
@@ -276,7 +300,8 @@ def main():
     import statistics as st
     print(f"[{cell}] S_rel={st.mean(x['S_rel'] for x in m):.3f} "
           f"D={st.mean(x['D'] for x in m):.2f} "
-          f"rho={st.mean(x['rho_rel'] for x in m):.2f} "
+          f"W/W0={st.mean(x['W']/x['W_ref'] for x in m):.2f} "
+          f"Rg/Rg0={st.mean(x['R_g']/x['R_g_ref'] for x in m):.2f} "
           f"trP={st.mean(x['tr_P'] for x in m):.3f} "
           f"base={base_eval:.5f} final={log['final_eval_loss']:.5f} "
           f"({log['wall_time']:.0f}s)")

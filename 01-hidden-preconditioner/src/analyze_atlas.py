@@ -25,6 +25,12 @@ def atlas_points(tag="atlas"):
             D=st.mean(x["D"] for x in m),
             rho=st.mean(x["rho_rel"] for x in m),
             trP=st.mean(x["tr_P"] for x in m),
+            # W = tr(A A^T) / tr(A Sigma A^T), relative to the vanilla draw:
+            # the parameter metric AdamW's per-coordinate step sees, divided by
+            # the data metric the function sees.  Computable for every run from
+            # (tr P, tr P of the vanilla draw, S_rel).
+            W=st.mean(x["tr_P"] / x["trP_ref"] for x in m)
+            / max(st.mean(x["S_rel"] for x in m), 1e-9),
             A_fro=st.mean(x["A_fro"] for x in m),
             curve={}, traj=r.get("traj")))
         p["curve"].setdefault(a["lr"], []).append(r["log"]["final_eval_loss"])
@@ -39,6 +45,7 @@ def atlas_points(tag="atlas"):
 
 def ood_points(tag="ood", coords="intrinsic_table.json"):
     C = json.load(open(os.path.join(RES, coords)))
+    TRP_VAN = C["kaiming|trace"]["tr_P"]
     out = {}
     for f in sorted(glob.glob(os.path.join(RES, tag, "*.json"))):
         r = json.load(open(f)); a = r["args"]
@@ -47,6 +54,8 @@ def ood_points(tag="ood", coords="intrinsic_table.json"):
             continue
         o = out.setdefault(k, dict(**{q: C[k][q] for q in
                                       ("S_rel", "D", "rho", "tr_P", "B0")},
+                                   W=(C[k]["tr_P"] / TRP_VAN) /
+                                   max(C[k]["S_rel"], 1e-9),
                                    curve={}))
         o["curve"].setdefault(a["lr"], []).append(r["log"]["final_eval_loss"])
     for o in out.values():
@@ -58,13 +67,16 @@ def ood_points(tag="ood", coords="intrinsic_table.json"):
     return out
 
 
-def feats(S, D, rho):
+def feats(S, D, rho, W=None):
     lS, lD, lr_ = math.log(max(S, 1e-6)), math.log(max(D, 1e-6)), \
         math.log(max(rho, 1e-3))
-    return [1.0, lS, lS * lS, 1.0 / math.sqrt(max(D, 1e-6)), lD, lr_]
+    f = [1.0, lS, lS * lS, 1.0 / math.sqrt(max(D, 1e-6)), lD, lr_]
+    if W is not None:
+        f.append(math.log(max(W, 1e-6)))
+    return f
 
 
-FNAMES = ["1", "log S", "(log S)^2", "1/sqrt(D)", "log D", "log rho"]
+FNAMES = ["1", "log S", "(log S)^2", "1/sqrt(D)", "log D", "log rho", "log W"]
 
 
 def fit(X, y):
@@ -75,18 +87,23 @@ def fit(X, y):
 def main(atlas_tag="atlas", ood_tag="ood"):
     A = atlas_points(atlas_tag)
     print(f"# Atlas: {len(A)} points\n")
-    print(f"  {'S':>8s} {'D':>7s} {'rho':>8s} {'trP':>9s} | "
+    print(f"  {'S':>8s} {'D':>7s} {'rho':>8s} {'W':>9s} | "
           f"{'L*':>9s} {'lr*':>8s} {'ok':>3s}")
     for k in sorted(A, key=lambda k: (k[0], str(k[1]), str(k[2]))):
         p = A[k]
-        print(f"  {p['S']:8.3f} {p['D']:7.3f} {p['rho']:8.3f} {p['trP']:9.2f} | "
+        print(f"  {p['S']:8.3f} {p['D']:7.3f} {p['rho']:8.3f} {p['W']:9.2f} | "
               f"{p['L_star']:9.5f} {p['lr_star']:8.0e} "
               f"{'y' if p['bracketed'] else 'EDGE':>3s}")
 
     use = [p for p in A.values() if p["bracketed"]]
     if len(use) < 6:
         print("\n(not enough bracketed atlas points yet)"); return
-    X = [feats(p["S"], p["D"], p["rho"]) for p in use]
+    useW = len({round(math.log10(max(p["W"], 1e-9)), 1) for p in use}) > 2
+    X = [feats(p["S"], p["D"], p["rho"], p["W"] if useW else None) for p in use]
+    print(f"\n  W (parameter/data metric ratio) spans "
+          f"{min(p['W'] for p in use):.2f} .. {max(p['W'] for p in use):.2f}"
+          + ("  -> included as a coordinate" if useW else
+             "  -> too narrow to fit, excluded"))
     yL = [p["L_star"] for p in use]
     ylr = [math.log(p["lr_star"]) for p in use]
     cL, clr = fit(X, yL), fit(X, ylr)
@@ -105,20 +122,21 @@ def main(atlas_tag="atlas", ood_tag="ood"):
     print(f"\n# Out-of-distribution: {len(O)} published initializers, "
           f"never used to fit\n")
     print(f"  {'initializer|match':30s} {'S':>8s} {'D':>6s} {'rho':>7s} "
-          f"{'L* obs':>9s} {'L* pred':>9s} {'err':>9s} {'lr* obs':>8s} "
-          f"{'lr* pred':>9s}")
+          f"{'W':>7s} {'L* obs':>9s} {'L* pred':>9s} {'err':>9s} "
+          f"{'lr* obs':>8s} {'lr* pred':>9s}")
     errs, errlr = [], []
     for k in sorted(O):
         o = O[k]
         if not o["bracketed"]:
             continue
-        x = np.array(feats(o["S_rel"], o["D"], o["rho"]))
+        x = np.array(feats(o["S_rel"], o["D"], o["rho"],
+                           o["W"] if useW else None))
         pL, plr = float(x @ cL), math.exp(float(x @ clr))
         errs.append(o["L_star"] - pL)
         errlr.append(math.log(o["lr_star"] / plr))
         print(f"  {k:30s} {o['S_rel']:8.2f} {o['D']:6.2f} {o['rho']:7.2f} "
-              f"{o['L_star']:9.5f} {pL:9.5f} {o['L_star']-pL:+9.5f} "
-              f"{o['lr_star']:8.0e} {plr:9.1e}")
+              f"{o['W']:7.3f} {o['L_star']:9.5f} {pL:9.5f} "
+              f"{o['L_star']-pL:+9.5f} {o['lr_star']:8.0e} {plr:9.1e}")
     if errs:
         rms = float(np.sqrt(np.mean(np.square(errs))))
         base = float(np.std([O[k]["L_star"] for k in O if O[k]["bracketed"]]))

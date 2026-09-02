@@ -124,6 +124,27 @@ def rowspace_for(rho, r, tau, U, generator=None):
     return U[:, k:k + r].contiguous()
 
 
+def gradient_alignment(A, Sigma, C_g):
+    """R_g = tr(A C_g A^T) / tr(A Sigma A^T).
+
+    This is the quantity that actually enters the first-order descent.  Writing
+    C = A Sigma^{1/2} = Lambda^{1/2} V^T and T = Sigma^{-1/2} C_g Sigma^{-1/2},
+
+        tr(A C_g A^T) = tr(C T C^T) = tr(Lambda V^T T V),
+
+    i.e. the row-space alignment weighted by the intrinsic spectrum Lambda.
+    The unweighted tr(V^T T V) used by `captured_of` coincides with it only when
+    Lambda is flat, so a null result on `captured_of` does NOT rule out task
+    alignment -- it rules out the unweighted statistic.  Divided by
+    tr(A Sigma A^T) = tr(Lambda), this is the descent rate per unit data-space
+    scale, and is invariant to rescaling A.
+    """
+    A = A.double()
+    num = float(((A @ C_g.double()) * A).sum())
+    den = float(((A @ Sigma.double()) * A).sum())
+    return num / (den + 1e-30)
+
+
 def captured_of(V, tau, U):
     """Task alignment as *captured whitened-gradient energy*, relative to what a
     random subspace of the same dimension would capture.
@@ -167,6 +188,82 @@ def rowspace_for_captured(target_rel, r, tau, U, iters=60):
             hi = mid
     k = lo if abs(cap_at(lo) - target_rel) < abs(cap_at(hi) - target_rel) else hi
     return U[:, k:k + r].contiguous()
+
+
+# ------------------------------------------------- exact two-constraint V
+
+def rowspace_constrained(Lam, Sinv, T, target_W, target_Rg, iters=400,
+                         lr=0.05, generator=None, V0=None, verbose=False):
+    """Find V in St(d, r) realising BOTH
+
+        W   = tr(Lam V^T Sinv V) / tr(Lam)      parameter/data metric ratio
+        R_g = tr(Lam V^T T    V) / tr(Lam)      first-order descent per unit S
+
+    Because A = Lam^{1/2} V^T Sigma^{-1/2} has M_x = Lam identically, S and D
+    are fixed exactly by Lam and are untouched by V.  So sweeping W at fixed
+    (S, D, R_g) is a genuinely matched intervention, unlike the whitening-
+    exponent sweep, which drags D and the row space along with it.
+
+    St(d, r) has dr - r(r+1)/2 dimensions (about 1.6e4 at d=1024, r=16), so two
+    scalar constraints are far from binding; a short Riemannian-free
+    parameterisation V = qr(M) with Adam is enough.
+    """
+    d = Sinv.shape[0]; r = Lam.shape[0]
+    dt = Sinv.dtype
+    if V0 is None:
+        M = torch.randn(d, r, generator=generator, device=Sinv.device, dtype=dt)
+    else:
+        M = V0.clone()
+    M = M.detach().requires_grad_(True)
+    opt = torch.optim.Adam([M], lr=lr)
+    lam = Lam.diagonal() if Lam.dim() == 2 else Lam
+    tl = lam.sum()
+    lw, lr_g = math.log(target_W), math.log(max(target_Rg, 1e-300))
+    best, bestV = float("inf"), None
+    for it in range(iters):
+        opt.zero_grad()
+        V, _ = torch.linalg.qr(M)
+        w = (lam * ((V.T @ Sinv) * V.T).sum(1)).sum() / tl
+        g = (lam * ((V.T @ T) * V.T).sum(1)).sum() / tl
+        loss = (torch.log(w.clamp_min(1e-300)) - lw) ** 2 + \
+               (torch.log(g.clamp_min(1e-300)) - lr_g) ** 2
+        f = float(loss.detach())
+        if f < best:
+            best, bestV = f, V.detach().clone()
+        loss.backward()
+        opt.step()
+    V = bestV
+    w = float((lam * ((V.T @ Sinv) * V.T).sum(1)).sum() / tl)
+    g = float((lam * ((V.T @ T) * V.T).sum(1)).sum() / tl)
+    if verbose:
+        print(f"    W {w:.4g} (target {target_W:.4g}), "
+              f"R_g {g:.4g} (target {target_Rg:.4g})")
+    return V, w, g
+
+
+def build_A_matched(S, D, target_W, target_Rg, r, Sigma, C_g, cache=None,
+                    generator=None, eps_rel=1e-6, iters=400):
+    """A with S and D exact by construction, and (W, R_g) driven to targets."""
+    if cache is None or "S_ihalf" not in cache:
+        S_half, S_ihalf, tau, U = whiten_ops(Sigma, C_g, eps_rel)
+        if cache is not None:
+            cache.update(S_half=S_half, S_ihalf=S_ihalf, tau=tau, U=U)
+    else:
+        S_half, S_ihalf, tau, U = (cache["S_half"], cache["S_ihalf"],
+                                   cache["tau"], cache["U"])
+    if cache is not None and "Sinv" in cache:
+        Sinv, T = cache["Sinv"], cache["T"]
+    else:
+        Sinv = sym_pow(Sigma, -1.0, eps_rel)
+        T = S_ihalf @ C_g.double() @ S_ihalf
+        T = 0.5 * (T + T.T)
+        if cache is not None:
+            cache.update(Sinv=Sinv, T=T)
+    lam = spectrum_for(S, D, r, device=S_ihalf.device, dtype=S_ihalf.dtype)
+    V, w, g = rowspace_constrained(lam, Sinv, T, target_W, target_Rg,
+                                   iters=iters, generator=generator)
+    A = torch.diag(lam.sqrt()) @ V.T @ S_ihalf
+    return A, w, g
 
 
 # ---------------------------------------------------------------- assembly

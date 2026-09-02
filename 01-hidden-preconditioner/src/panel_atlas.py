@@ -43,6 +43,15 @@ WAVE2 = [(f"W{q:g}", 1.0, None, "ref", q) for q in (-0.25, 0.0, 0.15, 0.3)]
 WAVE2 += [(f"W0_S{s:g}", s, None, "ref", 0.0) for s in (0.1, 10.0)]
 WAVE2 += [(f"W0_D{d:g}", 1.0, d, "ref", 0.0) for d in (2.0, 12.0)]
 
+# Wave 3.  The exact causal ladder for W.  Unlike wave 2, S and D are fixed by
+# construction (M_x = Lambda identically) and the *spectrum-weighted* alignment
+# R_g = tr(A C_g A^T)/tr(A Sigma A^T) -- the quantity that actually enters
+# <G, GP>, unlike the unweighted statistic wave 1 swept -- is driven to the
+# vanilla draw's value.  Only W moves.  The W/W0 = 1 rung reproduces the vanilla
+# draw in ALL FOUR coordinates and is the sufficiency test.
+WAVE3 = [(f"MW{w:g}", 1.0, None, "ref", w) for w in
+         (0.1, 0.3, 1.0, 3.0, 10.0, 30.0)]
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", default="atlas")
@@ -51,18 +60,20 @@ if __name__ == "__main__":
     ap.add_argument("--steps", type=int, default=300)
     ap.add_argument("--lrs", default=None)
     ap.add_argument("--seeds", default="0")
-    ap.add_argument("--wave", default="1", choices=["1", "2", "all"])
+    ap.add_argument("--wave", default="1", choices=["1", "2", "3", "all"])
     ap.add_argument("--reverse", action="store_true")
     ap.add_argument("--dry", action="store_true")
     a = ap.parse_args()
     lrs = [float(x) for x in a.lrs.split(",")] if a.lrs else LRS
-    pts = {"1": POINTS, "2": WAVE2, "all": POINTS + WAVE2}[a.wave]
+    pts = {"1": POINTS, "2": WAVE2, "3": WAVE3,
+           "all": POINTS + WAVE2 + WAVE3}[a.wave]
     jobs = []
     for _, S, D, rho, q in pts:
         for lr in lrs:
             for sd in [int(x) for x in a.seeds.split(",")]:
                 d = f"--D {D:g} " if D is not None else ""
-                w = f"--wexp {q:g} " if q != 0.5 else ""
+                w = (f"--matchW {q:g} " if a.wave == "3"
+                     else (f"--wexp {q:g} " if q != 0.5 else ""))
                 jobs.append(f"{{PY}} {RUN} --tag {a.tag} --S {S:g} {d}"
                             f"--rho {rho} {w}--lr {lr:g} --seed {sd} "
                             f"--steps {a.steps}")
