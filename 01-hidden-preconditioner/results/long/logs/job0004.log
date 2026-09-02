@@ -1,0 +1,18 @@
+# fvcrc20:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag long --cond frame0 --lr 0.0002 --steps 1000 --grad_clip 1e9 --acc_n 200
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+  base GSM8K acc = 0.5750
+    step 0/1000 loss=1.1613 (1s)
+    step 100/1000 loss=0.4223 (84s)
+    step 200/1000 loss=0.4763 (176s)
+    step 300/1000 loss=0.3812 (266s)
+    step 400/1000 loss=0.3621 (355s)
+    step 500/1000 loss=0.2867 (446s)
+    step 600/1000 loss=0.2780 (536s)
+    step 700/1000 loss=0.3668 (626s)
+    step 800/1000 loss=0.2423 (716s)
+    step 900/1000 loss=0.3349 (807s)
+    step 999/1000 loss=0.1815 (896s)
+[frame0_lr0.0002_s0] base=0.83113 final=0.47816 acc=0.4550 (base 0.5750) (901s)

@@ -1,18 +1,6 @@
 # fvcrc20:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8bprobe --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 16 --amp bf16 --cond frame0 --lr 0.0005
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8bprobe --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 16 --amp bf16 --cond kaiming --lr 0.0006
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:05<00:21,  5.33s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:12<00:18,  6.24s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:18<00:12,  6.24s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:23<00:05,  5.83s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:24<00:00,  4.05s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:24<00:00,  4.91s/it]
-    step 0/300 loss=0.5118 (5s)
-    step 30/300 loss=0.1418 (147s)
-    step 60/300 loss=0.2276 (289s)
-    step 90/300 loss=0.1805 (429s)
-    step 120/300 loss=0.1708 (569s)
-    step 150/300 loss=0.1771 (709s)
-    step 180/300 loss=0.2187 (855s)
-    step 210/300 loss=0.2419 (994s)
-    step 240/300 loss=0.2286 (1134s)
-    step 270/300 loss=0.1822 (1273s)
-    step 299/300 loss=0.2209 (1409s)
-[frame0_lr0.0005_s0] base=0.72289 final=0.41142 (1415s)
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:05<00:20,  5.22s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:11<00:17,  5.72s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:16<00:11,  5.70s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:21<00:05,  5.21s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:22<00:00,  3.60s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:22<00:00,  4.43s/it]

@@ -1,20 +1,6 @@
 # fvcrc20:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8bprobe --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 16 --amp bf16 --cond kaiming --lr 0.0005
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8bprobe --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 16 --amp bf16 --cond kaiming --lr 0.0003
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:06<00:24,  6.10s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:14<00:21,  7.24s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:22<00:15,  7.55s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:26<00:06,  6.35s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:27<00:00,  4.23s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:27<00:00,  5.41s/it]
-[W903 03:16:57.333089880 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 635437056 bytes (free: 229441536, total: 101971722240).
-[W903 03:17:06.826937482 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 935329792 bytes (free: 149749760, total: 101971722240).
-    step 0/300 loss=0.5118 (5s)
-    step 30/300 loss=0.1381 (138s)
-    step 60/300 loss=0.2323 (271s)
-    step 90/300 loss=0.1721 (403s)
-    step 120/300 loss=0.1795 (536s)
-    step 150/300 loss=0.1876 (671s)
-    step 180/300 loss=0.2139 (813s)
-    step 210/300 loss=0.2549 (945s)
-    step 240/300 loss=0.2336 (1078s)
-    step 270/300 loss=0.1884 (1212s)
-    step 299/300 loss=0.2237 (1340s)
-[kaiming_lr0.0005_s0] base=0.72289 final=0.40135 (1346s)
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:03<00:14,  3.51s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:09<00:15,  5.00s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:16<00:11,  5.72s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:21<00:05,  5.43s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:22<00:00,  3.79s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:22<00:00,  4.40s/it]

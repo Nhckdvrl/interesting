@@ -1,0 +1,33 @@
+# LOCAL:3 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8bprobe --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 16 --amp bf16 --cond frame0 --lr 0.0004
+
+/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py:21: UserWarning: CUDA is not available or torch_xla is imported. Disabling autocast.
+  AMP[0] = (torch.autocast("cuda", torch.bfloat16) if mode == "bf16"
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:02<00:08,  2.16s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:04<00:07,  2.36s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:06<00:04,  2.28s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:08<00:02,  2.10s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:08<00:00,  1.40s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:08<00:00,  1.77s/it]
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 185, in main
+    model, tok = load_model(args.model, dtype=dict(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 31, in load_model
+    m.to(device)
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/modeling_utils.py", line 4343, in to
+    return super().to(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+    return t.to(
+           ^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/cuda/__init__.py", line 529, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: No CUDA GPUs are available
