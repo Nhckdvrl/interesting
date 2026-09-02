@@ -3,7 +3,26 @@
 Three roles: **runners** train one cell, **panels** enqueue many cells across
 the cluster, **analyses** read `../results/` and print or plot.
 
-## Stage 2 — the intrinsic state space (current main line)
+## Stage 3 — the gauge frame (current main line)
+
+The conditions are dispatched by `run_lit.py`: `frame<t>` walks the gauge orbit
+of the vanilla draw in the gradient metric (`t = 0` its eigenbasis, `t = 1` a
+flat diagonal, `opt`/`min` the argmax/argmin of `Λ₁`), `framex<t>` does the same
+in the activation metric, `signperm<k>` is the exactly-invariant noise floor,
+and `<cond>@frame<t>` applies the same rotation to any published initializer,
+carrying `B` along so `BA` is preserved.
+
+| script | role |
+|---|---|
+| `second_order.py` | the nine order-≤2 gauge invariants plus the frame statistics (`Λ₁`, `E_g`, `Off_g`, `Off_x`) for every construction and every published initializer — **no training** |
+| `analyze_frame.py` | the frame ladder: SGD vs Muon vs AdamW on one orbit |
+| `analyze_mechanism.py` | which functional of the frame the optimizer responds to, and why the candidates cannot be separated |
+| `analyze_rot.py` | the zoo rotated in both directions, and how big the frame is next to what those papers compare |
+| `analyze_rank.py` | the effect against `dim O(r)/signed perms`, zero at r = 1 |
+| `analyze_8b.py` | the four predictions committed in `paper/8b_predictions.md` |
+| `frame_closure.py` | does the frame close the out-of-distribution gap the invariant law leaves? |
+
+## Stage 2 — the intrinsic state space
 
 | script | role |
 |---|---|
