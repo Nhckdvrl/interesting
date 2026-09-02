@@ -157,6 +157,9 @@ def main():
     ap.add_argument("--acc_n", type=int, default=0,
                     help="if >0, score GSM8K exact-match accuracy on this many "
                          "held-out problems before and after training")
+    ap.add_argument("--traj_every", type=int, default=0,
+                    help="record the frame coordinates every N steps, to test "
+                         "whether an initialisation-time frame survives")
     ap.add_argument("--acc_bs", type=int, default=16)
     ap.add_argument("--acc_max_new", type=int, default=320)
     args = ap.parse_args()
@@ -342,7 +345,49 @@ def main():
         base_acc, _ = safe_acc("base")
         if base_acc is not None:
             print(f"  base GSM8K acc = {base_acc:.4f}", flush=True)
-    log = train(model, adapters, params, trl, tel, cfg, log_every=5,
+    traj = []
+    if args.traj_every:
+        # Why should a choice made at step 0 still matter at step 300?  Either
+        # the frame persists, or it does not and the effect is a transient
+        # advantage that compounds.  Measuring it distinguishes the two, and
+        # both are interesting.  Lambda_1 needs the probe gradient, which is
+        # the one from initialisation -- so this tracks the frame RELATIVE to
+        # the geometry the initialiser was built for, which is exactly the
+        # quantity whose persistence is in question.
+        from common.intrinsic import l1_flatness, offdiag_mass
+        tmods = sorted(pstats)[::max(len(pstats) // 8, 1)]
+
+        def _traj(t, _m, ad):
+            """Diagnostics must never be able to lose a training run -- same
+            rule as safe_acc.  This one is also untested on a busy cluster, so
+            it swallows its own failure and records it once."""
+            if t % args.traj_every and t != cfg["steps"] - 1:
+                return
+            try:
+                with torch.no_grad():
+                    row = {"step": t}
+                    lam, eg, off = [], [], []
+                    for n in tmods:
+                        if n not in ad or n not in G:
+                            continue
+                        A = ad[n].lora_A.detach().double()
+                        Gd = G[n].cuda().double()
+                        GA = Gd @ A.T
+                        l, e, _ = l1_flatness(A, Gd)
+                        lam.append(l); eg.append(e)
+                        off.append(offdiag_mass(GA.T @ GA))
+                    if lam:
+                        row.update(Lam1=sum(lam) / len(lam),
+                                   E_g=sum(eg) / len(eg),
+                                   Off_g=sum(off) / len(off))
+                        traj.append(row)
+            except Exception as e:                                # noqa: BLE001
+                if not traj or "error" not in traj[-1]:
+                    traj.append({"step": t, "error": f"{type(e).__name__}: {e}"})
+        cb = _traj
+    else:
+        cb = None
+    log = train(model, adapters, params, trl, tel, cfg, callback=cb, log_every=5,
                 eval_every=args.eval_every, eval_batches=args.eval_batches,
                 sample_layers=[n for n in adapters
                                if n.endswith("layers.13.mlp.down_proj")])
@@ -350,7 +395,9 @@ def main():
     json.dump(dict(cell=cell, args=vars(args), base_eval_loss=base_eval,
                    base_acc=base_acc, final_acc=acc,
                    acc_samples=samples,
-                   init_pstats=pstats, log=log), open(outfile, "w"))
+                   init_pstats=pstats, log=log,
+                   **({"frame_traj": traj} if traj else {})),
+              open(outfile, "w"))
     print(f"[{cell}] base={base_eval:.5f} final={log['final_eval_loss']:.5f}"
           + (f" acc={acc:.4f}" + (f" (base {base_acc:.4f})"
                                   if base_acc is not None else "")
