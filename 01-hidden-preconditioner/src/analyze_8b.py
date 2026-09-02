@@ -33,21 +33,24 @@ def main(tag="q8b"):
         key = (a.get("optimizer", "adamw"), a["cond"], a.get("amp", "none"))
         D[key][a["lr"]] = r["log"]["eval_loss"][-1]
     conds = ["frame0", "frame1", "kaiming"]
-    for opt, amp, lrs in (("adamw", "bf16", (1e-4, 2e-4, 3e-4, 5e-4)),
+    for opt, amp, lrs in (("adamw", "bf16",
+                           (1e-4, 2e-4, 3e-4, 5e-4, 7e-4, 1e-3, 1.5e-3, 2e-3)),
                           ("sgd", "bf16", (0.03, 0.1)),
                           ("sgd", "none", (0.03, 0.1))):
         rows = [(c, D[(opt, c, amp)]) for c in conds if D.get((opt, c, amp))]
         if not rows:
             continue
         print(f"\n{opt.upper()} (amp={amp})")
-        print(f"{'cond':>9s} | " + " ".join(f"{l:>9.0e}" for l in lrs)
+        seen = sorted({l for _, cur in rows for l in cur})
+        lrs = tuple(l for l in lrs if l in seen)
+        print(f"{'cond':>9s} | " + " ".join(f"{l:>8.1e}" for l in lrs)
               + f" | {'tuned':>9s}")
         best = {}
         for c, cur in rows:
             b = min(cur.values()); best[c] = b
             lo = sorted(cur)
             edge = "*" if min(cur, key=cur.get) in (lo[0], lo[-1]) else " "
-            print(f"{c:>9s} | " + " ".join(f"{cur.get(l, float('nan')):9.5f}"
+            print(f"{c:>9s} | " + " ".join(f"{cur.get(l, float('nan')):8.5f}"
                                            for l in lrs) + f" | {b:9.5f}{edge}")
         # A partial panel produces conditions with DISJOINT learning-rate
         # grids, and comparing one condition's worst rung to another's best is
