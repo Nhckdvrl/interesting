@@ -1,17 +1,16 @@
-# LOCAL:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8b --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 4 --amp bf16 --cond kaiming --lr 0.0005
+# LOCAL:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8b --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 4 --amp bf16 --cond kaiming --lr 0.002
 
-Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]Fetching 5 files:  60%|██████    | 3/5 [02:23<01:35, 47.75s/it]Fetching 5 files:  80%|████████  | 4/5 [02:23<00:35, 35.84s/it]Fetching 5 files: 100%|██████████| 5/5 [02:45<00:00, 33.14s/it]Fetching 5 files: 100%|██████████| 5/5 [02:45<00:00, 33.14s/it]
-Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:41<02:47, 41.97s/it]Loading checkpoint shards:  40%|████      | 2/5 [01:22<02:02, 40.95s/it]Loading checkpoint shards:  60%|██████    | 3/5 [02:22<01:39, 49.63s/it]Loading checkpoint shards:  80%|████████  | 4/5 [03:28<00:56, 56.31s/it]Loading checkpoint shards: 100%|██████████| 5/5 [03:57<00:00, 46.38s/it]Loading checkpoint shards: 100%|██████████| 5/5 [03:57<00:00, 47.50s/it]
-    step 0/300 loss=0.5118 (2s)
-    step 30/300 loss=0.1373 (54s)
-    step 60/300 loss=0.2347 (106s)
-    step 90/300 loss=0.1867 (158s)
-    step 120/300 loss=0.1667 (210s)
-    step 150/300 loss=0.1960 (262s)
-    step 180/300 loss=0.2055 (319s)
-    step 210/300 loss=0.2470 (371s)
-    step 240/300 loss=0.2398 (424s)
-    step 270/300 loss=0.1773 (474s)
-    step 299/300 loss=0.2305 (523s)
-[kaiming_lr0.0005_s0] base=0.72289 final=0.39833 (529s)
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:03<00:13,  3.45s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:05<00:08,  2.77s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:07<00:04,  2.48s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:10<00:02,  2.51s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  1.80s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.20s/it]
+    step 0/300 loss=0.5118 (1s)
+    step 30/300 loss=0.3395 (55s)
+    step 60/300 loss=8.0294 (108s)
+    step 90/300 loss=5.1342 (162s)
+    step 120/300 loss=4.9429 (215s)
+    step 150/300 loss=5.1721 (269s)
+    step 180/300 loss=4.8120 (326s)
+    step 210/300 loss=4.9677 (379s)
+    step 240/300 loss=4.9592 (436s)
+    step 270/300 loss=5.0128 (490s)
+    step 299/300 loss=4.8808 (541s)
+[kaiming_lr0.002_s0] base=0.72289 final=4.94135 (547s)

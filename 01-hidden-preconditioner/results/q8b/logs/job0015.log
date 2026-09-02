@@ -1,0 +1,16 @@
+# LOCAL:3 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8b --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 4 --amp bf16 --cond frame1 --lr 0.0005
+
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:00<00:03,  1.07it/s]Loading checkpoint shards:  40%|████      | 2/5 [00:02<00:03,  1.07s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:03<00:02,  1.08s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:04<00:00,  1.00it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:04<00:00,  1.43it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:04<00:00,  1.18it/s]
+    step 0/300 loss=0.5118 (2s)
+    step 30/300 loss=0.1363 (55s)
+    step 60/300 loss=0.2292 (108s)
+    step 90/300 loss=0.1739 (162s)
+    step 120/300 loss=0.1692 (215s)
+    step 150/300 loss=0.1965 (268s)
+    step 180/300 loss=0.2101 (325s)
+    step 210/300 loss=0.2498 (378s)
+    step 240/300 loss=0.2249 (430s)
+    step 270/300 loss=0.1838 (483s)
+    step 299/300 loss=0.2421 (533s)
+[frame1_lr0.0005_s0] base=0.72289 final=0.39895 (539s)
