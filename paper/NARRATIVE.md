@@ -300,6 +300,32 @@ flat, AdamW monotone, with FullFT 4.5x more gauge-sensitive than LoRA. That is
 this section's statement one level up. The two topics are one principle at two
 symmetry groups, which is why they belong in one paper.
 
+## 6b. What this implies as the field moves off Adam
+
+Muon is exactly gauge-covariant, verified here to the reproducibility floor.
+That is not only a control -- it is a statement about what initialisation
+research will and will not be able to claim on optimizers of that family.
+
+Under Muon (and under SGD) an initialiser can only earn its keep through the
+**orbit**, `P_0 = A^T A`. Any part of its design that moves the frame is
+provably inert, no matter how principled the construction. Under AdamW both
+channels are live, and the frame channel is the larger of the two in every
+comparison we ran.
+
+That cuts both ways and we should be careful about which way.
+
+* It does **not** say the frame-based family (NoRA, ETF, BiMI) is invisible to
+  Muon. Those methods change the orbit as well -- their diagonal balancing and
+  frame constructions move `A^T A`, not just the frame. What we measured is
+  that *both* of their changes are null under AdamW: their orbit differs from
+  vanilla's only slightly (`D_g` 0.130-0.134 against 0.131, `Psi_0x` 1.000-1.015
+  against 1.015) and their frame not at all (`Lambda_1` 0.328-0.366 against
+  0.366).
+* It does say that an initialisation result obtained with AdamW carries a
+  component that will not transfer to an orthogonalised optimizer, and that
+  nobody currently reports enough to tell how much. Separating the two channels
+  costs one probe pass, which is the measurement in section 3.
+
 ## 7. Positioning
 
 See `paper/POSITION.md`. Both halves of the argument are individually known --
