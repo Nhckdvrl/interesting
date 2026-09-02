@@ -153,3 +153,27 @@ ZERO_B = ["kaiming", "gaussian", "nora", "nora_unit", "kaimingspec_flatdiag",
 NONZERO_B = ["pissa", "pissa_minor", "olora", "lora_one"]
 NEEDS_GRAD = {"gradsub", "lora_one"}
 NEEDS_ACT = {"eva"}
+
+
+def init_frame(A0, G, t):
+    """Walk the exact gauge orbit of a given A_0, from one extreme of the
+    Adam-visible coordinate to the other.
+
+    A -> Q A leaves P = s^2 A^T A bit-identical and every invariant of the
+    triple (A A^T, A Sigma A^T, A C_g A^T) fixed to machine precision, so this
+    is a dose ladder in which the ONLY thing that changes is the frame -- the
+    part of the initialisation that SGD provably cannot see and AdamW provably
+    can.  t = 0 puts the gradient metric in its own eigenbasis (gradient energy
+    maximally concentrated across the r adapter rows, E_g minimal); t = 1
+    flattens its diagonal (E_g = 1).  Schur-Horn says these are the two
+    extremes, so the ladder spans the whole reachable range.
+    """
+    from common.intrinsic import frame_ladder
+    A = A0.double()
+    Gd = G.double().to(A.device)
+    Mg = A @ (Gd.T @ Gd) @ A.T
+    Q = frame_ladder(Mg, [float(t)])[0].to(A.device)
+    return Q @ A
+
+
+NEEDS_GRAD.add("frame")

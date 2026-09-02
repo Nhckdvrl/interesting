@@ -244,6 +244,12 @@ def main():
         elif c == "eva":
             key = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
             A = IN.init_eva(ACT[key].cuda(), r, d_in, ref_tr).cpu().double()
+        elif c.startswith("frame"):
+            # pure gauge move on the vanilla draw: A -> Q(t) A_0, so P and
+            # every gauge invariant are bit-identical to `kaiming` and only the
+            # frame AdamW steps in changes.
+            A = IN.init_frame(base.cuda(), G[name].cuda(),
+                              float(c[5:])).cpu().double()
         elif c == "gradsub":
             A = IN.init_gradsubspace(G[name].cuda(), r, ref_tr).cpu().double()
         elif c in ("pissa", "pissa_minor"):
