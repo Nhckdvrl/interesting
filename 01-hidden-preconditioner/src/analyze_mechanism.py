@@ -17,6 +17,14 @@ Candidates:
   Off_x     off-diagonal mass of M_x = A Sigma A^T
   Off_g     off-diagonal mass of M_g = A C_g A^T
   E_g       equipartition of diag(M_g)
+
+CONCLUSION.  Off_x is falsified in both designs -- it is uncorrelated within the
+orbit (r = -0.004) and worst across the zoo -- and framex0, which sets it to
+exactly zero, is not the best frame.  Lambda_1, Off_g and E_g all score highly
+in both designs and are NOT separable here, because the gradient-metric
+eigenframe is simultaneously extremal in all three.  We report that rather than
+picking a winner: the practical prescription is the same under all three
+survivors, since all three name the same frame.
 """
 import glob, json, math, os, statistics as st, sys, collections
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
