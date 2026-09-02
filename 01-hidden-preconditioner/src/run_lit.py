@@ -290,23 +290,36 @@ def main():
                b_lr_ratio=args.b_lr_ratio)
     acc_set = gsm8k_eval_set(args.acc_n) if args.acc_n else None
     base_acc = None
+
+    def safe_acc(tag):
+        """Accuracy scoring must never be able to lose a training run."""
+        if not acc_set:
+            return None, None
+        try:
+            return gsm8k_accuracy(model, tok, acc_set, bs=args.acc_bs,
+                                  max_new=args.acc_max_new)
+        except Exception as e:                       # noqa: BLE001
+            print(f"  [{tag}] accuracy eval failed: {type(e).__name__}: {e}",
+                  flush=True)
+            return None, None
+
     if acc_set:
-        base_acc, _ = gsm8k_accuracy(model, tok, acc_set, bs=args.acc_bs,
-                                     max_new=args.acc_max_new)
-        print(f"  base GSM8K acc = {base_acc:.4f}", flush=True)
+        base_acc, _ = safe_acc("base")
+        if base_acc is not None:
+            print(f"  base GSM8K acc = {base_acc:.4f}", flush=True)
     log = train(model, adapters, params, trl, tel, cfg, log_every=5,
                 eval_every=args.eval_every, eval_batches=args.eval_batches,
                 sample_layers=[n for n in adapters
                                if n.endswith("layers.13.mlp.down_proj")])
-    acc, samples = (gsm8k_accuracy(model, tok, acc_set, bs=args.acc_bs,
-                                   max_new=args.acc_max_new)
-                    if acc_set else (None, None))
+    acc, samples = safe_acc("final")
     json.dump(dict(cell=cell, args=vars(args), base_eval_loss=base_eval,
                    base_acc=base_acc, final_acc=acc,
                    acc_samples=samples,
                    init_pstats=pstats, log=log), open(outfile, "w"))
     print(f"[{cell}] base={base_eval:.5f} final={log['final_eval_loss']:.5f}"
-          + (f" acc={acc:.4f} (base {base_acc:.4f})" if acc is not None else "")
+          + (f" acc={acc:.4f}" + (f" (base {base_acc:.4f})"
+                                  if base_acc is not None else "")
+             if acc is not None else "")
           + f" ({log['wall_time']:.0f}s)")
 
 

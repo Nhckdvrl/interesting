@@ -9,3 +9,5 @@ cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0  /home/xia
     step 160/400 loss=0.2344 (731s)
     step 200/400 loss=0.2738 (883s)
     step 240/400 loss=0.2369 (1077s)
+    step 280/400 loss=0.1643 (1265s)
+    step 320/400 loss=0.1533 (1457s)

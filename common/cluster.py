@@ -68,8 +68,12 @@ def run(jobs, slots, logdir, py_key=None, dry=False, env_extra=""):
                 return
             full = cmd.replace("{PY}", py)
             lf = os.path.join(logdir, f"job{i:04d}.log")
+            # PYTHONDONTWRITEBYTECODE: the repo lives on NFS and stale .pyc
+            # files from a different node's clock have silently shadowed source
+            # edits before.
             sh = (f"cd {REPO} && CUDA_VISIBLE_DEVICES={gpu} "
-                  f"HF_HUB_OFFLINE=0 {env_extra} {full}")
+                  f"HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1 "
+                  f"{env_extra} {full}")
             if dry:
                 print(f"[{host}:{gpu}] {sh}"); continue
             t0 = time.time()

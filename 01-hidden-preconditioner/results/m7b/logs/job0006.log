@@ -6,7 +6,8 @@ Warning: Permanently added 'fvcrc12' (ED25519) to the list of known hosts.
 Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 57.72it/s]
   base GSM8K acc = 0.0750
     step 0/800 loss=0.7096 (1s)
-eresting/01-hidden-preconditioner/src/run_lit.py", line 314, in <module>
+    step 80/800 loss=0.3061 (207s)
+rc/run_lit.py", line 314, in <module>
     main()
   File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 294, in main
     base_acc, _ = gsm8k_accuracy(model, tok, acc_set, bs=args.acc_bs,
