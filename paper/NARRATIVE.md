@@ -81,6 +81,12 @@ starts from a *bit-identical function*: `base_eval_loss = 0.82531` for all).
 | exactly flat spectrum + flat diagonal | 0.44282 |
 | **cluster** | **mean 0.44277, sd 1.0e-4, range 3.3e-4** |
 
+At a *shared* learning rate the data-aware initializers look strongly better —
+at lr = 3e-5, act-PCA gives 0.4510 vs vanilla's 0.4620, a gain of 0.011 nats.
+Give each method its own learning rate and the sign reverses: vanilla reaches
+0.4432, act-PCA only 0.4508. The entire apparent gain is the 42–89× larger
+`tr(PΣ)` acting as a 6.5–9.4× effective learning-rate multiplier.
+
 The six data-agnostic `B₀ = 0` initializers span **3.3e-4 nats** — *inside* the
 2.7e-4 null. NoRA's diagonal balancing, ETF/frame optimization, unit column
 norms, exact diagonal flattening at matched spectrum, and a perfectly flat
@@ -110,6 +116,18 @@ On a ladder with *exactly matched trace, exactly flat diagonal, identical rank
 and identical crosstalk magnitude*, sweeping `r_eff` 16 → 1.86 gives a monotone
 penalty at every learning rate, `loss vs 1/√r_eff`: **r = +0.947** (raw) and
 **+0.996** in the `tr(PΣ)`-matched frame.
+
+**Does method identity add anything?** Leave-one-out test
+(`01/src/predict_loo.py`): fit
+
+    loss ≈ a + b/√r_eff^Σ + c·log tr(PΣ) + d·1[‖B₀‖>0]
+
+on 12 of the 13 initializers and predict the 13th. **LOO rms = 9.6e-4 nats,
+R² = 0.957**, against a between-method spread of 1.42e-2 and a "predict the
+mean" baseline of 4.6e-3. The six data-agnostic methods are each predicted to
+within ±1.9 gauge nulls. Three numbers measured at initialisation, with four
+free parameters, therefore recover almost everything the method label could
+have told us.
 
 **(C3) `B₀ ≠ 0` is the only structural escape.** PiSSA, OLoRA and LoRA-One leave
 the `P₀` class because `∇_A = s BᵀG ≠ 0` at step one. Across all 13 methods,
