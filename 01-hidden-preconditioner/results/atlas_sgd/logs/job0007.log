@@ -1,0 +1,16 @@
+# LOCAL:3 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_atlas.py --tag atlas_sgd --matchW 0.3 --lr 0.03 --a_lr_ratio 0 --S 1 --rho ref --steps 300 --optimizer sgd --momentum 0 --warmup 0 --grad_clip 1e9
+
+usage: run_atlas.py [-h] --tag TAG [--S S] [--D D] [--a_lr_ratio A_LR_RATIO]
+                    [--matchW MATCHW] [--matchW_iters MATCHW_ITERS]
+                    [--wexp WEXP] [--rho RHO] [--model MODEL] [--task TASK]
+                    --lr LR [--seed SEED] [--r R] [--alpha ALPHA]
+                    [--steps STEPS] [--bs BS] [--micro_bs MICRO_BS]
+                    [--probe_bs PROBE_BS] [--probe_batches PROBE_BATCHES]
+                    [--optimizer OPTIMIZER] [--warmup WARMUP] [--sched SCHED]
+                    [--grad_clip GRAD_CLIP] [--dtype DTYPE] [--amp AMP]
+                    [--n_train N_TRAIN] [--n_eval N_EVAL] [--max_len MAX_LEN]
+                    [--eval_every EVAL_EVERY] [--eval_batches EVAL_BATCHES]
+                    [--traj_every TRAJ_EVERY] [--acc_n ACC_N]
+                    [--targets TARGETS]
+run_atlas.py: error: unrecognized arguments: --momentum 0
