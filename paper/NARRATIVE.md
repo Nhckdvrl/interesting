@@ -344,6 +344,36 @@ eliminate. We invert it: the frame is a free, prescribable coordinate of the
 GSM8K gain from a gauge-invariant optimizer becomes evidence for the mechanism
 rather than competition.
 
+## 7b. Limitations
+
+Stated plainly, because several of these are the first things a reader should
+want to know.
+
+1. **The effects are small in absolute terms.** 0.002-0.006 nats on a base of
+   ~0.83. They are large *relative* to the reproducibility floor (2e-4, measured
+   from two identity rotations) and to the gaps between published methods
+   (2.5x the median adjacent gap), and they grow with rank -- 0.004 at r = 64
+   against 0.0004 at r = 4 -- but a reader who cares about absolute nats should
+   see the number, not the ratio.
+2. **One model family.** Qwen3, at 0.6B and 8B. Nothing here tests whether the
+   activation and gradient geometry that makes the frame matter is a Qwen
+   property.
+3. **300 steps.** An initialisation effect that washes out by convergence is a
+   curiosity. 1000-step runs are in flight and the answer goes in either way.
+4. **Nats, not accuracy** -- so far. GSM8K exact-match runs are in flight. A
+   0.002 nat gap need not move it at all.
+5. **The mechanism is characterised, not derived.** We know concentration wins,
+   that the gradient-metric eigenframe is the best of the eight frames tested,
+   and that the three candidate summaries all name it. We do not have a
+   first-principles derivation of *why* concentration wins: the natural one --
+   AdamW's `l_inf` descent rate grows with `Lambda_1` -- predicts the opposite
+   sign, and we pre-registered it and were wrong.
+6. **The prescription needs a probe gradient.** There is no data-free version.
+   It is cheaper than what EVA, PiSSA or LoRA-One already spend, but it is not
+   nothing.
+7. **LoRA only.** The gauge argument applies verbatim to any two-factor adapter,
+   but DoRA, VeRA and friends are untested here.
+
 ## 8. Superseded by measurement
 
 * `Lambda_1` as a *directional* prescription (falsified in sign, section 4).
