@@ -228,20 +228,53 @@ a finer grid that rules out a learning-rate shift: both conditions peak at the
 same lr = 3e-4 and `frame0`'s optimum is 0.0022 lower, so the rotation buys a
 better optimum rather than a rescaled one.
 
-## 5. What is running
+## 5. A training-free diagnostic
 
-* **`results/q8b`** -- Qwen3-8B, with predictions committed in
+The span of `Lambda_1` over the gauge orbit -- eigenframe to flat frame -- costs
+one probe forward+backward and no training (`src/frame_reach.py`):
+
+| r | dim `O(r)`/signed perms | reach | measured `frame1 - frame0` |
+|---|---|---|---|
+| 1 | 0 | **1.000** | -0.00000 |
+| 4 | 6 | 1.431 | +0.00044 |
+| 16 | 120 | 2.923 | +0.00160 |
+| 64 | 2016 | 7.809 | +0.00402 |
+| 128 | 8128 | 13.278 | *predicted +0.00477* |
+
+Forced through the origin, because reach = 1 must give exactly zero:
+
+    effect = 0.00184 x log(reach),   R^2 = 0.975
+
+One parameter, four points, one of them pinned at zero by the group theory
+rather than by the data. The r = 128 value is committed in
+`PREDICTIONS_r128.md` with falsification bounds, before those runs land.
+
+If it holds, this is a **pre-training diagnostic**: one probe pass says whether
+rotating the initialisation is worth it for your rank and your data, before any
+training compute is spent. And the effect grows into exactly the rank range
+people now deploy.
+
+## 5b. In flight
+
+* **`results/q8b`** -- Qwen3-8B, predictions committed in
   `paper/8b_predictions.md` beforehand, including the unflattering P1 that the
-  effect should **not** grow (the training-free frame reach is 4.57x at both
-  0.6B and 1.7B).
+  effect should **not** grow (the training-free reach is 4.57x at both 0.6B and
+  1.7B).
 * **`results/dolly_frame`, `results/rank` (r = 128)** -- a second,
   non-mathematical task, and the rank range people actually deploy.
 * **`results/long`, `results/acc`** -- 1000 steps instead of 300, and GSM8K
   exact-match rather than nats. An initialisation effect that washes out by
   convergence is a curiosity; one that persists and moves accuracy is a
   prescription. Either answer goes in.
+* **`results/frame` (signperm)** -- the honest noise floor. Every number here
+  has been quoted against a "null" that was really a *random gauge move*, i.e.
+  a small dose of the effect. AdamW is exactly covariant under signed
+  permutations, so those runs are the same run and their spread is what "no
+  effect" looks like.
 * **`02-.../results/muon_dose`** -- Muon on the *backbone* gauge, completing a
   3 optimizers x 2 symmetry groups table.
+* **`03-.../results/e1b`** -- topic 03's second pre-registered setting, which
+  its own README requires before any kill decision.
 
 ## 6. Relation to topic 02
 
