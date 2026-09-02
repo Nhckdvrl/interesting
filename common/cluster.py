@@ -122,13 +122,27 @@ def run(jobs, slots, logdir, py_key=None, dry=False, env_extra=""):
 
 
 def main(jobs, tag, logdir, arch="a100", hosts=None, dry=False,
-         mem_min=None, per_gpu=1):
-    slots = [s for s in probe(hosts, mem_min=mem_min, per_gpu=per_gpu)
-             if s[2] == arch]
+         mem_min=None, per_gpu=1, wait=True, poll=120, max_wait=14400):
+    """wait=True polls until slots appear instead of giving up.
+
+    Panels here are chained behind one another, so several can become runnable
+    at the same moment; whichever probes first takes the cluster and the rest
+    used to exit with "no free slots" and silently lose their work.  Waiting is
+    the right default for a queue.
+    """
+    t0 = time.time()
+    while True:
+        slots = [s for s in probe(hosts, mem_min=mem_min, per_gpu=per_gpu)
+                 if s[2] == arch]
+        if slots or not wait or time.time() - t0 > max_wait:
+            break
+        print(f"  no free {arch} slots, waiting "
+              f"({int(time.time()-t0)}s elapsed)", flush=True)
+        time.sleep(poll)
     print(f"{len(jobs)} jobs, {len(slots)} free {arch} slots: "
           + ", ".join(f"{h}:{g}" for h, g, _ in slots))
     if not slots:
-        raise SystemExit("no free slots")
+        raise SystemExit(f"no free slots after {int(time.time()-t0)}s")
     return run(jobs, slots, logdir, dry=dry)
 
 
