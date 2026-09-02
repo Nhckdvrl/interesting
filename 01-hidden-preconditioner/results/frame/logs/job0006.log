@@ -1,18 +1,10 @@
-# fvcrc20:3 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag frame --cond kaiming --lr 0.0002 --seed 1 --steps 300 --grad_clip 1e9
-
-Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
-Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-[W902 23:45:18.871380141 CUDACachi[W902 23:50:12.979895795 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1119879168 bytes (free: 202899456, total: 101971722240).
-[W902 23:50:12.040087784 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0    step 120/300 loss=0.4295 (105s)
-    step 150/300 loss=0.4494 (132s)
-    step 180/300 loss=0.3709 (164s)
-    step 210/300 loss=0.3903 (190s)
-    step 240/300 loss=0.3974 (215s)
-    step 270/300 loss=0.3608 (241s)
-    step 299/300 loss=0.3917 (267s)
-[kaiming_lr0.0002_s1] base=0.83113 final=0.44570 (273s)
- in main
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag frame --steps 300 --grad_clip 1e9 --cond kaiming --lr 0.0001 --optimizer muon --momentum 0.95[W903 01:47:32.094369745 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1119879168 bytes (free: 108920832, total: 101971591168).
+[W903 01:47:32.104368895 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1119879168 bytes (free: 111017984, total: 101971591168).
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 324, in main
     base_eval = eval_loss(model, tel, args.eval_batches, "cuda")
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
@@ -42,4 +34,4 @@ Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
   File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 134, in forward
     return F.linear(input, self.weight, self.bias)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.04 GiB. GPU 0 has a total capacity of 94.97 GiB of which 195.50 MiB is free. Process 175498 has 12.81 GiB memory in use. Process 3435014 has 34.59 GiB memory in use. Including non-PyTorch memory, this process has 3.49 GiB memory in use. Process 3434284 has 3.48 GiB memory in use. Process 3435008 has 40.36 GiB memory in use. Of the allocated memory 2.35 GiB is allocated by PyTorch, and 508.52 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.04 GiB. GPU 0 has a total capacity of 94.97 GiB of which 105.88 MiB is free. Process 25307 has 7.55 GiB memory in use. Process 556413 has 80.21 GiB memory in use. Including non-PyTorch memory, this process has 3.53 GiB memory in use. Process 556621 has 3.53 GiB memory in use. Of the allocated memory 2.35 GiB is allocated by PyTorch, and 508.52 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

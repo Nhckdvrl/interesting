@@ -1,15 +1,31 @@
 # LOCAL:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag frame --cond frame0 --lr 0.0002 --seed 2 --steps 300 --grad_clip 1e9
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag frame --cond kaiming --lr 0.0003 --steps 300 --grad_clip 1e9 --optimizer matprec --warmup 0
 
-    step 0/300 loss=1.1613 (1s)
-    step 30/300 loss=0.4483 (26s)
-    step 60/300 loss=0.5036 (51s)
-    step 90/300 loss=0.3983 (76s)
-    step 120/300 loss=0.4259 (101s)
-    step 150/300 loss=0.4468 (126s)
-    step 180/300 loss=0.3708 (157s)
-    step 210/300 loss=0.3905 (183s)
-    step 240/300 loss=0.3903 (208s)
-    step 270/300 loss=0.3567 (232s)
-    step 299/300 loss=0.3881 (256s)
-[frame0_lr0.0002_s2] base=0.83113 final=0.44389 (262s)
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 185, in main
+    model, tok = load_model(args.model, dtype=dict(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 31, in load_model
+    m.to(device)
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/modeling_utils.py", line 4343, in to
+    return super().to(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+    return t.to(
+           ^^^^^
+torch.AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+For more detailed error information, run with CUDA_LOG_FILE=stderr
+

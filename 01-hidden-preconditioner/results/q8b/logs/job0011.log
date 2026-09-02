@@ -1,18 +1,23 @@
-# fvcrc20:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8b --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 4 --amp bf16 --cond frame0 --lr 0.1 --optimizer sgd --momentum 0 --warmup 0
+# LOCAL:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8b --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 4 --amp bf16 --cond frame1 --lr 0.002
 
-Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
-Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:02<00:08,  2.03s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:05<00:08,  2.99s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:09<00:06,  3.25s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:12<00:03,  3.20s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:12<00:00,  2.24s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:12<00:00,  2.58s/it]
-    step 0/300 loss=0.5118 (5s)
-    step 30/300 loss=0.2197 (142s)
-    step 60/300 loss=0.2477 (278s)
-    step 90/300 loss=0.1877 (413s)
-    step 120/300 loss=0.1570 (548s)
-    step 150/300 loss=0.1397 (683s)
-    step 180/300 loss=0.1815 (823s)
-    step 210/300 loss=0.1815 (959s)
-    step 240/300 loss=0.1452 (1096s)
-    step 270/300 loss=0.1108 (1233s)
-    step 299/300 loss=0.1428 (1366s)
-[frame0_lr0.1_s0_sgd] base=0.72289 final=0.41659 (1372s)
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:01<00:06,  1.69s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:05<00:09,  3.02s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:08<00:06,  3.06s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:09<00:02,  2.21s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:09<00:00,  1.46s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:09<00:00,  1.96s/it]
+    step 0/300 loss=0.5118 (2s)
+[W903 01:50:55.865700763 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 465567744 bytes (free: 227344384, total: 101971591168).
+[W903 01:50:55.871715481 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 465567744 bytes (free: 292356096, total: 101971591168).
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 390, in main
+    log = train(model, adapters, params, trl, tel, cfg, callback=cb, log_every=5,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 166, in train
+    (loss_sum / max(ntok, 1) / accum).backward()
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/_tensor.py", line 623, in backward
+    torch.autograd.backward(
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/__init__.py", line 395, in backward
+    _engine_run_backward(
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/graph.py", line 979, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 444.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 278.81 MiB is free. Including non-PyTorch memory, this process has 54.31 GiB memory in use. Process 561584 has 40.36 GiB memory in use. Of the allocated memory 52.50 GiB is allocated by PyTorch, and 1.12 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

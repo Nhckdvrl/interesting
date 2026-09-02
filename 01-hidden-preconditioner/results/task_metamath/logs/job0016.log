@@ -1,0 +1,24 @@
+# fvcrc20:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag task_codefeedback --task codefeedback --cond frame0 --lr 0.0001 --steps 300 --grad_clip 1e9
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+    step 0/300 loss=0.7595 (2s)
+[W903 02:24:06.135647200 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3472883712 bytes (free: 785252352, total: 101971722240).
+[W903 02:24:06.136227848 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3472883712 bytes (free: 785252352, total: 101971722240).
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 390, in main
+    log = train(model, adapters, params, trl, tel, cfg, callback=cb, log_every=5,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 166, in train
+    (loss_sum / max(ntok, 1) / accum).backward()
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/_tensor.py", line 623, in backward
+    torch.autograd.backward(
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/__init__.py", line 395, in backward
+    _engine_run_backward(
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/graph.py", line 979, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 3.23 GiB. GPU 0 has a total capacity of 94.97 GiB of which 748.88 MiB is free. Process 1381976 has 13.35 GiB memory in use. Process 3535881 has 3.67 GiB memory in use. Process 3538153 has 3.66 GiB memory in use. Process 3564290 has 43.45 GiB memory in use. Including non-PyTorch memory, this process has 30.06 GiB memory in use. Of the allocated memory 24.40 GiB is allocated by PyTorch, and 4.97 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
