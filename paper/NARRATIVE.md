@@ -111,11 +111,27 @@ AdamW's first-order descent rate to SGD's:
 | NoRA | 0.366 |
 | Kaiming | 0.366 |
 
-The ordering is systematic: **data-aware methods sit low, frame-based methods
-sit high**, and the whole NoRA family sits exactly at vanilla's value -- which
+The ordering is systematic and the separation is perfect -- every frame-based
+or random method sits above every data-aware one, with no overlap, and the whole NoRA family sits exactly at vanilla's value -- which
 is why we measure those conditions as mutually indistinguishable to within
 1.2x the measurement null. Published comparisons between these methods are, in
 part, comparisons of an unreported coordinate.
+
+### What the separation does and does not show
+
+It is tempting to read the perfect separation as "data-aware initialisation is
+really a frame effect". We do not claim that, and this panel cannot support it:
+in our runs the data-aware methods are *worse* than vanilla Kaiming overall, so
+there is no advantage here to decompose. The separation is also partly
+definitional -- `Lambda_1` measures how concentrated the gradient energy is
+across the adapter rows, and building `A` from eigenvectors concentrates it by
+construction.
+
+What the measurement does show is narrower and still uncomfortable for the
+literature: these methods differ along an axis none of them controls or
+reports, that axis is worth 2.5x the typical gap between adjacent entries in
+their own ranking, and moving along it while holding everything they *do*
+report exactly fixed changes the result.
 
 ## 4. The causal test (`results/frame`, 42 runs, pre-registered)
 
