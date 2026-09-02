@@ -67,3 +67,19 @@ larger than the effect.
 ## What would falsify the paper's central claim
 
 P3 failing. Everything else is a matter of size; P3 is the derivation itself.
+
+---
+
+## Reading log (appended as the panel filled; predictions above unedited)
+
+At 9 of 18 runs, `frame0` beat `kaiming` at **every shared learning rate**
+(1e-4: -0.00035, 2e-4: -0.00409, 3e-4: -0.00219), the same pattern as 0.6B.
+No verdict was recorded, because both conditions were still improving toward
+the top of the grid and a comparison read off a truncated grid is worth nothing
+-- that error already produced one reversal in the zoo panel. `analyze_8b.py`
+now refuses to print P1/P2/P4 until every condition covers the same rungs with
+an interior optimum.
+
+The 8B optimum turned out to be above the grid carried over from 0.6B
+(5e-4 beat 3e-4 for `kaiming`, where 0.6B peaked at 3e-4), so the grid was
+extended upward to 1e-3 and 2e-3.
