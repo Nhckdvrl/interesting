@@ -552,7 +552,7 @@ def eg_bounds(Mg):
     return float(lam.sqrt().sum() ** 2) / (r * float(lam.sum()) + 1e-30), 1.0
 
 
-def max_l1_frame(GA, iters=400, lr=0.05, seed=0):
+def max_l1_frame(GA, iters=400, lr=0.05, seed=0, sign=+1):
     """Q maximising ||G A^T Q^T||_1 -- the frame AdamW descends fastest in.
 
     AdamW is steepest descent under the elementwise max norm, so its
@@ -567,6 +567,13 @@ def max_l1_frame(GA, iters=400, lr=0.05, seed=0):
     true optimum over the flat frame grows with rank -- +2% at r = 4, +8% at
     r = 16, +18% at r = 64 -- so the prescription matters more exactly where
     LoRA is heading.
+
+    sign = -1 MINIMISES instead, which is what separates the surviving
+    mechanism candidates: the gradient-metric eigenframe is extremal in
+    Lambda_1, Off_g and E_g at once, so no ladder built from it can say which of
+    them the optimizer is responding to.  The argmin of Lambda_1 need not
+    diagonalise M_g, and if it does not, it is a frame where the candidates
+    disagree.
     """
     GA = GA.double()
     m, r = GA.shape
@@ -577,17 +584,17 @@ def max_l1_frame(GA, iters=400, lr=0.05, seed=0):
                                device=GA.device)
     M.requires_grad_(True)
     opt = torch.optim.Adam([M], lr=lr)
-    best, bestQ = -1.0, None
+    best, bestQ = -math.inf, None
     for _ in range(iters):
         Q, _ = torch.linalg.qr(M)
         val = (GA @ Q.T).abs().sum() ** 2 / (m * r * f2)
-        opt.zero_grad(); (-val).backward(); opt.step()
+        opt.zero_grad(); (-sign * val).backward(); opt.step()
         with torch.no_grad():
-            v = float(val)
+            v = sign * float(val)
             if v > best:
                 Qd, _ = torch.linalg.qr(M.detach())
                 best, bestQ = v, Qd.clone()
-    return bestQ, best
+    return bestQ, sign * best
 
 
 def offdiag_mass(M):

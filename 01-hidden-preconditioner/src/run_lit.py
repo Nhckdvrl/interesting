@@ -235,7 +235,7 @@ def main():
         gauge_t = None
         if "@frame" in c:                     # post-hoc gauge on any condition
             c, _gt = c.split("@frame")[0], c.split("@frame")[1]
-            gauge_t = "opt" if _gt == "opt" else float(_gt)
+            gauge_t = _gt if _gt in ("opt", "min") else float(_gt)
         if c in ("kaiming",):
             A = base
         elif c == "left_gauge":
@@ -258,7 +258,7 @@ def main():
             # frame AdamW steps in changes.
             _t = c[5:]
             A = IN.init_frame(base.cuda(), G[name].cuda(),
-                              _t if _t == "opt" else float(_t)).cpu().double()
+                              _t if _t in ("opt", "min") else float(_t)).cpu().double()
         elif c == "gradsub":
             A = IN.init_gradsubspace(G[name].cuda(), r, ref_tr).cpu().double()
         elif c in ("pissa", "pissa_minor"):
@@ -292,10 +292,12 @@ def main():
             from common.intrinsic import frame_ladder, max_l1_frame
             Ad = A.double().cuda()
             Gd = G[name].cuda().double()
-            if gauge_t == "opt":
-                Q, _ = max_l1_frame(Gd @ Ad.T)
+            if gauge_t in ("opt", "min"):
+                Q, _ = max_l1_frame(Gd @ Ad.T,
+                                    sign=1 if gauge_t == "opt" else -1)
             else:
-                Q = frame_ladder(Ad @ (Gd.T @ Gd) @ Ad.T, [gauge_t])[0]
+                GAd = Gd @ Ad.T
+                Q = frame_ladder(GAd.T @ GAd, [gauge_t])[0]
             A = (Q @ Ad).cpu().double()
             if B is not None:
                 B = (B.double().cuda() @ Q.T).cpu().double()

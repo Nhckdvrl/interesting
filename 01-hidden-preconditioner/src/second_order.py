@@ -158,7 +158,7 @@ def main():
             elif cond.startswith("frame"):
                 _t = cond[5:]
                 A = IN.init_frame(base.cuda(), G[name].cuda(),
-                                  _t if _t == "opt" else
+                                  _t if _t in ("opt", "min") else
                                   float(_t)).cpu().double()
             elif cond == "gradsub":
                 A = IN.init_gradsubspace(G[name].cuda(), a.r, ref_tr).cpu().double()
@@ -175,7 +175,8 @@ def main():
             if gauge_t is not None:
                 from common.intrinsic import frame_ladder
                 Ad2 = A.double().cuda(); Gd2 = G[name].cuda().double()
-                Qg = frame_ladder(Ad2 @ (Gd2.T @ Gd2) @ Ad2.T, [gauge_t])[0]
+                GA2 = Gd2 @ Ad2.T
+                Qg = frame_ladder(GA2.T @ GA2, [gauge_t])[0]
                 A = (Qg @ Ad2).cpu().double()
             if match != "none":
                 p = P[name]

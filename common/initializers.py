@@ -173,10 +173,16 @@ def init_frame(A0, G, t, Sigma=None):
     Gd = G.double().to(A.device)
     if str(t) == "opt":          # the actual argmax, not the flat-diagonal proxy
         Q, _ = max_l1_frame(Gd @ A.T)
+    elif str(t) == "min":        # the argmin -- where the candidates disagree
+        Q, _ = max_l1_frame(Gd @ A.T, sign=-1)
     elif Sigma is not None:      # ladder in the ACTIVATION metric instead
         Q = frame_ladder(A @ Sigma.double().to(A.device) @ A.T, [float(t)])[0]
     else:
-        Q = frame_ladder(A @ (Gd.T @ Gd) @ A.T, [float(t)])[0]
+        # M_g = A G^T G A^T = (G A^T)^T (G A^T).  Forming G^T G first is
+        # O(d_in^2 d_out) and dominates everything else at 8B (d = 4096, r = 16:
+        # 250x more work, and in float64, where the cards are slow).
+        GA = Gd @ A.T
+        Q = frame_ladder(GA.T @ GA, [float(t)])[0]
     return Q.to(A.device) @ A
 
 
