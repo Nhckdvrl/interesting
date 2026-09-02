@@ -20,6 +20,7 @@ Candidates:
 """
 import glob, json, math, os, statistics as st, sys, collections
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+RES = os.path.join(REPO, "01-hidden-preconditioner", "results")
 NULL = 2.7e-4
 KEYS = ("Lam1", "Off_x", "Off_g", "E_g")
 
