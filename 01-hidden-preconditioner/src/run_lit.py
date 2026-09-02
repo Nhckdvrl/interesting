@@ -143,6 +143,7 @@ def main():
     ap.add_argument("--n_eval", type=int, default=256)
     ap.add_argument("--max_len", type=int, default=384)
     ap.add_argument("--probe_batches", type=int, default=4)
+    ap.add_argument("--force_probe", type=int, default=0)
     ap.add_argument("--eval_every", type=int, default=25)
     ap.add_argument("--eval_batches", type=int, default=16)
     ap.add_argument("--targets", default=",".join(DEFAULT_TARGETS))
@@ -209,12 +210,15 @@ def main():
     pstats = {}
 
     def weighted_traces(A, name, d_in):
-        """tr(P), tr(P Sigma_x), tr(P C_g) up to the common factor s^2."""
+        """tr(P), tr(P Sigma_x), tr(P C_g) up to the common factor s^2.
+        Returns NaN for the weighted entries when the probes were skipped."""
         Ad = A.float().cuda()
+        t_p = float(Ad.pow(2).sum())
+        if not ACT or not G:
+            return t_p, float("nan"), float("nan")
         key = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
         Sig = ACT[key].cuda()
         Gc = G[name].cuda()
-        t_p = float(Ad.pow(2).sum())
         t_act = float(((Ad @ Sig) * Ad).sum())
         GA = Gc @ Ad.T
         t_grad = float(GA.pow(2).sum())      # tr(A C_g A^T) = ||G A^T||_F^2

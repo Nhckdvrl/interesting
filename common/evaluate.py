@@ -5,7 +5,9 @@ HumanEval/MBPP pass@1 — not held-out loss, and its headline is a +5.44 point
 average SFT gain.  Loss deltas of 1e-3 nats are not comparable to that, so every
 decisive comparison here is also scored on accuracy.
 """
+import math
 import re
+
 import torch
 
 GSM_GOLD = re.compile(r"####\s*(-?[0-9][0-9,]*\.?[0-9]*)")
@@ -17,10 +19,14 @@ def _norm(x):
     if x is None:
         return None
     x = x.replace(",", "").rstrip(".")
+    if len(x) > 40:           # a runaway digit string overflows float()
+        return x
     try:
         v = float(x)
+        if not math.isfinite(v):
+            return x
         return str(int(v)) if v == int(v) else str(v)
-    except ValueError:
+    except (ValueError, OverflowError):
         return x
 
 
@@ -61,9 +67,12 @@ def gsm8k_accuracy(model, tok, examples, device="cuda", max_new=320, bs=16,
                              skip_special_tokens=True)
             if stop_str and stop_str in txt:
                 txt = txt.split(stop_str)[0]
-            pred = extract_pred(txt)
-            g = _norm(GSM_GOLD.search(gold).group(1)) if GSM_GOLD.search(gold) \
-                else _norm(gold)
+            try:
+                pred = extract_pred(txt)
+                g = (_norm(GSM_GOLD.search(gold).group(1))
+                     if GSM_GOLD.search(gold) else _norm(gold))
+            except Exception:
+                pred, g = None, None
             n_ok += int(pred is not None and pred == g)
             n += 1
             if len(outs) < 4:
