@@ -1,0 +1,4 @@
+# LOCAL:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8b --steps 300 --grad_clip 1e9 --micro_bs 2 --probe_bs 4 --probe_batches 4 --amp bf16 --cond frame0 --lr 0.03 --optimizer sgd --momentum 0 --warmup 0
+
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:00<00:03,  1.18it/s]Loading checkpoint shards:  40%|████      | 2/5 [00:01<00:02,  1.08it/s]Loading checkpoint shards:  60%|██████    | 3/5 [00:02<00:01,  1.04it/s]Loading checkpoint shards:  80%|████████  | 4/5 [00:03<00:00,  1.12it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:03<00:00,  1.59it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:03<00:00,  1.32it/s]
