@@ -60,7 +60,15 @@ def probe(hosts=None, mem_min=None, per_gpu=1):
         except Exception as e:
             print(f"  {host}: {e}"); continue
         for line in r.stdout.strip().split("\n"):
-            i, used, total, util = [int(x.strip()) for x in line.split(",")]
+            # a GPU in a bad state reports "[N/A]" for some fields; skip it
+            # rather than take down the whole queue, which is what an
+            # unguarded int() did after six panels had run
+            try:
+                i, used, total, util = [int(x.strip())
+                                        for x in line.split(",")]
+            except ValueError:
+                print(f"  {host}: skipping unparseable line {line!r}")
+                continue
             if i in gpus and (total - used) >= mem_min * per_gpu:
                 out.extend([(host, i, arch)] * per_gpu)
     return out
