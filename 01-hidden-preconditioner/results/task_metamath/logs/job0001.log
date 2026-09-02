@@ -1,17 +1,19 @@
 # fvcrc20:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag task_metamath --task metamath --cond kaiming --lr 0.0002 --steps 300 --grad_clip 1e9
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag task_metamath --task metamath --cond frame0 --lr 0.0002 --steps 300 --grad_clip 1e9
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
     step 0/300 loss=0.4100 (1s)
-    step 30/300 loss=0.2134 (19s)
-    step 60/300 loss=0.2521 (36s)
-    step 90/300 loss=0.1880 (54s)
-    step 120/300 loss=0.2464 (72s)
-    step 150/300 loss=0.2118 (90s)
-    step 180/300 loss=0.2079 (111s)
-    step 210/300 loss=0.2423 (130s)
-    step 240/300 loss=0.1907 (152s)
-    step 270/300 loss=0.1810 (170s)
-    step 299/300 loss=0.1942 (189s)
-[kaiming_lr0.0002_s0] base=0.26874 final=0.19671 (193s)
+[W903 04:43:32.452098785 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3735027712 bytes (free: 3692560384, total: 101971722240).
+[W903 04:43:40.452722150 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3735027712 bytes (free: 2671247360, total: 101971722240).
+    step 30/300 loss=0.2143 (33s)
+    step 60/300 loss=0.2522 (64s)
+    step 90/300 loss=0.1879 (96s)
+    step 120/300 loss=0.2464 (129s)
+    step 150/300 loss=0.2128 (159s)
+    step 180/300 loss=0.2086 (197s)
+    step 210/300 loss=0.2444 (229s)
+    step 240/300 loss=0.1915 (262s)
+    step 270/300 loss=0.1809 (293s)
+    step 299/300 loss=0.1929 (316s)
+[frame0_lr0.0002_s0] base=0.26874 final=0.19688 (319s)

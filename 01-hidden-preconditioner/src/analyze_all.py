@@ -18,7 +18,9 @@ PANELS = [("frame", "Qwen3-0.6B", "gsm8k"), ("q8b", "Qwen3-8B", "gsm8k"),
           ("task_metamath", "Qwen3-0.6B", "metamath"),
           ("task_codefeedback", "Qwen3-0.6B", "codefeedback"),
           ("long", "Qwen3-0.6B (1000 steps)", "gsm8k"),
-          ("frame_bf16", "Qwen3-0.6B (bf16)", "gsm8k")]
+          ("frame_bf16", "Qwen3-0.6B (bf16)", "gsm8k"),
+          ("persist", "Qwen3-0.6B", "gsm8k"),
+          ("acc", "Qwen3-0.6B", "gsm8k")]
 
 
 def cell(tag):
@@ -34,18 +36,20 @@ def cell(tag):
 
 def main():
     print(f"{'model':>22s} {'task':>13s} {'opt':>6s} | "
-          f"{'kaiming':>9s} {'frame0':>9s} {'delta':>9s} {'x floor':>8s}  note")
+          f"{'kaiming':>9s} {'frame0':>9s} {'frame1':>9s} {'d(f0-kai)':>9s} "
+          f"{'x floor':>8s}  note")
     for tag, model, task in PANELS:
         D = cell(tag)
         for opt in ("adamw", "sgd", "muon"):
             k, f0 = D.get((opt, "kaiming")), D.get((opt, "frame0"))
+            f1 = D.get((opt, "frame1")) or {}
             if not (k and f0):
                 continue
             shared = sorted(set(k) & set(f0))
             if len(shared) < 3:
                 note = f"only {len(shared)} shared lr"
                 print(f"{model:>22s} {task:>13s} {opt:>6s} | "
-                      f"{'':>9s} {'':>9s} {'':>9s} {'':>8s}  {note}")
+                      f"{'':>9s} {'':>9s} {'':>9s} {'':>9s} {'':>8s}  {note}")
                 continue
             bk = min(k[l] for l in shared); bf = min(f0[l] for l in shared)
             edge = (min(shared, key=lambda l: k[l]) in (shared[0], shared[-1])
@@ -55,8 +59,10 @@ def main():
             note = "GRID EDGE -- provisional" if edge else \
                    ("frame0 better" if d < -FLOOR else
                     "kaiming better" if d > FLOOR else "within the floor")
+            b1 = min((f1[l] for l in shared if l in f1), default=float("nan"))
             print(f"{model:>22s} {task:>13s} {opt:>6s} | "
-                  f"{bk:9.5f} {bf:9.5f} {d:+9.5f} {d/FLOOR:+8.1f}  {note}")
+                  f"{bk:9.5f} {bf:9.5f} {b1:9.5f} {d:+9.5f} {d/FLOOR:+8.1f}  "
+                  f"{note}")
     print(f"\nfloor = {FLOOR:.0e} nats, measured from two identity rotations "
           f"in results/rot.\nA row marked GRID EDGE has no tuned comparison "
           f"yet and must not be read as a result.")
