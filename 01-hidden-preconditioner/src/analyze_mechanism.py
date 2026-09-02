@@ -18,7 +18,22 @@ Candidates:
   Off_g     off-diagonal mass of M_g = A C_g A^T
   E_g       equipartition of diag(M_g)
 
-CONCLUSION.  Off_x is falsified in both designs -- it is uncorrelated within the
+RESOLUTION.  The question "Lambda_1 or Off_g?" turns out to be ill-posed, and
+the measurement says so without needing another training panel.  Minimising
+Lambda_1 directly over O(r) -- an elementwise l1 norm of G A^T Q^T, i.e. a
+sparsification -- lands on essentially the gradient-metric eigenframe:
+
+    frame0   (eigenbasis of M_g)      Lambda_1 = 0.1443   Off_g = 0.0000
+    framemin (argmin of Lambda_1)     Lambda_1 = 0.1462   Off_g = 0.0473
+
+The sparsest orthogonal representation of a matrix concentrates its energy on
+the principal axes, so the l1 argmin and the M_g-diagonalising frame coincide;
+and Schur-Horn puts the argmin of E_g at the same place, since the eigenbasis is
+the majorisation extreme.  All three candidates name ONE frame.  That is a
+unification rather than an unresolved fork: however you formalise "concentrate
+the gradient energy across the adapter rows", you get the same prescription.
+
+Off_x is falsified in both designs -- it is uncorrelated within the
 orbit (r = -0.004) and worst across the zoo -- and framex0, which sets it to
 exactly zero, is not the best frame.  Lambda_1, Off_g and E_g all score highly
 in both designs and are NOT separable here, because the gradient-metric

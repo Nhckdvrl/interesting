@@ -146,12 +146,25 @@ tied with vanilla), and within the orbit `Off_x` is uncorrelated with loss
 (r = -0.004).
 
 What survives is that AdamW's second moment estimates *gradient* variance, so
-the relevant matrix is `M_g`, not `M_x`. Within the orbit
-`Off_g` scores r = +0.859, `Lambda_1` +0.814 and `E_g` +0.806, and all three are
-extremal at the same frame, so **these designs cannot separate them** and we do
-not claim one. `Off_g` was reached post-hoc; 8B is its first out-of-sample test.
-The practical prescription is unaffected: all three name the gradient-metric
-eigenframe.
+the relevant matrix is `M_g`, not `M_x`. Within the orbit `Off_g` scores
+r = +0.859, `Lambda_1` +0.814 and `E_g` +0.806.
+
+They cannot be separated, and the reason is not a weakness of the design. We
+minimised `Lambda_1` directly over `O(r)` and it lands on the gradient-metric
+eigenframe anyway:
+
+| frame | `Lambda_1` | `Off_g` |
+|---|---|---|
+| `frame0` (eigenbasis of `M_g`) | 0.1443 | 0.0000 |
+| `framemin` (argmin of `Lambda_1`) | 0.1462 | 0.0473 |
+
+Minimising an elementwise `l1` norm over an orthogonal group is a
+sparsification, and the sparsest orthogonal representation of a matrix
+concentrates its energy on the principal axes; Schur-Horn puts the argmin of
+`E_g` in the same place, the eigenbasis being the majorisation extreme. **All
+three candidates name one frame.** That is a unification, not an unresolved
+fork: however you formalise "concentrate the gradient energy across the adapter
+rows", the prescription is the same.
 
 ### Rotating the zoo (`results/rot`, 96 runs)
 
