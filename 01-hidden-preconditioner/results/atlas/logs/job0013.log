@@ -1,0 +1,18 @@
+# fvcrc20:3 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_atlas.py --tag atlas --S 0.1 --rho ref --lr 0.001 --seed 0 --steps 300
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+  reusing cached atlas point (196 modules)
+    step 0/300 loss=1.1613 (2s)
+    step 30/300 loss=0.4663 (17s)
+    step 60/300 loss=0.5871 (33s)
+    step 90/300 loss=0.4628 (48s)
+    step 120/300 loss=0.5127 (63s)
+    step 150/300 loss=0.5112 (78s)
+    step 180/300 loss=0.4481 (95s)
+    step 210/300 loss=0.4927 (111s)
+    step 240/300 loss=0.4948 (126s)
+    step 270/300 loss=0.4258 (140s)
+    step 299/300 loss=0.4774 (155s)
+[S0.1_Dref_Rref_lr0.001_s0] S_rel=0.100 D=6.38 rho=7.71 trP=16.184 base=0.83113 final=0.51881 (158s)
