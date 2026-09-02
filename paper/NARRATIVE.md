@@ -25,6 +25,26 @@ fitting — as an out-of-distribution test.
 
 ## 2. The object
 
+Three `r × r` matrices carry everything:
+
+    M_0 = A Aᵀ            parameter metric
+    M_x = A Σ Aᵀ          data / function metric
+    M_g = A C_g Aᵀ        gradient metric
+
+Under the adapter-factor gauge `A → QA` all three conjugate by `Q`; under an
+exact backbone gauge (`A → ARᵀ`, `Σ → RΣRᵀ`, `C_g → RC_gRᵀ`) all three are
+**invariant**. The scientific object is the simultaneous-conjugacy class of the
+triple `(M_0, M_x, M_g)`, and the coordinates below are its low-order
+invariants:
+
+    S = tr M_x      D = (tr M_x)²/tr(M_x²)      W = tr M_0 / tr M_x
+    R_g = tr M_g / tr M_x
+
+If a residual ever survives these, the next place to look is a higher-order
+invariant of the same triple — a generalised spectrum — not another hand-picked
+feature.
+
+
 For a layer with input second moment `Σ = E[xxᵀ]`, the state is the rank-space
 Gram in the data metric,
 
@@ -44,7 +64,7 @@ Candidate coordinates, all measurable at initialisation from a few batches:
 | `S` | `tr M_x` | data-space scale |
 | `D` | `(tr M_x)²/‖M_x‖_F²` | intrinsic spectral dimension, in [1, r] |
 | `R_g` | `tr(A C_g Aᵀ)/tr(A Σ Aᵀ)` | first-order descent per unit scale |
-| `W` | `tr(AAᵀ)/tr(A Σ Aᵀ)` | **parameter** metric ÷ **data** metric |
+| `W`, `ω` | `tr(AAᵀ)/tr(A Σ Aᵀ)`, normalised by `W_iso = d/tr Σ` | **parameter** metric ÷ **data** metric |
 
 `R_g` is the quantity that actually enters `⟨G, GP⟩`: writing `A Σ^{1/2} =
 Λ^{1/2}Vᵀ`, `tr(A C_g Aᵀ) = tr(Λ Vᵀ T V)` with `T = Σ^{-1/2}C_gΣ^{-1/2}` — the
@@ -110,22 +130,80 @@ Three results at once.
    ladder while `lr*` stays at 2–3e-4. This is the sharpest available proof
    that `tr P` is not the learning-rate coordinate — `S` is — and it separates
    `W` from `S` as an independent axis rather than a reparameterisation.
-3. **The optimum sits at `W/W₀ = 1`, the vanilla draw's own value**, and the
-   curve is non-monotone on both sides. `W = 1/⟨λ⟩_adapter-energy`, so
-   `W = W₀` is the parameter-space-isotropic choice — precisely what AdamW's
-   isotropic per-coordinate step is matched to. A random draw is already at the
-   optimum of this coordinate, which is a mechanism for why nothing beats it.
+3. **The response is non-monotone, with a broad optimum near the isotropic
+   baseline.** Extreme mismatch in either direction costs 0.0023 nats; the
+   interior is flat to within the seed spread — the differences between
+   `ω = 1, 3, 10` (0.44180 / 0.44223 / 0.44248) are 4e-4 to 7e-4, the same size
+   as the null, and a quadratic in `log ω` puts the continuous minimum nearer
+   `ω ≈ 2.3` than 1. The defensible statement is therefore **"extreme
+   parameter-to-data metric mismatch hurts, and the isotropic baseline lies
+   inside the broad optimum"**, not "the optimum is exactly the vanilla value".
+   Paired seeds at the central rungs are needed before saying more.
+
+   The natural, seed-free reference point is not one random draw but the
+   isotropic baseline: for `A_ij` i.i.d. with variance `σ²`,
+   `E tr(AAᵀ) = rdσ²` and `E tr(AΣAᵀ) = rσ² tr Σ`, so
+
+       W_iso = d / tr Σ,        ω := W / W_iso = W · tr Σ / d.
+
+   A kaiming draw sits at `ω = 1` *in expectation*, which is why `W/W₀` and `ω`
+   coincide here — but `ω` is the quantity to report, since it is computable
+   before training, independent of the seed, and comparable across models and
+   tasks. Note also that `ω = 1` fixes only this scalar ratio; it does **not**
+   mean `A` is isotropic, since many strongly anisotropic `A` share the same `ω`.
 
 The reconstruction at `W/W₀ = 1` gives 0.44180 against the vanilla draw's
 0.44276 — a gap of 1e-3, inside that draw's own seed spread of 2.3e-3. So
 `(S, D, R_g, W)` reproduce a vanilla initialisation to within its own noise,
 from a construction with a completely different `A`.
 
+### The OOD closure test: `W` helps, but does not close the gap
+
+Refitting the law on **synthetic points only**, now with `(D, ω)` and the
+theoretical learning-rate exponent, and re-predicting the held-out published
+initializers (`src/ood_closure.py`):
+
+| held-out family | systematic offset | sign | lr* median ratio |
+|---|---|---|---|
+| wave-1 law, all 13 | +0.00500 | 12/13 positive | 1.37× (fitted features) |
+| **with `ω`, B₀=0 (9)** | **+0.00283** | 8/8 positive | 1.59× (theory exponent, no fitting) |
+| with `ω`, B₀≠0 (4) | +0.00378 | 3/4 positive | 1.28× |
+
+So `ω` removes **44%** of the systematic offset — it was part of the missing
+piece — but the residual is still one-sided, so `(S, D, ω)` is **not sufficient**
+and we do not claim closure.
+
+Two further honest readings:
+
+* **The theoretical exponent is not quite right.** `log lr* = a − ½ log S` gives
+  rms 0.225 on the atlas against 0.155 for a fitted `b = −0.36`. The first-order
+  derivation assumes Adam's normalised `ΔB` is isotropic in rank coordinates;
+  the 0.14 discrepancy is where that assumption fails, and is worth explaining
+  rather than fitting away.
+* **The sign of the residual is a lead.** Every atlas construction beats the
+  published initializer at its own coordinates. Atlas row spaces are structured
+  (eigenbases of `Σ` and `T`); published ones are random. Wave 1 already
+  contained the same signal internally — a Haar row space scored 0.44342 against
+  0.43926 for a windowed one at identical `(S, D, ρ)`. The next coordinate is
+  therefore likely to be about **row-space delocalisation**, i.e. a higher-order
+  invariant of the `(M_0, M_x, M_g)` triple, not another hand-picked feature.
+
 ## 4. What is running
 
 * **Wave 2** — a discovery sweep of `W` via `A = Ã Σ^{-q}`. Honest about what it
   is: it fixes `S` but lets `D` and the row space drift, because
   `M_x = Ã Σ^{1-2q} Ãᵀ`. Not a causal test.
+* **Wave 4 — is `W` a dynamical timescale?** `‖ΔA‖_F/‖A‖_F ~ η_A√(rd)/√(SW)`,
+  so the persistence timescale of the initial scaffold is `τ_A ~ √(SW)/η_A`. If
+  the tuned optimum corresponds to a roughly fixed `τ_A`, then at fixed `S`,
+  **`ω* ∝ η_A²`**: halving `η_A/η_B` should move the optimum of the `ω` ladder
+  from 1 to 0.25 and doubling it to 4. The existing rungs 0.3 / 1 / 3 sit almost
+  exactly on that prediction. Includes `η_A = 0` (frozen `A`), the sharpest
+  control: if the `ω` response flattens, `ω` acts through A-remodelling.
+  This is also the point of contact with *LoRA Without Regret*, whose two scalar
+  invariants `α·init_A·LR_B` and `init_A/LR_A` are the **isotropic special case**
+  of `η_B√S` and `√(SW)/η_A` — our versions are the data-metric generalisation
+  to arbitrary anisotropic initializers.
 * **`R_g` recomputed offline** for every cached atlas point. With the corrected,
   spectrum-weighted statistic included as a candidate, leave-one-out model
   selection on the atlas still prefers `S + D`; adding `R_g` makes prediction
@@ -155,7 +233,7 @@ than a repeat.
 |---|---|
 | "the second and only other channel is effective rank" | **false** — `W` is a further coordinate, now causally isolated, and `D`'s effect is weaker than Stage 1 suggested |
 | "method identity adds nothing after conditioning on three statistics" | **false** — the OOD test mispredicts tuned loss by +0.005 nats systematically |
-| "task alignment is not an independent axis" | **not established** — the statistic swept was unweighted; the correct `R_g` has not been tested |
+| "task alignment is not an independent axis" | **now established** — the statistic swept in wave 1 was unweighted, but the corrected spectrum-weighted `R_g` has since been recomputed for every atlas point and still adds nothing on top of `(S, D)` out of sample |
 | "`tr P` is not causal" | **corrected** — `tr P` is not the learning-rate coordinate (265× at constant `lr*`), but `tr P / tr(PΣ)` **is** an independent causal coordinate |
 | "the gauge effect's headroom is roughly scale-invariant" | **false** — based on 0.6B/1.7B only; 4B and 8B show PR falling 5.2× |
 

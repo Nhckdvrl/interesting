@@ -87,6 +87,10 @@ def main():
                     help="data-space scale, RELATIVE to the vanilla draw")
     ap.add_argument("--D", type=float, default=None,
                     help="target r_eff(A Sigma A^T); default = the vanilla draw's")
+    ap.add_argument("--a_lr_ratio", type=float, default=1.0,
+                    help="eta_A / eta_B.  The timescale on which Adam rewrites "
+                         "the initial A is tau_A ~ sqrt(S W)/eta_A, so at fixed "
+                         "S the optimal W should scale as eta_A^2.  0 freezes A.")
     ap.add_argument("--matchW", type=float, default=None,
                     help="wave 3: hold S, D and the LAMBDA-WEIGHTED alignment "
                          "R_g at the vanilla draw's values and drive "
@@ -132,6 +136,7 @@ def main():
             + (f"_MW{args.matchW:g}" if args.matchW is not None
                else f"_R{rho_s}" + (f"_W{args.wexp:g}" if args.wexp != 0.5
                                     else ""))
+            + (f"_a{args.a_lr_ratio:g}" if args.a_lr_ratio != 1.0 else "")
             + f"_lr{args.lr:g}_s{args.seed}")
     outdir = os.path.join(REPO, "01-hidden-preconditioner", "results", args.tag)
     os.makedirs(outdir, exist_ok=True)
@@ -283,7 +288,7 @@ def main():
     acc_set = gsm8k_eval_set(args.acc_n) if args.acc_n else None
     cfg = dict(steps=args.steps, accum=accum, optimizer=args.optimizer,
                lr=args.lr, wd=0.0, warmup=args.warmup, sched=args.sched,
-               grad_clip=args.grad_clip)
+               grad_clip=args.grad_clip, a_lr_ratio=args.a_lr_ratio)
     log = train(model, adapters, params, trl, tel, cfg, log_every=5,
                 eval_every=args.eval_every, eval_batches=args.eval_batches,
                 sample_layers=sample, callback=cb)

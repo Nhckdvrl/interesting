@@ -78,14 +78,20 @@ def adapter_diagnostics(adapters, sample_layers=None):
 
 
 def make_optimizer(params, kind, lr, wd=0.0, betas=(0.9, 0.999), eps=1e-8,
-                   momentum=0.0, b_lr_ratio=1.0, adapters=None):
-    """b_lr_ratio > 1 reproduces LoRA+ (Hayou et al., ICML 2024): the
-    up-projection B gets a larger learning rate than the down-projection A."""
-    if b_lr_ratio != 1.0 and adapters:
+                   momentum=0.0, b_lr_ratio=1.0, adapters=None,
+                   a_lr_ratio=1.0):
+    """b_lr_ratio > 1 reproduces LoRA+ (Hayou et al., ICML 2024).
+    a_lr_ratio scales the DOWN-projection's learning rate independently, which
+    is the knob that sets how fast Adam rewrites the initial A scaffold:
+    ||dA||_F/||A||_F ~ eta_A sqrt(r d) / sqrt(S W), so the persistence timescale
+    of the initialisation is tau_A ~ sqrt(S W)/eta_A.  Setting a_lr_ratio = 0
+    freezes A entirely (LoRA-FA), which is the cleanest control for whether an
+    effect is carried by A-remodelling at all."""
+    if (b_lr_ratio != 1.0 or a_lr_ratio != 1.0) and adapters:
         bs = {id(a.lora_B) for a in adapters.values()}
         gb = [p for p in params if id(p) in bs]
         ga = [p for p in params if id(p) not in bs]
-        params = [{"params": ga, "lr": lr},
+        params = [{"params": ga, "lr": lr * a_lr_ratio},
                   {"params": gb, "lr": lr * b_lr_ratio}]
     if kind == "adamw":
         return torch.optim.AdamW(params, lr=lr, weight_decay=wd, betas=betas, eps=eps)
@@ -104,6 +110,7 @@ def train(model, adapters, params, train_loader, eval_loader, cfg, device="cuda"
                          eps=cfg.get("eps", 1e-8),
                          momentum=cfg.get("momentum", 0.0),
                          b_lr_ratio=cfg.get("b_lr_ratio", 1.0),
+                         a_lr_ratio=cfg.get("a_lr_ratio", 1.0),
                          adapters=adapters)
     base_lrs = [g["lr"] for g in opt.param_groups]
     steps = cfg["steps"]; accum = cfg.get("accum", 1)
