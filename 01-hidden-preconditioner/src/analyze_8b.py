@@ -9,6 +9,15 @@ P3  SGD is flat to within 1e-3 nats.  This one is not about size: the
     implementation fault, not a finding
 P4  the ordering follows Off_g, with the minimum at frame0 where Off_g = 0.
     Off_g was reached post-hoc at 0.6B, so this is its first out-of-sample test
+
+CAVEAT TO CHECK BEFORE READING A WEAK RESULT.  The 8B panel probes with
+probe_bs = 4 x probe_batches = 4 = 16 examples, against 64 at 0.6B, because the
+probe materialises a gradient for every adapted module and 8B cannot afford the
+larger batch alongside fp32 weights.  The frame construction only needs the
+eigenvectors of a 16x16 M_g, which is a mild ask of a noisy gradient estimate,
+but a WEAK 8B effect would be ambiguous between "the frame matters less at
+scale" and "the probe was too small to find the frame".  If P1/P2 come out weak,
+the control is a probe-size sweep at 8B, not a conclusion.
 """
 import glob, json, os, sys, collections
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
