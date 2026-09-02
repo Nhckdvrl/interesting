@@ -1,0 +1,15 @@
+# LOCAL:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag ood --cond bimi --lr 0.0002 --match none --steps 300
+
+    step 0/300 loss=1.1613 (0s)
+    step 30/300 loss=0.5641 (12s)
+    step 60/300 loss=0.6361 (25s)
+    step 90/300 loss=0.5191 (37s)
+    step 120/300 loss=0.4995 (50s)
+    step 150/300 loss=0.5543 (62s)
+    step 180/300 loss=0.4605 (77s)
+    step 210/300 loss=0.4906 (89s)
+    step 240/300 loss=0.4805 (102s)
+    step 270/300 loss=0.4657 (114s)
+    step 299/300 loss=0.4632 (126s)
+[bimi_lr0.0002_s0_mnone] base=0.83113 final=0.52883 (128s)
