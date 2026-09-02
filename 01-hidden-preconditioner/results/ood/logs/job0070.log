@@ -1,0 +1,17 @@
+# fvcrc20:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag ood --cond pissa_minor --lr 1e-05 --match none --steps 300
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (1s)
+    step 30/300 loss=0.4823 (16s)
+    step 60/300 loss=0.5262 (32s)
+    step 90/300 loss=0.4252 (47s)
+    step 120/300 loss=0.4366 (62s)
+    step 150/300 loss=0.4617 (77s)
+    step 180/300 loss=0.3862 (95s)
+    step 210/300 loss=0.4074 (111s)
+    step 240/300 loss=0.4338 (126s)
+    step 270/300 loss=0.3779 (141s)
+    step 299/300 loss=0.4020 (156s)
+[pissa_minor_lr1e-05_s0_mnone] base=0.83113 final=0.47377 (159s)

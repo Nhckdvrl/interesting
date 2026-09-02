@@ -172,7 +172,7 @@ def rowspace_for_captured(target_rel, r, tau, U, iters=60):
 # ---------------------------------------------------------------- assembly
 
 def build_A(S, D, rho, r, Sigma, C_g=None, generator=None, eps_rel=1e-6,
-            cache=None):
+            cache=None, wexp=0.5):
     """A (r, d) whose intrinsic state has exactly the requested (S, D) and,
     where the spectrum allows, the requested captured-energy ratio `rho`
     (rho = None gives a Haar-random row space, which sits at rho_rel = 1).
@@ -195,7 +195,24 @@ def build_A(S, D, rho, r, Sigma, C_g=None, generator=None, eps_rel=1e-6,
     else:
         V = rowspace_for_captured(float(rho), r, tau, U)
     Atil = torch.diag(lam.sqrt()) @ V.T          # (r, d)
-    return Atil @ S_ihalf
+    # `wexp` opens the fourth axis.  A = Atil Sigma^{-q}:
+    #   q = 1/2 gives the fully whitened construction, whose parameter-space
+    #           norm is large because it places mass on low-variance directions;
+    #   q = 0   gives A = Atil, whose row space sits in the parameter metric.
+    # The ratio W = tr(A A^T) / tr(A Sigma A^T) -- the parameter metric that
+    # Adam's per-coordinate step sees, divided by the data metric that the
+    # function sees -- sweeps over orders of magnitude with q, and the vanilla
+    # draw sits at W = 1 by definition.  S is restored exactly afterwards.
+    A = Atil @ sym_pow(Sigma, -wexp, eps_rel) if abs(wexp - 0.5) > 1e-12 \
+        else Atil @ S_ihalf
+    cur = float(((A @ Sigma.double()) * A).sum())
+    return A * (S / max(cur, 1e-30)) ** 0.5
+
+
+def metric_ratio(A, Sigma):
+    """W = tr(A A^T) / tr(A Sigma A^T): parameter metric over data metric."""
+    A = A.double()
+    return float(A.pow(2).sum()) / (float(((A @ Sigma.double()) * A).sum()) + 1e-30)
 
 
 def intrinsic_state(A, Sigma):

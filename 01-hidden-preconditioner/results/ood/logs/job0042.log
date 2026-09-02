@@ -1,0 +1,17 @@
+# fvcrc20:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag ood --cond geomspec_flatdiag0.5 --lr 1e-05 --match trace --steps 300
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (1s)
+    step 30/300 loss=0.5252 (16s)
+    step 60/300 loss=0.5435 (31s)
+    step 90/300 loss=0.4387 (46s)
+    step 120/300 loss=0.4452 (61s)
+    step 150/300 loss=0.4673 (76s)
+    step 180/300 loss=0.3893 (94s)
+    step 210/300 loss=0.4147 (110s)
+    step 240/300 loss=0.4424 (125s)
+    step 270/300 loss=0.3818 (140s)
+    step 299/300 loss=0.4067 (155s)
+[geomspec_flatdiag0.5_lr1e-05_s0] base=0.83113 final=0.47944 (157s)

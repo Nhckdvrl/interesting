@@ -28,7 +28,7 @@ from common.lora import apply_lora, lora_parameters, DEFAULT_TARGETS
 from common.pinit import kaiming_A
 from common.pstats import p_stats
 from common.intrinsic import (build_A, intrinsic_state, whiten_ops, captured_of,
-                              output_state, sym_pow)
+                              output_state, sym_pow, metric_ratio)
 
 
 def sym_half(M):
@@ -86,6 +86,9 @@ def main():
                     help="data-space scale, RELATIVE to the vanilla draw")
     ap.add_argument("--D", type=float, default=None,
                     help="target r_eff(A Sigma A^T); default = the vanilla draw's")
+    ap.add_argument("--wexp", type=float, default=0.5,
+                    help="whitening exponent q in A = Atil Sigma^-q; sweeps the "
+                         "parameter-vs-data metric ratio W")
     ap.add_argument("--rho", default="1.0",
                     help="captured-energy ratio; 'rand' for a Haar row space; "
                          "'ref' to copy the vanilla draw's own alignment")
@@ -118,7 +121,8 @@ def main():
 
     rho_s = args.rho
     cell = (f"S{args.S:g}_D{args.D if args.D is not None else 'ref'}"
-            f"_R{rho_s}_lr{args.lr:g}_s{args.seed}")
+            f"_R{rho_s}" + (f"_W{args.wexp:g}" if args.wexp != 0.5 else "")
+            + f"_lr{args.lr:g}_s{args.seed}")
     outdir = os.path.join(REPO, "01-hidden-preconditioner", "results", args.tag)
     os.makedirs(outdir, exist_ok=True)
     outfile = os.path.join(outdir, cell + ".json")
@@ -157,7 +161,7 @@ def main():
     os.makedirs(ACACHE, exist_ok=True)
     ckey = hashlib.md5(
         f"{args.model}|{args.task}|{args.seed}|{args.r}|{args.S}|{args.D}|"
-        f"{rho_s}|{args.probe_batches}|{probe_bs}|{args.n_train}|"
+        f"{rho_s}|{args.wexp}|{args.probe_batches}|{probe_bs}|{args.n_train}|"
         f"{args.max_len}".encode()).hexdigest()
     cfile = os.path.join(ACACHE, ckey + ".pt")
     CACHED = None
@@ -199,13 +203,15 @@ def main():
         rho_ref = captured_of(V_ref, tau, U)
         rr = rho_ref if rho == "ref" else rho
         A = build_A(args.S * S_ref, args.D if args.D is not None else D_ref,
-                    rr, r, Sig, Cg, generator=g, cache=cache)
+                    rr, r, Sig, Cg, generator=g, cache=cache, wexp=args.wexp)
         s_got, d_got = intrinsic_state(A, Sig)
         V = torch.linalg.qr((A @ cache["S_half"]).T)[0]
         st = p_stats(A.cpu(), s=1.0); st.pop("spec_top4", None)
         st.update(S_abs=s_got, S_rel=s_got / S_ref, D=d_got, D_ref=D_ref,
                   rho_rel=captured_of(V, cache["tau"], cache["U"]),
                   rho_ref=rho_ref, trP_ref=float((A_ref * A_ref).sum()),
+                  W=metric_ratio(A, Sig),
+                  W_ref=metric_ratio(A_ref, Sig),
                   A_fro=float(A.norm()))
         stats[name] = st
         SIGMA_CPU[name] = Sig.float().cpu()

@@ -1,0 +1,15 @@
+# LOCAL:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag ood --cond lora_one --lr 0.0002 --match none --steps 300
+
+    step 0/300 loss=1.1613 (1s)
+    step 30/300 loss=0.4854 (14s)
+    step 60/300 loss=0.5341 (26s)
+    step 90/300 loss=0.4313 (43s)
+    step 120/300 loss=0.4599 (61s)
+    step 150/300 loss=0.4801 (74s)
+    step 180/300 loss=0.3928 (100s)
+    step 210/300 loss=0.4088 (121s)
+    step 240/300 loss=0.4217 (143s)
+    step 270/300 loss=0.3849 (164s)
+    step 299/300 loss=0.4166 (184s)
+[lora_one_lr0.0002_s0_mnone] base=0.83113 final=0.45638 (189s)
