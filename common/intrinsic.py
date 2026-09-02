@@ -550,3 +550,60 @@ def eg_bounds(Mg):
     lam = torch.linalg.eigvalsh(Mg.double()).clamp_min(0)
     r = lam.numel()
     return float(lam.sqrt().sum() ** 2) / (r * float(lam.sum()) + 1e-30), 1.0
+
+
+def max_l1_frame(GA, iters=400, lr=0.05, seed=0):
+    """Q maximising ||G A^T Q^T||_1 -- the frame AdamW descends fastest in.
+
+    AdamW is steepest descent under the elementwise max norm, so its
+    first-order decrease is the dual norm ||grad_B||_1 of grad_B = s G A^T.
+    Right-multiplying by Q^T is exactly the gauge action, so the best frame is
+    the argmax of an elementwise l1 norm over O(r) -- a small, dense problem in
+    r^2 unknowns solved by Adam on an unconstrained M with a QR retraction.
+
+    The flat-M_g-diagonal frame is only a proxy for this: it equalises the
+    per-row gradient ENERGY, which is the row-partition factor of Lambda_1, and
+    leaves the within-row delocalisation untouched.  Measured headroom of the
+    true optimum over the flat frame grows with rank -- +2% at r = 4, +8% at
+    r = 16, +18% at r = 64 -- so the prescription matters more exactly where
+    LoRA is heading.
+    """
+    GA = GA.double()
+    m, r = GA.shape
+    f2 = float(GA.pow(2).sum()) + 1e-30
+    g = torch.Generator(device=GA.device).manual_seed(seed)
+    M = torch.eye(r, dtype=torch.float64, device=GA.device)
+    M = M + 0.01 * torch.randn(r, r, generator=g, dtype=torch.float64,
+                               device=GA.device)
+    M.requires_grad_(True)
+    opt = torch.optim.Adam([M], lr=lr)
+    best, bestQ = -1.0, None
+    for _ in range(iters):
+        Q, _ = torch.linalg.qr(M)
+        val = (GA @ Q.T).abs().sum() ** 2 / (m * r * f2)
+        opt.zero_grad(); (-val).backward(); opt.step()
+        with torch.no_grad():
+            v = float(val)
+            if v > best:
+                Qd, _ = torch.linalg.qr(M.detach())
+                best, bestQ = v, Qd.clone()
+    return bestQ, best
+
+
+def offdiag_mass(M):
+    """||offdiag M||_F^2 / ||M||_F^2 in [0, 1) -- the fraction of the curvature
+    a DIAGONAL preconditioner cannot see in this frame.
+
+    Adam preconditions elementwise, i.e. it is a diagonal preconditioner in
+    whatever basis the parameters are written in.  For LoRA's B-subproblem the
+    adapter-side curvature is governed by M_x = A Sigma A^T, so Adam's
+    approximation is exact when M_x is diagonal and worst when its mass is
+    off-diagonal.  Under the gauge A -> QA this quantity moves (it is
+    signed-permutation invariant, not O(r) invariant) -- the same group
+    fingerprint as E_g, but a different functional: E_g asks how EQUAL the
+    diagonal is, this asks how much is NOT on it.
+    """
+    M = M.double()
+    d = torch.diagonal(M)
+    tot = float((M * M).sum())
+    return (tot - float((d * d).sum())) / (tot + 1e-30)

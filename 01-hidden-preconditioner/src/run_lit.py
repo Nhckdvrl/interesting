@@ -232,6 +232,10 @@ def main():
         W = mods[name].weight.detach().float()   # stays on GPU for SVD/QR
         A, B, sub = None, None, False
         c = args.cond
+        gauge_t = None
+        if "@frame" in c:                     # post-hoc gauge on any condition
+            c, _gt = c.split("@frame")[0], c.split("@frame")[1]
+            gauge_t = "opt" if _gt == "opt" else float(_gt)
         if c in ("kaiming",):
             A = base
         elif c == "left_gauge":
@@ -248,8 +252,9 @@ def main():
             # pure gauge move on the vanilla draw: A -> Q(t) A_0, so P and
             # every gauge invariant are bit-identical to `kaiming` and only the
             # frame AdamW steps in changes.
+            _t = c[5:]
             A = IN.init_frame(base.cuda(), G[name].cuda(),
-                              float(c[5:])).cpu().double()
+                              _t if _t == "opt" else float(_t)).cpu().double()
         elif c == "gradsub":
             A = IN.init_gradsubspace(G[name].cuda(), r, ref_tr).cpu().double()
         elif c in ("pissa", "pissa_minor"):
@@ -275,6 +280,21 @@ def main():
             A = A * k
             if B is not None:
                 B = B / k            # product (hence initial function) preserved
+        if gauge_t is not None:
+            # A -> Q A and B -> B Q^T leaves B A, P = s^2 A^T A and every
+            # invariant of (A A^T, A Sigma A^T, A C_g A^T) exactly fixed; only
+            # the frame moves, so this is the same initialiser in rotated
+            # coordinates.  SGD cannot tell the difference at all.
+            from common.intrinsic import frame_ladder, max_l1_frame
+            Ad = A.double().cuda()
+            Gd = G[name].cuda().double()
+            if gauge_t == "opt":
+                Q, _ = max_l1_frame(Gd @ Ad.T)
+            else:
+                Q = frame_ladder(Ad @ (Gd.T @ Gd) @ Ad.T, [gauge_t])[0]
+            A = (Q @ Ad).cpu().double()
+            if B is not None:
+                B = (B.double().cuda() @ Q.T).cpu().double()
         st = p_stats(A, s=1.0); st.pop("spec_top4", None)
         tp, ta, tg = weighted_traces(A, name, d_in)
         bp, ba, bg = weighted_traces(base, name, d_in)

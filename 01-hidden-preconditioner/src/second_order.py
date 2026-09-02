@@ -34,7 +34,7 @@ import torch.nn as nn
 from common.pinit import make_A, kaiming_A
 from common import initializers as IN
 from common.intrinsic import (whiten_ops, sym_pow, second_order, triple,
-                              l1_flatness)
+                              l1_flatness, offdiag_mass)
 from common.data import build_sft, FixedOrderLoader
 from common.train import load_model
 from run_lit import collect_grads, collect_act_cov, ACT_GROUP, cached_make_A
@@ -43,7 +43,8 @@ from intrinsic_table import CONDS
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 KEYS = ("D_0", "D_x", "D_g", "E_0", "E_x", "E_g",
-        "Psi_0x", "Psi_0g", "Psi_xg", "Lam1", "Dout")
+        "Psi_0x", "Psi_0g", "Psi_xg", "Lam1", "Dout",
+        "Off_x", "Off_g", "Off_0")
 
 
 def main():
@@ -55,6 +56,11 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--every_layer", type=int, default=4)
     ap.add_argument("--probe_batches", type=int, default=4)
+    ap.add_argument("--extra", default="",
+                    help="comma-separated extra conditions, e.g. "
+                         "frame0,frame1,gradsub@frame1 -- each may carry a "
+                         "'|match' suffix (default |trace)")
+    ap.add_argument("--no_atlas", action="store_true")
     ap.add_argument("--out", default=os.path.join(
         REPO, "01-hidden-preconditioner", "results", "second_order.json"))
     a = ap.parse_args()
@@ -87,13 +93,24 @@ def main():
         out = second_order(*triple(Ad, p["Sig"], p["Cg"]))
         lam, _, dout = l1_flatness(Ad, p["G"])
         out["Lam1"], out["Dout"] = lam, dout
+        M0, Mx, Mg = triple(Ad, p["Sig"], p["Cg"])
+        out["Off_0"] = offdiag_mass(M0)
+        out["Off_x"] = offdiag_mass(Mx)
+        out["Off_g"] = offdiag_mass(Mg)
         return out
 
     rows = {}
 
+    CONDS_ALL = list(CONDS)
+    for e in filter(None, a.extra.split(",")):
+        CONDS_ALL.append((e.split("|")[0],
+                          e.split("|")[1] if "|" in e else "trace"))
+
     # ---- the synthetic atlas, straight from the construction cache ---------
     n_at = 0
-    for f in sorted(glob.glob(os.path.join(ACACHE, "*.pt"))):
+    if a.no_atlas:
+        print("skipping the atlas cache")
+    for f in ([] if a.no_atlas else sorted(glob.glob(os.path.join(ACACHE, "*.pt")))):
         try:
             c = torch.load(f, map_location="cpu")
         except Exception:
@@ -110,8 +127,11 @@ def main():
     print(f"{n_at} cached atlas constructions", flush=True)
 
     # ---- the published initializers, rebuilt exactly as run_lit does ------
-    for cond, match in CONDS:
+    for cond, match in CONDS_ALL:
         acc = {}
+        gauge_t = None
+        if "@frame" in cond:
+            cond, gauge_t = cond.split("@frame")[0], float(cond.split("@frame")[1])
         for name, mod in mods.items():
             d_in = mod.weight.shape[1]
             h = int(hashlib.md5(f"{a.seed}:{name}".encode()).hexdigest()[:12], 16)
@@ -131,6 +151,9 @@ def main():
             elif cond == "eva":
                 key = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
                 A = IN.init_eva(ACT[key].cuda(), a.r, d_in, ref_tr).cpu().double()
+            elif cond.startswith("frame"):
+                A = IN.init_frame(base.cuda(), G[name].cuda(),
+                                  float(cond[5:])).cpu().double()
             elif cond == "gradsub":
                 A = IN.init_gradsubspace(G[name].cuda(), a.r, ref_tr).cpu().double()
             elif cond in ("pissa", "pissa_minor"):
@@ -143,6 +166,11 @@ def main():
                 A = A.cpu().double()
             else:
                 A = cached_make_A(cond, a.r, d_in, f"{a.seed}:{name}", base)
+            if gauge_t is not None:
+                from common.intrinsic import frame_ladder
+                Ad2 = A.double().cuda(); Gd2 = G[name].cuda().double()
+                Qg = frame_ladder(Ad2 @ (Gd2.T @ Gd2) @ Ad2.T, [gauge_t])[0]
+                A = (Qg @ Ad2).cpu().double()
             if match != "none":
                 p = P[name]
                 Ad, bd = A.double().cuda(), base.double().cuda()
@@ -154,12 +182,15 @@ def main():
                 A = A * (q(bd)[idx] / max(q(Ad)[idx], 1e-30)) ** 0.5
             for k, v in row(A, name).items():
                 acc.setdefault(k, []).append(v)
-        rows[f"lit:{cond}|{match}"] = {k: st.mean(acc[k]) for k in KEYS}
-        r_ = rows[f"lit:{cond}|{match}"]
-        print(f"  {cond:22s} {match:10s} Lam1={r_['Lam1']:.4f} "
-              f"E_g={r_['E_g']:.4f} Dout={r_['Dout']:.4f} "
+        tagn = cond + (f"@frame{gauge_t:g}" if gauge_t is not None else "")
+        rows[f"lit:{tagn}|{match}"] = {k: st.mean(acc[k]) for k in KEYS}
+        r_ = rows[f"lit:{tagn}|{match}"]
+        print(f"  {tagn:26s} {match:10s} Lam1={r_['Lam1']:.4f} "
+              f"E_g={r_['E_g']:.4f} Off_x={r_['Off_x']:.4f} "
               f"D_g={r_['D_g']:.4f} Psi_0x={r_['Psi_0x']:.4f}", flush=True)
 
+    if os.path.exists(a.out):          # merge, never clobber earlier rows
+        old = json.load(open(a.out)); old.update(rows); rows = old
     json.dump(rows, open(a.out, "w"), indent=2)
     print("wrote", a.out, f"({len(rows)} rows)")
 

@@ -1,0 +1,15 @@
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag frame --cond frame0 --lr 0.3 --steps 300 --grad_clip 1e9 --optimizer sgd --momentum 0 --warmup 0
+
+    step 0/300 loss=1.1613 (0s)
+    step 30/300 loss=7.4240 (12s)
+    step 60/300 loss=6.4352 (23s)
+    step 90/300 loss=6.0108 (35s)
+    step 120/300 loss=5.7379 (47s)
+    step 150/300 loss=5.7342 (58s)
+    step 180/300 loss=5.4428 (72s)
+    step 210/300 loss=5.4103 (84s)
+    step 240/300 loss=5.2623 (96s)
+    step 270/300 loss=5.1533 (108s)
+    step 299/300 loss=5.4177 (119s)
+[frame0_lr0.3_s0_sgd] base=0.83113 final=5.32177 (121s)
