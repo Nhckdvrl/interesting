@@ -44,12 +44,13 @@ def main(tag="dose"):
     ax[0].legend(fontsize=7); ax[0].grid(alpha=.3)
     ax[0].set_title("(a) exactly function-preserving gauges")
 
-    # (b) annotated ladder
-    xs = [dd[g]["PR"] for g in ORDER]
+    # (b) annotated ladder -- only the rungs this panel actually contains
+    present = [g for g in ORDER if ("full", "adamw", g) in B]
+    xs = [dd[g]["PR"] for g in present]
     ys = [1000 * (B[("full", "adamw", g)] - B[("full", "adamw", "none")])
-          for g in ORDER if ("full", "adamw", g) in B]
-    ax[1].plot(xs[:len(ys)], ys, "o-", color="C0")
-    for g, x, y in zip(ORDER, xs, ys):
+          for g in present]
+    ax[1].plot(xs, ys, "o-", color="C0")
+    for g, x, y in zip(present, xs, ys):
         ax[1].annotate(g, (x, y), fontsize=6.5, xytext=(3, 4),
                        textcoords="offset points")
     ax[1].set_xlabel("participation ratio"); ax[1].set_ylabel("millinats")
