@@ -113,7 +113,16 @@ Rotating the vanilla Kaiming draw to the gradient-metric eigenframe improves it
 from 0.44551 to 0.44329 -- free, no parameters, no optimizer state, `BA` and
 `P` preserved to 1e-15.
 
-### The pre-registered sign is wrong, and that is informative
+### How big is this, next to what those papers compare?
+
+The six published initialisers span **0.01177 nats** between them, which is the
+quantity their tables are about. The frame alone moves **one** method by
+0.00204 nats (median) and 0.00594 (max) -- **17% to 51% of that entire range**,
+and **2.5x the median gap between adjacent methods in the ranking** (0.00081).
+It preserves `BA`, `P = s^2 A^T A` and all nine gauge invariants to 1e-15, and
+no paper reports it.
+
+### The pre-registered sign is wrong, and the mechanism is still open
 
 Prediction 2 said higher `Lambda_1` should train *better*, because
 `||grad_B||_1` is AdamW's first-order descent rate. The measurement says the
@@ -122,26 +131,59 @@ adapter rows wins.** The `l_inf` argument identifies the right variable and the
 right magnitude, and the wrong sign, so it is not what governs the 300-step
 outcome.
 
-The candidate that survives is that **AdamW is a diagonal preconditioner**: its
-elementwise normalisation is exact only when the adapter-side curvature
-`M_x = A Sigma A^T` is diagonal in the frame it is handed. On this ladder the
-off-diagonal mass `Off_x` runs 0.380 -> 0.517 and reproduces the loss ordering
-*including the reversal in the last pair* that `Lambda_1` misses. A single
-one-parameter ladder cannot separate the two, so `results/frame` is being
-extended with a second ladder in the activation metric, whose eigenbasis
-differs from the gradient metric's, to break the collinearity.
+A second pre-registration (`PREDICTIONS_mechanism.md`) proposed that AdamW,
+being a *diagonal* preconditioner, should prefer the frame that diagonalises
+the adapter-side curvature `M_x = A Sigma A^T`. That is falsified too:
+`framex0` sets `Off_x` to exactly zero and is **not** the best frame (0.44542,
+tied with vanilla), and within the orbit `Off_x` is uncorrelated with loss
+(r = -0.004).
+
+What survives is that AdamW's second moment estimates *gradient* variance, so
+the relevant matrix is `M_g`, not `M_x`. Within the orbit
+`Off_g` scores r = +0.859, `Lambda_1` +0.814 and `E_g` +0.806, and all three are
+extremal at the same frame, so **these designs cannot separate them** and we do
+not claim one. `Off_g` was reached post-hoc; 8B is its first out-of-sample test.
+The practical prescription is unaffected: all three name the gradient-metric
+eigenframe.
+
+### Rotating the zoo (`results/rot`, 96 runs)
+
+Each published initialiser as published, rotated to the gradient-metric
+eigenframe, and rotated to a flat gradient-metric diagonal:
+
+| method | published | `@frame0` | delta | `@frame1` | delta |
+|---|---|---|---|---|---|
+| kaiming | 0.44515 | **0.44322** | -0.00192 | 0.44495 | -0.00019 |
+| bimi | 0.44556 | **0.44516** | -0.00041 | 0.44617 | +0.00061 |
+| pissa | 0.45655 | **0.45198** | -0.00456 | 0.45790 | +0.00136 |
+| eva | 0.45538 | **0.45459** | -0.00079 | 0.45675 | +0.00137 |
+| gradsub | 0.45457 | 0.45478 | +0.00021 | 0.45526 | +0.00068 |
+| lora_one | 0.45691 | 0.45676 | -0.00015 | 0.46271 | +0.00579 |
+
+`@frame0` helps or is neutral **6/6**; `@frame1` hurts or is neutral **6/6**.
+LoRA-One and gradsub are *already* at the eigenframe, so `@frame0` is the
+identity there -- and those two cells give an unplanned reproducibility floor of
+about 2e-4 nats for a 300-step run.
+
+The headline pair survives three seeds (-0.00222, -0.00241, -0.00147; 3/3) and
+a finer grid that rules out a learning-rate shift: both conditions peak at the
+same lr = 3e-4 and `frame0`'s optimum is 0.0022 lower, so the rotation buys a
+better optimum rather than a rescaled one.
 
 ## 5. What is running
 
-* **`results/rot`** -- the zoo rotated in both directions. If `@frame0` lifts
-  the spread initialisers (Kaiming, BiMI) toward the data-aware ones, then a
-  free rotation buys a large part of what data-aware initialisation is credited
-  with.
-* **`results/frame` (framex)** -- the discriminating design: `Lambda_1` vs
-  `Off_x`.
-* **`results/rank`** -- `O(r)` has dimension `r(r-1)/2`, which is **zero at
-  r = 1**. The frame effect must be structurally absent at rank 1 and grow with
-  rank. No confound has that signature.
+* **`results/q8b`** -- Qwen3-8B, with predictions committed in
+  `paper/8b_predictions.md` beforehand, including the unflattering P1 that the
+  effect should **not** grow (the training-free frame reach is 4.57x at both
+  0.6B and 1.7B).
+* **`results/dolly_frame`, `results/rank` (r = 128)** -- a second,
+  non-mathematical task, and the rank range people actually deploy.
+* **`results/long`, `results/acc`** -- 1000 steps instead of 300, and GSM8K
+  exact-match rather than nats. An initialisation effect that washes out by
+  convergence is a curiosity; one that persists and moves accuracy is a
+  prescription. Either answer goes in.
+* **`02-.../results/muon_dose`** -- Muon on the *backbone* gauge, completing a
+  3 optimizers x 2 symmetry groups table.
 
 ## 6. Relation to topic 02
 

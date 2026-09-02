@@ -96,6 +96,31 @@ def main(tag="rot"):
             print(f"           a free rotation of the vanilla draw recovers "
                   f"{100*frac:.0f}% of the gap between Kaiming and the best "
                   f"published method")
+    # --- how big is the frame next to what these papers compare? ----------
+    pub = {m: rows[(m, "published")]["L"] for m in MATCH
+           if (m, "published") in rows}
+    fr = {}
+    for m in MATCH:
+        v = [rows[(m, x)]["L"] for x in ("published", "@frame0", "@frame1")
+             if (m, x) in rows]
+        if len(v) == 3:
+            fr[m] = max(v) - min(v)
+    if len(pub) >= 3 and len(fr) >= 3:
+        tot = max(pub.values()) - min(pub.values())
+        adj = sorted(pub.values())
+        gaps = [adj[i + 1] - adj[i] for i in range(len(adj) - 1)]
+        mf = st.median(list(fr.values()))
+        print(f"\nscale: the six published initialisers span {tot:.5f} nats "
+              f"between them.")
+        print(f"       the frame alone moves ONE method by {mf:.5f} nats "
+              f"(median), {max(fr.values()):.5f} (max)")
+        print(f"       = {100*mf/tot:.0f}% to {100*max(fr.values())/tot:.0f}% "
+              f"of that entire range,")
+        print(f"       and {mf/st.median(gaps):.1f}x the median gap between "
+              f"ADJACENT methods in the ranking ({st.median(gaps):.5f} nats).")
+        print(f"       It preserves B A, P = s^2 A^T A and all nine gauge "
+              f"invariants to 1e-15, and no paper reports it.")
+
     json.dump({f"{m}|{v}": r for (m, v), r in rows.items()},
               open(os.path.join(RES, f"{tag}_summary.json"), "w"), indent=2)
 
