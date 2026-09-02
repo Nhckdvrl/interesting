@@ -98,12 +98,6 @@ def make_optimizer(params, kind, lr, wd=0.0, betas=(0.9, 0.999), eps=1e-8,
     if kind == "sgd":
         return torch.optim.SGD(params, lr=lr, weight_decay=wd, momentum=momentum)
     if kind == "matprec":
-        # full-matrix preconditioner on the low-rank side.  Covariant under the
-        # adapter gauge, unlike Adam's diagonal one -- the structure LoRA-RITE
-        # uses, isolated so the frame ladder can be run against it.
-        from common.matprec import MatrixPrecond
-        return MatrixPrecond(params, lr=lr, wd=wd)
-    if kind == "matprec":
         # Adam with a full-matrix second moment contracted on the rank index --
         # exactly gauge-covariant (verified to 3e-16 over a trajectory), which
         # isolates DIAGONALITY as the property that makes AdamW see the frame,
