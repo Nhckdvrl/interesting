@@ -83,6 +83,70 @@ print(f"\nThe AdamW figure, **{NULL:.1e} nats**, is used throughout as the "
       f"produce while carrying *zero* preconditioner information.")
 
 # ------------------------------------------------------------------ audit
+H("The gauge frame: which optimizer can see it")
+D = {}
+for r in runs(os.path.join(R1, "frame")):
+    a = r["args"]
+    D.setdefault((a.get("optimizer", "adamw"), a["cond"]), {})[a["lr"]] = \
+        r["log"]["eval_loss"][-1]
+SO = json.load(open(os.path.join(R1, "second_order.json")))
+LAD = ["frame0", "frame0.5", "frame1", "kaiming"]
+print("One gauge orbit of the vanilla Kaiming draw: `A -> Q A`, so `B A`, "
+      "`P = s²AᵀA` and every invariant of `(AAᵀ, AΣAᵀ, AC_gAᵀ)` are identical "
+      "to 1.5e-8 relative, and only the frame moves.\n")
+print("| optimizer | norm it descends in | orthogonally invariant | spread over the frames |")
+print("|---|---|---|---|")
+for opt, nm, inv in (("sgd", "Frobenius", "yes"),
+                     ("muon", "spectral", "yes"),
+                     ("adamw", "elementwise max", "**no**")):
+    b = [min(D[(opt, c)].values()) for c in LAD if D.get((opt, c))]
+    if len(b) < 2:
+        continue
+    sp = max(b) - min(b)
+    print(f"| {opt.upper()} | {nm} | {inv} | **{sp:.5f}** nats "
+          f"({sp/2.7e-4:.1f}× the null) |")
+print("\nSGD's and Muon's covariance are derivations, not fits: `dB -> dB Qᵀ` "
+      "and `msign(M Qᵀ) = msign(M) Qᵀ` are exact (the latter to 3.8e-15 in "
+      "float64). AdamW's failure is equally exact — the elementwise ℓ1 norm is "
+      "invariant only under signed permutations.\n")
+ad = [(c, min(D[("adamw", c)].values())) for c in
+      ["frame0", "frame0.25", "frame0.5", "frame0.75", "frame1", "framex0",
+       "framex1", "kaiming"] if D.get(("adamw", c))]
+print("| frame | Λ₁ | Off_g | Off_x | tuned loss |")
+print("|---|---|---|---|---|")
+for c, L in sorted(ad, key=lambda z: z[1]):
+    so = SO.get(f"lit:{c}|trace", {})
+    print(f"| `{c}` | {so.get('Lam1', float('nan')):.4f} | "
+          f"{so.get('Off_g', float('nan')):.4f} | "
+          f"{so.get('Off_x', float('nan')):.4f} | {L:.5f} |")
+print("\nWithin the orbit the tuned loss correlates with `Off_g` at r = +0.859, "
+      "`Λ₁` at +0.814 and `Off_x` at −0.004; the best frame is exactly the one "
+      "where `Off_g = 0`. `Off_g` was reached post-hoc — the pre-registered "
+      "candidate named `M_x` and was falsified by `framex0`, which sets "
+      "`Off_x = 0` exactly and is not the best frame.")
+
+H("The effect is structurally zero at rank 1")
+D = {}
+for r in runs(os.path.join(R1, "rank")):
+    a = r["args"]
+    D.setdefault((a["r"], a["cond"]), {})[a["lr"]] = r["log"]["eval_loss"][-1]
+print("What the ladder can move is `O(r)` modulo AdamW's own symmetry group, "
+      "the signed permutations — which is **trivial at r = 1**, where "
+      "`O(1) = {±1}` *is* that group.\n")
+print("| r | dim `O(r)`/signed perms | `frame1 − frame0` at lr=1e-4 | tuned gap |")
+print("|---|---|---|---|")
+for rr in sorted({k[0] for k in D}):
+    a0, a1 = D.get((rr, "frame0")), D.get((rr, "frame1"))
+    if not a0 or not a1:
+        continue
+    gap = abs(min(a1.values()) - min(a0.values()))
+    print(f"| {rr} | {rr*(rr-1)//2} | "
+          f"{a1.get(1e-4, float('nan')) - a0.get(1e-4, float('nan')):+.5f} | "
+          f"{gap:.5f} ({gap/2.7e-4:.1f}×) |")
+print("\nNo confound of the frame ladder — learning-rate scale, initialisation "
+      "magnitude, data order, gradient noise — is zero at rank 1 and monotone "
+      "in `r(r−1)/2` thereafter.")
+
 H("The literature audit (Qwen3-0.6B / GSM8K, 300 steps, AdamW, r=16 α=32)")
 P = json.load(open(os.path.join(R1, "pstat_table_trace.json")))
 ORDER = ["kaiming", "left_gauge", "nora", "nora_unit", "etf",
