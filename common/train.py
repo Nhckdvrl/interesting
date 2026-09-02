@@ -103,6 +103,13 @@ def make_optimizer(params, kind, lr, wd=0.0, betas=(0.9, 0.999), eps=1e-8,
         # uses, isolated so the frame ladder can be run against it.
         from common.matprec import MatrixPrecond
         return MatrixPrecond(params, lr=lr, wd=wd)
+    if kind == "matprec":
+        # Adam with a full-matrix second moment contracted on the rank index --
+        # exactly gauge-covariant (verified to 3e-16 over a trajectory), which
+        # isolates DIAGONALITY as the property that makes AdamW see the frame,
+        # rather than adaptivity or the norm.
+        from common.matprec import MatPrecAdam
+        return MatPrecAdam(params, lr=lr, betas=betas, eps=eps, wd=wd)
     if kind == "muon":
         # steepest descent under the SPECTRAL norm, which is orthogonally
         # invariant -- so Muon, like SGD and unlike AdamW, is exactly covariant

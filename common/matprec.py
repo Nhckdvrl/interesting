@@ -1,90 +1,94 @@
-"""A matrix preconditioner on the low-rank side.
+"""Adam with a full-matrix second moment contracted on the rank index.
 
-The frame ladder shows AdamW responds to LoRA's gauge frame and SGD and Muon do
-not.  The rule we first wrote was about norm geometry -- Frobenius and spectral
-are orthogonally invariant, the elementwise max is not.  There is a sharper one.
+This exists to sharpen the paper's rule.  "The frame is visible iff the
+optimizer's norm is not orthogonally invariant" is true but not the tightest
+statement; the tighter one is about the PRECONDITIONER's shape:
 
-Take grad_B (d_out x r) and precondition it on the r side with the inverse root
-of R = E[grad_B^T grad_B] (r x r).  Under the gauge grad_B -> grad_B Q^T,
+    none              (SGD)     covariant       measured  1e-5 nats
+    orthogonalised    (Muon)    covariant       measured  2.6e-4
+    full-matrix on r            covariant       this file
+    DIAGONAL          (AdamW)   NOT covariant   measured  2.2e-3
 
-    R -> Q R Q^T,   R^(-1/2) -> Q R^(-1/2) Q^T,
-    grad_B Q^T (Q R Q^T)^(-1/2) = grad_B R^(-1/2) Q^T,
+Adam's second moment is the only diagonal one in that list and the only one
+that sees the frame.  So the property that matters is not adaptivity, and not
+even the norm -- it is whether the preconditioner is diagonal in the coordinates
+the gauge acts on.
 
-so the update transforms exactly like the gradient and the whole trajectory is
-gauge-covariant.  The same holds on the other factor with grad_A -> Q grad_A
-preconditioned on the left by L = E[grad_A grad_A^T].  Verified to 2.9e-13.
+Why the matrix version is exactly covariant.  For B (d_out x r) the second
+moment is contracted on the rank index, V = E[grad_B^T grad_B] (r x r), and the
+step is grad_B V^{-1/2}.  Under the gauge grad_B -> grad_B Q^T:
 
-So it is not the norm that decides, it is the STRUCTURE OF THE PRECONDITIONER:
+    V -> Q V Q^T,  V^{-1/2} -> Q V^{-1/2} Q^T,
+    step -> grad_B Q^T Q V^{-1/2} Q^T = (grad_B V^{-1/2}) Q^T,
 
-    none (SGD)          covariant
-    orthogonalised (Muon)   covariant
-    full-matrix (Shampoo, and this)  covariant
-    DIAGONAL (Adam)     not covariant
+which is the transformed step.  For A (r x d_in), U = E[grad_A grad_A^T] and the
+step is U^{-1/2} grad_A; under grad_A -> Q grad_A the same cancellation gives
+Q U^{-1/2} grad_A.  Exact, at every step, with momentum.
 
-The frame is visible exactly when the preconditioner is diagonal.  That also
-says what LoRA-RITE (ICLR 2025) is doing: it puts a transformation-invariant
-matrix preconditioner on the low-rank side, which is precisely the structure
-that removes the frame dependence.  Both preconditioners here are r x r, so
-this costs almost nothing at LoRA ranks.
+This is the structure LoRA-RITE (ICLR 2025) uses, so if the frame ladder comes
+out flat under this optimizer, our account says what LoRA-RITE's transformation
+invariance is buying: it removes a coordinate that Adam was responding to.
 """
 import torch
 
 
-def _inv_root(M, p=0.5, eps=1e-12):
-    w, V = torch.linalg.eigh(M.double())
-    w = w.clamp_min(eps * float(w.max()).__abs__() if float(w.max()) > 0 else eps)
-    return (V @ torch.diag(w.pow(-p)) @ V.T).to(M.dtype)
+@torch.no_grad()
+def _inv_sqrt(V, eps):
+    """V^{-1/2} for a symmetric PSD V, with an eigenvalue floor."""
+    lam, U = torch.linalg.eigh(V.double())
+    lam = lam.clamp_min(0)
+    floor = eps * float(lam.max()) if float(lam.max()) > 0 else eps
+    return (U * (lam + floor).rsqrt()) @ U.T
 
 
-class MatrixPrecond(torch.optim.Optimizer):
-    """Adam-style moments with a full r x r preconditioner instead of a
-    diagonal one, applied on whichever side is small.
+class MatPrecAdam(torch.optim.Optimizer):
+    """Adam whose second moment is a matrix on the short (rank) side.
 
-    Parameters that are not 2-D, or whose smaller dimension exceeds `max_side`,
-    fall back to plain momentum -- preconditioning them would need a matrix as
-    large as the layer.
+    Non-2-D parameters fall back to ordinary diagonal Adam, which is what the
+    reference low-rank optimizers do too; in the experiments here only the LoRA
+    factors are trainable, so every parameter takes the matrix path.
     """
 
-    def __init__(self, params, lr=1e-3, beta1=0.9, beta2=0.99, wd=0.0,
-                 eps=1e-12, max_side=256, update_every=1):
-        super().__init__(params, dict(lr=lr, beta1=beta1, beta2=beta2, wd=wd,
-                                      eps=eps, max_side=max_side,
-                                      update_every=update_every))
+    def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, wd=0.0):
+        super().__init__(params, dict(lr=lr, betas=betas, eps=eps, wd=wd))
 
     @torch.no_grad()
     def step(self, closure=None):
         loss = closure() if closure is not None else None
         for g in self.param_groups:
-            b1, b2 = g["beta1"], g["beta2"]
+            b1, b2 = g["betas"]
             for p in g["params"]:
                 if p.grad is None:
                     continue
                 d = p.grad
                 st = self.state[p]
-                st.setdefault("t", 0)
-                st["t"] += 1
-                if "m" not in st:
+                if not st:
+                    st["t"] = 0
                     st["m"] = torch.zeros_like(d)
+                    if d.ndim == 2:
+                        r = min(d.shape)
+                        st["V"] = torch.zeros(r, r, dtype=torch.float64,
+                                              device=d.device)
+                    else:
+                        st["v"] = torch.zeros_like(d)
+                st["t"] += 1
+                t = st["t"]
                 st["m"].mul_(b1).add_(d, alpha=1 - b1)
-                mhat = st["m"] / (1 - b1 ** st["t"])
-                if d.ndim == 2 and min(d.shape) <= g["max_side"]:
-                    right = d.shape[1] <= d.shape[0]     # precondition small side
-                    C = (d.T @ d) if right else (d @ d.T)
-                    if "C" not in st:
-                        st["C"] = torch.zeros_like(C)
-                    st["C"].mul_(b2).add_(C, alpha=1 - b2)
-                    Chat = st["C"] / (1 - b2 ** st["t"])
-                    n = Chat.shape[0]
-                    Chat = Chat + g["eps"] * float(torch.diagonal(Chat).mean()
-                                                   + 1e-30) * torch.eye(
-                        n, device=d.device, dtype=d.dtype)
-                    if st["t"] % g["update_every"] == 1 or "P" not in st \
-                            or g["update_every"] == 1:
-                        st["P"] = _inv_root(Chat, 0.5)
-                    u = (mhat @ st["P"]) if right else (st["P"] @ mhat)
+                mh = st["m"] / (1 - b1 ** t)
+                if d.ndim == 2:
+                    dd = d.double()
+                    # contract on the SHORT side: that is the rank index, and
+                    # the rank index is the one the gauge acts on
+                    tall = d.shape[0] >= d.shape[1]      # d_out x r  (B-like)
+                    M = (dd.T @ dd) if tall else (dd @ dd.T)
+                    st["V"].mul_(b2).add_(M, alpha=1 - b2)
+                    Vh = _inv_sqrt(st["V"] / (1 - b2 ** t), g["eps"])
+                    upd = (mh.double() @ Vh) if tall else (Vh @ mh.double())
+                    upd = upd.to(d.dtype)
                 else:
-                    u = mhat
+                    st["v"].mul_(b2).addcmul_(d, d, value=1 - b2)
+                    upd = mh / ((st["v"] / (1 - b2 ** t)).sqrt() + g["eps"])
                 if g["wd"]:
                     p.mul_(1 - g["lr"] * g["wd"])
-                p.add_(u, alpha=-g["lr"])
+                p.add_(upd, alpha=-g["lr"])
         return loss
