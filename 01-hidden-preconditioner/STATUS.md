@@ -1,3 +1,13 @@
+> **Superseded in part.** This file is the Stage-1 record (the audit of
+> published initializers). Stage 2 — the intrinsic state space — has since
+> falsified two of its conclusions; see `paper/NARRATIVE.md` §6 for the
+> corrected state. In particular *"effective rank is the second and only
+> other channel"* and *"method identity adds nothing after conditioning on
+> three statistics"* are no longer supported: an out-of-distribution test
+> on the same 13 initializers mispredicts their tuned loss by a systematic
+> +0.005 nats, and the residual points at a further coordinate,
+> `W = tr(AAᵀ)/tr(AΣAᵀ)`.
+
 # 01 — Hidden Preconditioner — STATUS
 
 Last update: 2026-09-02

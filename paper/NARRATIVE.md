@@ -1,220 +1,157 @@
-# Combined narrative: 01 + 02
+# Main line: the intrinsic state space of low-rank adaptation
 
-**Working title.** *The Coordinates Do the Work: Identifiability Limits of
-Low-Rank Adaptation Initialization*
+**Working title.** *What Are the Effective Degrees of Freedom of LoRA
+Initialisation?*
 
-**Status.** Draft narrative. Every number below is measured in this repository;
-provenance is given per claim. Open items are marked ▢.
+This is the current-state document. `01-.../STATUS.md` and `02-.../STATUS.md`
+hold the per-topic records; **where they disagree with this file, this file is
+right** — Stage 1 conclusions that Stage 2 has since falsified are listed in §6.
 
 ---
 
-## 1. The anomaly
+## 1. The question
 
-Normalized LoRA (NoRA, Kang et al. 2026 — the mother paper) reports that simply
-normalizing the columns of the down-projection `A` improves SFT by **+5.44
-average points** (37.93 → 43.37 on their GSM8K/MATH suite), fixes a pretraining
-collapse, and helps RL — with no extra parameters. Its stated mechanism: LoRA
-performs full fine-tuning under an implicit **input-side preconditioner**
+Low-rank adapters are initialised in an enormous parameter space, and a fast
+growing literature proposes increasingly different ways to choose that
+initialisation — random matrices, normalised frames, block-identity structures,
+and weight-, activation-, gradient- and curvature-aware subspaces. It is not
+clear whether these are genuinely distinct ways to begin adaptation, or
+different coordinate descriptions of a much smaller set of effective states.
 
-    ΔW = −η G P,      P = α² AᵀA,
+We do not compare methods. We **construct** initialisations at exactly specified
+locations in a candidate state space, map the response of a real transformer to
+that space, and then use the published initializers — which never touch the
+fitting — as an out-of-distribution test.
 
-and full fine-tuning corresponds to `P = I`; normalizing `A`'s columns sets
-`diag(P) = I`, "aligning the adapter's gradient norm with full finetuning,
-independent of rank r."
+## 2. The object
 
-That derivation is correct and the object it exposes is real. But `diag(P) = I`
-is only the *diagonal* of `P = I`. This paper asks what the rest of `P` does,
-and finds that the answer is sharply constrained by two exact symmetries.
+For a layer with input second moment `Σ = E[xxᵀ]`, the state is the rank-space
+Gram in the data metric,
 
-## 2. Two exact symmetries
+    M_x = A Σ Aᵀ  ∈ R^{r×r},        A ∈ R^{r×d} the down-projection.
 
-For a LoRA adapter `ΔW = s·B·A` with `B₀ = 0`:
+It is the right object because it respects both exact symmetries of the problem
+at once: under the adapter-factor gauge `A → QA` it conjugates,
+`M_x → Q M_x Qᵀ`, and under an exact backbone representation gauge
+(`x → Rx`, `A → ARᵀ`, `Σ → RΣRᵀ`) it is **unchanged**. So `spec(M_x)` does not
+depend on either coordinate system. `diag(AᵀA)` — the quantity the mother paper
+normalises — has no such status; it is a description in a particular chart.
 
-**(S1) Adapter-factor gauge.** `(A, B) → (QA, BQᵀ)` for `Q ∈ O(r)` leaves `ΔW`
-and `P₀` unchanged. Conversely, if `rank(A) = r`, then `A₁ᵀA₁ = A₂ᵀA₂` **iff**
-`A₂ = QA₁` for some `Q ∈ O(r)` (polar uniqueness). So the `O(r)` orbit is
-*exactly* the level set of `P₀`.
+Candidate coordinates, all measurable at initialisation from a few batches:
 
-**(S2) Backbone representation gauge.** For a residual-stream rotation
-`x' = Rx`, `W' = WRᵀ` the network computes the *same function*; coupling the
-adapter by `A' = ARᵀ`, `B' = B` represents the same adapter.
-
-**Theorem (verified).** Under plain SGD both couplings are preserved for **all
-time**, not just at step 1: `∇_{B'} = ∇_B` and `∇_{A'} = (∇_A)Rᵀ`. Hence
-
-> under SGD, the entire trajectory of the merged update depends on `A₀` only
-> through `P₀`. "Which initialization method" is **unidentifiable** given `P₀`.
-
-AdamW is equivariant under permutations and sign flips only, because `m/√v` is
-elementwise. It therefore *creates* a difference between members of the same
-equivalence class — a difference that carries, by construction, **zero
-preconditioner information**.
-
-**Measured on Qwen3-0.6B, fp32, 100 steps, identical minibatch order**
-(`01/results/sgdnull32`, `01/results/adamnull32`):
-
-| optimizer | final eval spread across identical-`P₀` initializations |
-|---|---|
-| SGD | **1.5e-6 nats** |
-| AdamW | **2.7e-4 nats** |
-
-Both are bit-identical at step 0. **2.7e-4 nats is the yardstick**: no claimed
-initialization effect below it can be attributed to the preconditioner.
-
-## 3. What survives the yardstick — the audit
-
-13 initializers re-implemented (`common/initializers.py`) and run as samples in
-`P`-space, per-method LR sweeps (7–9 rates), 3 seeds for the reference, 3 gauge
-draws for the null, three matching conventions, fp32 (so that every condition
-starts from a *bit-identical function*: `base_eval_loss = 0.82531` for all).
-
-**Qwen3-0.6B / GSM8K, matched `tr(PΣ)`, best-tuned loss** (`01/results/lit`):
-
-| | best loss |
-|---|---|
-| vanilla LoRA (kaiming) | 0.44270 |
-| `left_gauge` (identical `P₀`) — **the null** | 0.44292 |
-| NoRA (column normalization) | 0.44277 |
-| NoRA, literal unit columns | 0.44260 |
-| BIMI (NoRA's block-identity init) | ▢ 7B panel |
-| ETF / tight frame | 0.44283 |
-| exactly flat spectrum + flat diagonal | 0.44282 |
-| **cluster** | **mean 0.44277, sd 1.0e-4, range 3.3e-4** |
-
-At a *shared* learning rate the data-aware initializers look strongly better —
-at lr = 3e-5, act-PCA gives 0.4510 vs vanilla's 0.4620, a gain of 0.011 nats.
-Give each method its own learning rate and the sign reverses: vanilla reaches
-0.4432, act-PCA only 0.4508. The entire apparent gain is the 42–89× larger
-`tr(PΣ)` acting as a 6.5–9.4× effective learning-rate multiplier.
-
-The six data-agnostic `B₀ = 0` initializers span **3.3e-4 nats** — *inside* the
-2.7e-4 null. NoRA's diagonal balancing, ETF/frame optimization, unit column
-norms, exact diagonal flattening at matched spectrum, and a perfectly flat
-spectrum are **mutually unidentifiable**.
-
-At the published scale, after per-method LR tuning, no initializer beats vanilla
-LoRA on this task (all in 0.4495–0.4535 vs 0.4428).
-
-## 4. What does matter: two channels, both measurable at initialization
-
-**(C1) Scale in the data metric.** `P` acts on data, so the size of the function
-change is set not by `tr P` but by `tr(P Σ_x)`. At matched `tr P`,
-EVA carries **54×**, the gradient subspace **42×**, LoRA-One **89×** the
-activation-weighted trace of a vanilla draw. This channel is *exactly equivalent
-to a learning-rate change*: matching `tr(PΣ)` instead of `tr P` moves them onto
-the vanilla curve (EVA 0.45104 → 0.44618, gradsub 0.45175 → 0.44503).
-Across all `B₀=0` methods, `loss vs log tr(PΣ)`: **r = +0.973**.
-
-**(C2) Effective rank, in the metric that acts.** At matched scale the only
-remaining feature is `r_eff(P) = (tr P)²/‖P‖_F²`, or its data-metric version
-`r_eff^Σ = (tr AΣAᵀ)²/‖AΣAᵀ‖_F²`. It has an exact first-order law:
-
-    cos(G, GP) = √( r_eff(P) / d_in )
-
-verified on real Qwen3 gradients to **2.5% CV over an 8.6× range of r_eff**.
-On a ladder with *exactly matched trace, exactly flat diagonal, identical rank
-and identical crosstalk magnitude*, sweeping `r_eff` 16 → 1.86 gives a monotone
-penalty at every learning rate, `loss vs 1/√r_eff`: **r = +0.947** (raw) and
-**+0.996** in the `tr(PΣ)`-matched frame.
-
-**Does method identity add anything?** Leave-one-out test
-(`01/src/predict_loo.py`): fit
-
-    loss ≈ a + b/√r_eff^Σ + c·log tr(PΣ) + d·1[‖B₀‖>0]
-
-on 12 of the 13 initializers and predict the 13th. **LOO rms = 9.6e-4 nats,
-R² = 0.957**, against a between-method spread of 1.42e-2 and a "predict the
-mean" baseline of 4.6e-3. The six data-agnostic methods are each predicted to
-within ±1.9 gauge nulls. Three numbers measured at initialisation, with four
-free parameters, therefore recover almost everything the method label could
-have told us.
-
-**(C3) `B₀ ≠ 0` is the only structural escape.** PiSSA, OLoRA and LoRA-One leave
-the `P₀` class because `∇_A = s BᵀG ≠ 0` at step one. Across all 13 methods,
-`‖B₀‖ > 0` predicts the residual at r = +0.85.
-
-**Why NoRA targets the inert coordinate.** NoRA's goal — make `P` look like `I`
-— is right. But `P = I` has `diag(P) = I` *and* `r_eff = d_in`. Column
-normalization achieves the first exactly and cannot touch the second: at rank r,
-`r_eff(P) ≤ r ≪ d_in`. The audit says the first is inert and the second is what
-carries signal. NoRA's own BIMI control is explained by the same fact: BIMI has
-a flat spectrum and a flat diagonal, i.e. it is the *same point* as
-random+normalization in `(spectrum, diagonal)` coordinates — only the crosstalk
-*pattern* differs, and Gate 0 shows the crosstalk *magnitude* is not a free
-parameter at all (`c(P) ∈ [√(1−r/d_in), 1]` = [0.991, 1] at r=16).
-
-## 5. The other gauge: the coordinates of the backbone
-
-(S2) is a *function-preserving* intervention, verified in fp32 to **5e-6
-relative logit error at 0.6B and 2.7e-7 nats at 7B** (Mistral-7B-v0.3). We build
-a **dose ladder** in how many coordinates a rotation mixes —
-`none → perm(1) → block4 → block16 → block64 → block256 → rand/hadamard(1024)` —
-where `perm` is an exact **zero-dose control** (AdamW is covariant under
-permutations).
-
-**Qwen3-0.6B / NuminaMath, 7-point LR sweeps, 2 seeds** (`02/results/edge`):
-
-| gauge | mixed coords | FullFT+AdamW | FullFT+SGD |
-|---|---|---|---|
-| none | 1 | 0.49340 | 0.49944 |
-| block64 | 64 | +0.00050 | +0.00010 |
-| rand | 1024 | +0.00196 | +0.00001 |
-| hadamard | 1024 | **+0.00229** | **−0.00005** |
-
-**SGD is exactly flat** across the whole ladder — the positive control. AdamW is
-monotone in the dose.
-
-**Mechanism, with a quantitative predictor.** AdamW's second moment is a
-*diagonal* model of gradient scale, useful only insofar as coordinate-wise
-scales are heterogeneous. Measuring the participation ratio of per-coordinate
-gradient energy `PR = (ΣE_j)²/(d·ΣE_j²)`: the pretrained basis has
-**PR = 0.025** (energy in 2.5% of coordinates — the outlier-feature structure),
-a permutation leaves it *bit-identical*, and the ladder raises it to 0.73.
-Penalty vs PR: **Pearson r = +0.98** (FullFT), and the ordering is predicted
-correctly *including the non-trivial tie-break* — Hadamard homogenizes more than
-a random rotation (0.73 vs 0.48) and costs more, though both mix all 1024 coords.
-
-**Consequence.** Adam's advantage over SGD is partly a property of the
-coordinate system rather than of the model:
-
-| gauge | PR | Adam's edge over SGD (FullFT) |
+| | definition | meaning |
 |---|---|---|
-| none | 0.025 | +0.00604 |
-| block64 | 0.076 | +0.00565 (−6%) |
-| rand | 0.476 | +0.00409 (−32%) |
-| hadamard | 0.727 | **+0.00370 (−39%)** |
+| `S` | `tr M_x` | data-space scale |
+| `D` | `(tr M_x)²/‖M_x‖_F²` | intrinsic spectral dimension, in [1, r] |
+| `R_g` | `tr(A C_g Aᵀ)/tr(A Σ Aᵀ)` | first-order descent per unit scale |
+| `W` | `tr(AAᵀ)/tr(A Σ Aᵀ)` | **parameter** metric ÷ **data** metric |
 
-LoRA is markedly *less* gauge-sensitive than full fine-tuning, so PEFT does not
-carry excess coordinate dependence — it partially shields it.
+`R_g` is the quantity that actually enters `⟨G, GP⟩`: writing `A Σ^{1/2} =
+Λ^{1/2}Vᵀ`, `tr(A C_g Aᵀ) = tr(Λ Vᵀ T V)` with `T = Σ^{-1/2}C_gΣ^{-1/2}` — the
+row-space alignment **weighted by the intrinsic spectrum**.
 
-## 6. Positioning against the closest work
+`W` has a direct reading: with adapter energy `a_i²` on the eigendirections of
+`Σ`, `W = 1 / Σ_i (a_i²/Σa²)λ_i`, the reciprocal of the adapter-energy-weighted
+activation variance. Large `W` means the adapter must put a lot of parameter
+norm into low-variance directions to achieve a given function-space effect.
+Since AdamW's step lives in the parameter metric and the function lives in the
+data metric, `W` measures a mismatch between the two — which is also what links
+this topic to the representation-gauge result.
+
+## 3. What the atlas has established
+
+**Wave 1** — 18 designed points spanning 300× in `S`, 8× in `D` and 230× in an
+alignment statistic, 7 learning rates each (`results/atlas`).
+
+* **`S` is the learning-rate coordinate.** Leave-one-out on the atlas alone:
+  `log η*` from `S` alone reaches R² = 0.74, and no other candidate improves it.
+* **The tuned loss is nearly flat across the whole space** — 0.0059 nats total,
+  against a 2.7e-4 measurement null.
+* **Master curve.** Rescaling `η → η·S^0.41` (first-order theory says ½)
+  tightens the spread of the optimum from 1.63× to **1.23×**, which is the
+  resolution of the learning-rate grid itself.
+
+**The out-of-distribution test** — 13 published initializers, located in the
+same coordinates without training and never used to fit (`results/ood`,
+`results/intrinsic_table.json`):
+
+* **Learning rate: predicted.** Median error **1.37×** against a grid spaced
+  1.7×. A law derived only from synthetic constructions predicts where an unseen
+  published initializer's optimum sits, across a 300× range of `S`.
+* **Tuned loss: systematically mispredicted.** 12/13 residuals positive, mean
+  +0.005 nats.
+
+**The failure diagnosed itself.** Wave 1 occupies `W/W_vanilla ∈ [27, 42]`;
+every published initializer sits in `[0.018, 1.0]` — disjoint. The residual
+correlates with `log W` at **r = −0.79**. The atlas had a coordinate it did not
+span, and the OOD test found it.
+
+## 4. What is running
+
+* **Wave 2** — a discovery sweep of `W` via `A = Ã Σ^{-q}`. Honest about what it
+  is: it fixes `S` but lets `D` and the row space drift, because
+  `M_x = Ã Σ^{1-2q} Ãᵀ`. Not a causal test.
+* **Wave 3** — the *exact* ladder. `M_x = Λ` identically, so `S` and `D` cannot
+  move; a Stiefel-manifold solve drives `W` to target while holding `R_g` at the
+  vanilla value. Verified on the model: `S_rel = 1.000`, `D = D_ref`,
+  `R_g/R_g₀ = 1.00`, `W/W₀ = 3.44`. Its `W/W₀ = 1` rung reproduces the vanilla
+  draw in **all four** coordinates and is the sufficiency test.
+* **`R_g` recomputed offline** for every cached atlas point, to check whether
+  wave 1's alignment null was a property of task alignment or only of the
+  unweighted statistic that was swept.
+
+## 5. Scale: a training-free prediction, measured through 8B
+
+`paper/scaling_predictor.py`, forward+backward only, Qwen3 0.6B→8B:
+
+| model | d | gradient-energy PR | Σ participation | `tr(PΣ)` top-r / random |
+|---|---|---|---|---|
+| 0.6B | 1024 | 0.0290 | 0.00684 | 20.8× |
+| 1.7B | 2048 | 0.0273 | 0.00312 | 45.2× |
+| 4B | 2560 | 0.0164 | 0.00210 | 48.0× |
+| 8B | 4096 | **0.0056** | **0.00126** | **87.8×** |
+
+Both mechanisms' headroom **grows with scale**: the pretrained gradient
+coordinates concentrate 5.2× further, and the data-metric amplification a
+data-aware subspace can buy grows 4.2×. This is a prediction made before any
+large-model training, and it is what makes a sparse 8B run informative rather
+than a repeat.
+
+## 6. Stage-1 statements that Stage 2 has falsified
+
+| earlier claim | status |
+|---|---|
+| "the second and only other channel is effective rank" | **false** — at least `W` is a further coordinate, and `D`'s effect is weaker than Stage 1 suggested |
+| "method identity adds nothing after conditioning on three statistics" | **false** — the OOD test mispredicts tuned loss by +0.005 nats systematically |
+| "task alignment is not an independent axis" | **not established** — the statistic swept was unweighted; the correct `R_g` has not been tested |
+| "`tr P` is not causal" | **too strong** — `tr P` is not a universal one-dimensional scale, but `tr P / tr(PΣ)` may be an independent coordinate |
+| "the gauge effect's headroom is roughly scale-invariant" | **false** — based on 0.6B/1.7B only; 4B and 8B show PR falling 5.2× |
+
+## 7. Current confidence
+
+    S    confirmed strong coordinate; predicts the LR of unseen methods
+    D    confirmed but weak
+    R_g  correct statistic now defined; untested
+    W    strong candidate found by OOD failure; causal ladder in flight
+    B0≠0 leaves the equivalence class, not yet folded into the state
+
+## 8. Positioning
 
 | work | what it owns | what remains ours |
 |---|---|---|
-| **NoRA** (mother paper, 2026) | `P = α²AᵀA`; `diag(P)=I` normalization; BIMI; NoRA-init | that `diag(P)` is the inert coordinate of `P`, and which coordinates are not |
-| **"The Loss Does Not See the Basis, but Adam Does"** (2608.05136) | classification of optimizers by equivariance under the *factor* gauge `(U,V)→(UQ,VQ)`; matrix sensing, 2-layer transformers, hyperspectral | the **LoRA identifiability statement** (`P₀` is the *complete* invariant, so the design space of `B₀=0` initializers is `{P ⪰ 0, rank ≤ r}`), the audit of the real initialization literature at LLM scale, and the two channels |
-| **"Understanding Adam Requires Better Rotation Dependent Assumptions"** (NeurIPS 2025) | parameter-space rotations degrade Adam in pretraining (GPT-2, ViT) | rotations that preserve the *network function exactly* and keep every weight matrix a weight matrix; a dose ladder with a permutation zero-dose control; a quantitative predictor (PR, r=+0.98); the fine-tuning/PEFT setting; the Adam-vs-SGD edge decomposition |
-| **"Learning Rate Matters: Vanilla LoRA May Suffice"** (2602.04998) | 9 LoRA variants collapse to within 1–2% after LR tuning (GLUE) | the *mechanism* that predicts the required LR shift (`tr(PΣ)`), and a **provable** null that says the residual is unmeasurable in principle rather than merely small |
-| **LoRA-DA / EVA / LoRA-One** | data-aware subspace selection | their gain is a `tr(PΣ)` amplification; after matching it, what remains is `r_eff^Σ` |
+| **NoRA** (mother paper) | `P = α²AᵀA`; `diag(P)=I` normalisation; BIMI; NoRA-init | that `diag(P)` is a chart-dependent description, and what the chart-free coordinates are |
+| *The Loss Does Not See the Basis, but Adam Does* (2608.05136) | optimizer equivariance under the **factor** gauge, on matrix sensing and small transformers | the LoRA state space, its coordinates, and prediction of unseen initializers at LLM scale |
+| *Understanding Adam Requires Better Rotation Dependent Assumptions* (NeurIPS 2025) | parameter-space rotations degrade Adam in pretraining | rotations that preserve the network function exactly; a dose ladder with a permutation zero-dose control; a quantitative predictor |
+| *Learning Rate Matters* (2602.04998) | 9 LoRA variants collapse after LR tuning (GLUE) | the coordinate that *predicts* the required LR shift, tested out of sample |
+| *LoRA-S* (ICLR 2026), *Balanced LoRA* (ICML 2026) | quotient/Stiefel geometry of the adapter factors; balancedness | the **data-metric** state and its response surface, not a new optimizer |
+| *GIDA / RaLoRA* (ICLR 2026) | matching LoRA rank to gradient intrinsic dimension | at **fixed nominal rank**, the initialisation-induced spectrum shape as an independent coordinate |
 
-## 7. Experimental scope (target = ICML)
+## 9. Compute plan
 
-| axis | mother paper (NoRA) | this work |
-|---|---|---|
-| models | 342M pretrain, 3B SFT, 1.5B RL | 0.6B (Qwen3) + **7B (Mistral-7B-v0.3)** ▢ |
-| tasks | MetaMath, CodeFeedback | GSM8K, NuminaMath, Dolly, **MetaMath** ▢ |
-| metrics | benchmark accuracy | held-out loss **and** GSM8K exact-match ▢ |
-| initializers | 9 baselines | **13** incl. BIMI, plus 6 exact synthetic controls |
-| LR protocol | tuned per method | swept per method (5–9 rates), reported in full |
-| seeds | 1 (seed 42) | 3 for the reference and the null |
-| null condition | — | `left_gauge`, provably content-free |
-
-## 8. Open items
-
-▢ 7B panels running: `01/results/m7b` (75 runs, MetaMath, r=32, GSM8K accuracy),
-  `02/results/dose7b` (24 runs, fp32 gauge ladder).
-▢ BIMI in the audit at 0.6B (implemented, not yet swept).
-▢ A code task (CodeFeedback → HumanEval) for a non-math, non-chat third domain.
-▢ FullFT at 7B for the gauge ladder (needs 2-GPU sharding).
-▢ The prescription test: does vanilla LoRA at `lr·√(tr(PΣ) ratio)` reproduce a
-  data-aware initializer's entire loss curve, or only its optimum?
+    0.6B   discovery microscope: the atlas, all controls, all ladders
+    1.7B   law selection: a handful of designed points to check the law is not
+           a finite-width accident
+    8B     prospective falsification only: measure (S, D, R_g, W) on a couple of
+           batches, predict lr* and the ordering, then train the predicted
+           points and a neighbour.  Model scale is an out-of-distribution axis,
+           not another grid dimension.
