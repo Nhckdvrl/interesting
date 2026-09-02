@@ -1,12 +1,30 @@
 > **Superseded in part.** This file is the Stage-1 record (the audit of
-> published initializers). Stage 2 — the intrinsic state space — has since
-> falsified two of its conclusions; see `paper/NARRATIVE.md` §6 for the
-> corrected state. In particular *"effective rank is the second and only
-> other channel"* and *"method identity adds nothing after conditioning on
-> three statistics"* are no longer supported: an out-of-distribution test
-> on the same 13 initializers mispredicts their tuned loss by a systematic
-> +0.005 nats, and the residual points at a further coordinate,
-> `W = tr(AAᵀ)/tr(AΣAᵀ)`.
+> published initializers). Stage 2 found what Stage 1 was missing, and it is
+> not another invariant: it is the **gauge frame**. See `paper/NARRATIVE.md`
+> for the current main line and `paper/POSITION.md` for how it sits against
+> LoRA-RITE, Balanced LoRA and FedRot-LoRA.
+>
+> Two Stage-1 conclusions are falsified. *"Effective rank is the second and
+> only other channel"* and *"method identity adds nothing after conditioning
+> on three statistics"* are not supported: an out-of-distribution test on the
+> same 13 initializers mispredicts their tuned loss systematically, and the
+> residual points past every invariant.
+>
+> The reason the Stage-1 audit found the NoRA family mutually
+> indistinguishable is now understood rather than merely reported. Those
+> conditions differ in statistics of `P` but sit at the **same frame** as the
+> vanilla draw (`Lambda_1` 0.357-0.366 against Kaiming's 0.366), and the frame
+> is the coordinate AdamW actually responds to. The audit's null result was
+> correct and its interpretation was incomplete.
+>
+> Superseding measurements, all in `results/`:
+>
+> | claim | evidence |
+> |---|---|
+> | SGD cannot see the gauge at all | `results/frame`, spread 0.00001 nats over a 2.9x `Lambda_1` ladder |
+> | AdamW can, monotonically at every learning rate | same panel, tuned spread 0.00222 nats = 8.2x the null |
+> | the published zoo varies the frame 4.3x, unreported | `results/second_order.json`, no training |
+> | rotating vanilla Kaiming to the gradient-metric eigenframe helps for free | 0.44551 -> 0.44329, `B A` and `P` preserved to 1e-15 |
 
 # 01 — Hidden Preconditioner — STATUS
 
