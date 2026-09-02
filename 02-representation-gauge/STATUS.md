@@ -43,7 +43,9 @@ permutations and sign flips because `m/√v` is elementwise. SGD (with momentum)
 decoupled weight decay and global-norm clipping are covariant under **all**
 rungs, so every SGD row is a full positive control.
 
-Best-tuned loss (per-rung LR sweep), Qwen3-0.6B-Base / NuminaMath / 500 steps:
+Best-tuned loss (per-rung LR sweep), Qwen3-0.6B-Base / NuminaMath / 500 steps.
+
+**Full 8-rung ladder, 3 LRs per cell** (`results/dose`, 96 runs):
 
 | gauge | mixed coords | FullFT+AdamW | LoRA+AdamW | LoRA+SGD |
 |---|---|---|---|---|
@@ -55,6 +57,25 @@ Best-tuned loss (per-rung LR sweep), Qwen3-0.6B-Base / NuminaMath / 500 steps:
 | block256 | 256 | +0.00065 | +0.00042 | −0.00015 |
 | rand | 1024 | +0.00149 | +0.00028 | +0.00007 |
 | hadamard | 1024 | **+0.00174** | +0.00110 | −0.00016 |
+
+**Dense 7-point LR sweeps × 2 seeds, complete 2×2** (`results/edge`, 224 runs):
+
+| gauge | PR | FullFT+AdamW | FullFT+SGD | LoRA+AdamW | LoRA+SGD |
+|---|---|---|---|---|---|
+| none | 0.0252 | 0.49340 | 0.49944 | 0.49309 | 0.49832 |
+| block64 | 0.0759 | +0.00050 | +0.00010 | +0.00010 | −0.00021 |
+| rand | 0.4763 | +0.00196 | +0.00001 | +0.00054 | +0.00001 |
+| hadamard | 0.7265 | **+0.00229** | **−0.00005** | **+0.00051** | **−0.00022** |
+
+Both SGD columns are flat to ±2e-4 with no trend; both AdamW columns rise
+monotonically with the dose. Adam's advantage over SGD:
+
+| gauge | PR | FullFT | LoRA |
+|---|---|---|---|
+| none | 0.025 | +0.00604 | +0.00523 |
+| block64 | 0.076 | +0.00565 (−7%) | +0.00492 (−6%) |
+| rand | 0.476 | +0.00409 (−32%) | +0.00471 (−10%) |
+| hadamard | 0.727 | **+0.00370 (−39%)** | **+0.00450 (−14%)** |
 
 ### Mechanism (`src/diag_dominance.py`)
 
@@ -111,10 +132,13 @@ identical at step 0 to 8 digits and drifts only to 2.7e-5 nats of eval loss afte
 2. **AdamW is not**, and the violation is a clean, monotone dose–response in the
    amount of coordinate mixing, with an exact zero-dose control.
 3. **The mechanism is identified and predictive**, not merely descriptive.
-4. **PEFT does not carry excess gauge sensitivity — it carries less.** FullFT is
-   ~1.6× more gauge-sensitive than LoRA at the tuned optimum (and 2× at fixed
-   LR). This falsifies the project's originally preferred Branch A and moves it
-   to Branch B, with the sign reversed from the natural guess.
+4. **PEFT does not carry excess gauge sensitivity — it carries less.** With the
+   complete 2×2 at dense LR resolution, FullFT loses 4.5× more to a Hadamard
+   gauge than LoRA (+0.00229 vs +0.00051) and loses 2.8× more of its Adam
+   advantage (−39% vs −14%). This falsifies the project's originally preferred
+   Branch A and moves it to Branch B, with the sign reversed from the natural
+   guess: the low-rank constraint partially *shields* the optimizer from the
+   coordinate system.
 5. **NoRA's non-commutation is a mathematical fact with no measurable
    consequence** — the effect is below the fp32 roundoff floor under SGD, and no
    larger than the plain-LoRA baseline under AdamW.
@@ -144,13 +168,16 @@ benchmark catastrophe.
 * Whether an *optimised* gauge (rather than a random one) can beat the
   pretrained basis, i.e. whether coordinate choice is an exploitable design axis
   rather than only a source of degradation.
-* Whether Adam's advantage over SGD shrinks in a homogenised basis (the FullFT
-  +SGD rows of the dose panel bear on this directly).
+* ~~Whether Adam's advantage over SGD shrinks in a homogenised basis~~ —
+  **answered**: it does, by 39% (FullFT) and 14% (LoRA), monotonically in the
+  participation ratio, while SGD itself is unchanged.
 
 ## Next experiments
 
-1. Scale check: repeat the ladder on Qwen3-1.7B-Base at 3 rungs
-   (`none`, `block64`, `hadamard`), and at 3× training length.
+1. **Scale.** The exact residual-stream gauge is already verified at 7B in fp32
+   (Mistral-7B-v0.3: all five gauges within 2.7e-7 nats of the untransformed
+   model), so the machinery is ready. The right backbone to scale on is
+   **Qwen3-8B** — hidden_size 4096 is a power of two, which the Hadamard rung
+   requires, and Qwen2.5-7B's 3584 is not.
 2. Gauge seeds 1–2 on every rung for error bars.
-3. Adam-vs-SGD advantage as a function of PR — the "privileged basis" claim in
-   its sharpest form.
+3. Whether the penalty grows with training length as well as with scale.

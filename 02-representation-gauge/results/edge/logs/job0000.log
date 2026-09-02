@@ -1,17 +1,15 @@
-# fvcrc20:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/02-representation-gauge/src/run_dose.py --tag edge --method full --optimizer adamw --lr 3e-07 --gauge none --gauge_seed 0 --seed 0 --steps 500
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/02-representation-gauge/src/run_dose.py --tag edge --method lora --optimizer sgd --lr 0.5 --gauge rand --gauge_seed 0 --seed 1 --steps 500
 
-Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
-Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
     step 0/500 loss=0.6461 (1s)
-    step 50/500 loss=0.3623 (34s)
-    step 100/500 loss=0.6528 (73s)
-    step 150/500 loss=0.4087 (113s)
-    step 200/500 loss=0.4017 (153s)
-    step 250/500 loss=0.4515 (194s)
-    step 300/500 loss=0.5312 (234s)
-    step 350/500 loss=0.5204 (274s)
-    step 400/500 loss=0.4675 (315s)
-    step 450/500 loss=0.6011 (355s)
-    step 499/500 loss=0.6376 (395s)
-[full_adamw_noneg0_lr3e-07_s0] base=0.553113 final=0.504707 (402s)
+    step 50/500 loss=7.4527 (30s)
+    step 100/500 loss=6.3246 (66s)
+    step 150/500 loss=5.7526 (102s)
+    step 200/500 loss=6.1951 (138s)
+    step 250/500 loss=5.6437 (174s)
+    step 300/500 loss=5.6802 (211s)
+    step 350/500 loss=5.3426 (247s)
+    step 400/500 loss=5.3865 (283s)
+    step 450/500 loss=5.4054 (319s)
+    step 499/500 loss=5.4462 (355s)
+[lora_sgd_randg0_lr0.5_s1] base=0.553113 final=5.235282 (362s)

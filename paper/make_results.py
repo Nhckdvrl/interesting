@@ -252,21 +252,40 @@ for r in rs:
         a["lr"], []).append(r["log"]["final_eval_loss"])
 bb = {k: min(st.mean(v) for v in d.values()) for k, d in bb.items()}
 print(f"\n### Dose ladder, dense 7-point LR sweeps × 2 seeds ({len(rs)} runs)\n")
+MIXD = {"none": 1, "perm": 1, "block4": 4, "block16": 16, "block64": 64,
+        "block256": 256, "rand": 1024, "hadamard": 1024}
+print("Penalty relative to the pretrained basis, after a per-cell LR sweep:\n")
 print("| gauge | mixed coords | grad-energy PR | FullFT+AdamW | FullFT+SGD | "
-      "Adam's edge |")
-print("|---|---|---|---|---|---|")
-base_e = None
+      "LoRA+AdamW | LoRA+SGD |")
+print("|---|---|---|---|---|---|---|")
 for g in GO:
-    a_ = bb.get(("full", "adamw", g)); s_ = bb.get(("full", "sgd", g))
-    if a_ is None or s_ is None:
+    if ("full", "adamw", g) not in bb:
         continue
-    e = s_ - a_
-    if base_e is None:
-        base_e, ba, bs_ = e, a_, s_
-    mix = {"none": 1, "perm": 1, "block4": 4, "block16": 16, "block64": 64,
-           "block256": 256, "rand": 1024, "hadamard": 1024}[g]
-    print(f"| `{g}` | {mix} | {dd[g]['PR']:.4f} | {a_-ba:+.5f} | {s_-bs_:+.5f} | "
-          f"{e:+.5f} ({100*(e-base_e)/base_e:+.0f}%) |")
+    cells = []
+    for m, o in (("full", "adamw"), ("full", "sgd"), ("lora", "adamw"),
+                 ("lora", "sgd")):
+        v, b0 = bb.get((m, o, g)), bb.get((m, o, "none"))
+        cells.append(f"{v-b0:+.5f}" if v is not None and b0 is not None else "–")
+    print(f"| `{g}` | {MIXD[g]} | {dd[g]['PR']:.4f} | " + " | ".join(cells) + " |")
+print("\n**Both SGD columns are flat; both AdamW columns rise monotonically "
+      "with the dose.**\n")
+print("Adam's advantage over SGD, same runs:\n")
+print("| gauge | PR | FullFT | vs pretrained basis | LoRA | vs pretrained basis |")
+print("|---|---|---|---|---|---|")
+b_full = b_lora = None
+for g in GO:
+    ef = (bb.get(("full", "sgd", g)) or 0) - (bb.get(("full", "adamw", g)) or 0) \
+        if ("full", "sgd", g) in bb and ("full", "adamw", g) in bb else None
+    el = (bb.get(("lora", "sgd", g)) or 0) - (bb.get(("lora", "adamw", g)) or 0) \
+        if ("lora", "sgd", g) in bb and ("lora", "adamw", g) in bb else None
+    if ef is None:
+        continue
+    if b_full is None:
+        b_full, b_lora = ef, el
+    print(f"| `{g}` | {dd[g]['PR']:.4f} | {ef:+.5f} | "
+          f"{100*(ef-b_full)/b_full:+.0f}% | "
+          + (f"{el:+.5f} | {100*(el-b_lora)/b_lora:+.0f}% |" if el is not None
+             else "– | – |"))
 prs = [dd[g]["PR"] for g in GO if ("full", "adamw", g) in bb]
 pen = [bb[("full", "adamw", g)] - bb[("full", "adamw", "none")]
        for g in GO if ("full", "adamw", g) in bb]

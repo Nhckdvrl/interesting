@@ -28,6 +28,10 @@ if __name__ == "__main__":
     ap.add_argument("--gauges", default="none,block64,hadamard,rand")
     ap.add_argument("--methods", default="full,lora")
     ap.add_argument("--seeds", default="0,1")
+    ap.add_argument("--reverse", action="store_true",
+                    help="walk the job list backwards, so a second scheduler "
+                         "can drain the same queue from the other end without "
+                         "colliding with the first")
     ap.add_argument("--dry", action="store_true")
     a = ap.parse_args()
     jobs = []
@@ -40,6 +44,8 @@ if __name__ == "__main__":
                             f"{{PY}} {RUN} --tag {a.tag} --method {meth} "
                             f"--optimizer {opt} --lr {lr:g} --gauge {gauge} "
                             f"--gauge_seed 0 --seed {sd} --steps {a.steps}")
+    if a.reverse:
+        jobs = jobs[::-1]
     print(f"{len(jobs)} jobs")
     cluster.main(jobs, a.tag,
                  f"{REPO}/02-representation-gauge/results/{a.tag}/logs",

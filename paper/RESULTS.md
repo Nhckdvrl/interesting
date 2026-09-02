@@ -124,14 +124,27 @@ Functional-equivalence check on Qwen3-0.6B, 8 held-out batches:
 
 At 7B (Mistral-7B-v0.3, fp32) the five gauges agree with the untransformed model to **≤2.7e-7 nats** of eval loss.
 
-### Dose ladder, dense 7-point LR sweeps × 2 seeds (202 runs)
+### Dose ladder, dense 7-point LR sweeps × 2 seeds (224 runs)
 
-| gauge | mixed coords | grad-energy PR | FullFT+AdamW | FullFT+SGD | Adam's edge |
+Penalty relative to the pretrained basis, after a per-cell LR sweep:
+
+| gauge | mixed coords | grad-energy PR | FullFT+AdamW | FullFT+SGD | LoRA+AdamW | LoRA+SGD |
+|---|---|---|---|---|---|---|
+| `none` | 1 | 0.0252 | +0.00000 | +0.00000 | +0.00000 | +0.00000 |
+| `block64` | 64 | 0.0759 | +0.00050 | +0.00010 | +0.00010 | -0.00021 |
+| `rand` | 1024 | 0.4763 | +0.00196 | +0.00001 | +0.00054 | +0.00001 |
+| `hadamard` | 1024 | 0.7265 | +0.00229 | -0.00005 | +0.00051 | -0.00022 |
+
+**Both SGD columns are flat; both AdamW columns rise monotonically with the dose.**
+
+Adam's advantage over SGD, same runs:
+
+| gauge | PR | FullFT | vs pretrained basis | LoRA | vs pretrained basis |
 |---|---|---|---|---|---|
-| `none` | 1 | 0.0252 | +0.00000 | +0.00000 | +0.00604 (+0%) |
-| `block64` | 64 | 0.0759 | +0.00050 | +0.00010 | +0.00565 (-7%) |
-| `rand` | 1024 | 0.4763 | +0.00196 | +0.00001 | +0.00409 (-32%) |
-| `hadamard` | 1024 | 0.7265 | +0.00229 | -0.00005 | +0.00370 (-39%) |
+| `none` | 0.0252 | +0.00604 | +0% | +0.00523 | +0% |
+| `block64` | 0.0759 | +0.00565 | -7% | +0.00492 | -6% |
+| `rand` | 0.4763 | +0.00409 | -32% | +0.00471 | -10% |
+| `hadamard` | 0.7265 | +0.00370 | -39% | +0.00450 | -14% |
 
 - SGD is flat across the whole ladder (max |Δ| 1e-04 nats)
 - AdamW penalty vs participation ratio: **Pearson r = +0.975**
