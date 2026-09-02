@@ -56,11 +56,13 @@ literature is already setting it -- by accident.
    comparisons between these methods are partly comparisons of an unreported
    coordinate.
 
-4. **A free win.** Rotating an existing initialiser preserves `B A` to 1e-15,
-   `P = s^2 A^T A` to 1e-15, and every invariant of the triple exactly: it is
-   the same initialiser in different coordinates by every definition those
-   papers use. If it trains better, the gain costs nothing -- no parameters, no
-   optimizer state, no extra step.
+4. **A cheap win, and a cheap one specifically.** Rotating an existing
+   initialiser preserves `B A` to 1e-15, `P = s^2 A^T A` to 1e-15, and every
+   invariant of the triple exactly: it is the same initialiser in different
+   coordinates by every definition those papers use. It adds no parameters and
+   no optimizer state. It does need one probe gradient -- but that is strictly
+   less than EVA, PiSSA, gradient-subspace or LoRA-One already spend, and it
+   buys `r(r-1)/2` numbers rather than an `r x d_in` subspace.
 
 ## The relationship to LoRA-RITE is synthesis, not competition
 

@@ -32,7 +32,9 @@
 > frame-based methods spread it -- and no paper reports it. The frame moves a
 > single method by **2.5x the median gap between adjacent methods in their own
 > ranking**. Rotating any of six published initializers to the gradient-metric
-> eigenframe helps or is neutral **6 of 6**, at zero cost: the initial
+> eigenframe helps or is neutral **6 of 6**, for the price of one probe
+> gradient -- less information than EVA, PiSSA, gradient-subspace or LoRA-One
+> already require, used to choose a *frame* rather than a subspace. The initial
 > function, the preconditioner and all nine invariants are preserved to 1e-15.
 
 ## 1. The question
@@ -145,8 +147,16 @@ Tuned spread **0.00222 nats = 8.2x the measurement null**, against SGD's
 0.00001. **The same intervention costs 222x more under AdamW than under SGD.**
 
 Rotating the vanilla Kaiming draw to the gradient-metric eigenframe improves it
-from 0.44551 to 0.44329 -- free, no parameters, no optimizer state, `BA` and
-`P` preserved to 1e-15.
+from 0.44551 to 0.44329, with `BA` and `P` preserved to 1e-15 and no parameters
+or optimizer state added.
+
+**What it costs.** The eigenframe of `M_g` needs `G`, so this is not literally
+free: it costs one probe forward+backward, the same measurement EVA, PiSSA,
+gradient-subspace and LoRA-One already take. The difference is what the
+measurement is spent on. Those methods use it to choose a rank-`r` *subspace*
+of a `d_in`-dimensional space; we use it to choose a frame within a subspace
+already fixed -- `r(r-1)/2` numbers instead of `r d_in` -- and the frame is
+worth 2.5x the median gap between their published results.
 
 ### How big is this, next to what those papers compare?
 
