@@ -58,11 +58,21 @@ def msign(M, steps=5, eps=1e-7, dtype=torch.float32):
 
 
 class Muon(torch.optim.Optimizer):
-    """Muon on 2-D parameters, AdamW on everything else.
+    """Muon on every 2-D parameter, plain momentum on the rest.
 
-    Matches the reference in the parts that matter here: heavy-ball momentum
-    with optional Nesterov, orthogonalised update, and the sqrt(max(1, m/n))
-    shape scaling that makes the update RMS comparable across shapes.
+    Heavy-ball momentum with optional Nesterov, orthogonalised update, and the
+    sqrt(max(1, m/n)) shape scaling that makes the update RMS comparable across
+    shapes.
+
+    DEVIATION FROM THE REFERENCE, and it matters for how this is used here: the
+    reference keeps embeddings and the LM head on AdamW and runs Muon only on
+    hidden layers.  This class orthogonalises every 2-D parameter it is given.
+    For LoRA that is exactly the reference behaviour, because only the adapter
+    factors are trainable and both are hidden-layer matrices -- which is why the
+    experiments here use Muon on LoRA only.  Do not use it for full fine-tuning
+    without adding the exclusion; the gauge argument would survive, but the
+    optimizer would not be Muon as published and its absolute quality would not
+    be interpretable.
     """
 
     def __init__(self, params, lr=0.02, momentum=0.95, nesterov=True, wd=0.0,
