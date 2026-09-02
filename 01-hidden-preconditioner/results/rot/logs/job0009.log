@@ -1,0 +1,6 @@
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag rot --cond pissa@frame0 --lr 5e-05 --steps 300 --grad_clip 1e9 --match none
+
+    step 0/300 loss=1.1613 (0s)
+    step 30/300 loss=0.4535 (21s)
+    step 60/300 loss=0.5053 (47s)

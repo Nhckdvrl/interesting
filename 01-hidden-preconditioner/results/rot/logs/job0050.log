@@ -1,0 +1,15 @@
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag rot --cond bimi --lr 0.0003 --steps 300 --grad_clip 1e9 --match trace
+
+    step 0/300 loss=1.1613 (0s)
+    step 30/300 loss=0.4466 (12s)
+    step 60/300 loss=0.5036 (24s)
+    step 90/300 loss=0.4009 (37s)
+    step 120/300 loss=0.4268 (49s)
+    step 150/300 loss=0.4512 (61s)
+    step 180/300 loss=0.3692 (76s)
+    step 210/300 loss=0.3947 (88s)
+    step 240/300 loss=0.3938 (100s)
+    step 270/300 loss=0.3592 (112s)
+    step 299/300 loss=0.3888 (124s)
+[bimi_lr0.0003_s0] base=0.83113 final=0.44556 (127s)

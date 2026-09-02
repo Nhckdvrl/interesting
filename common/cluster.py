@@ -24,8 +24,18 @@ POOL = {
 MEM_FREE_MIN = 60000   # MiB required free to claim a slot
 
 
-def probe(hosts=None):
-    """Return list of (host, gpu, arch) slots that are currently free enough."""
+def probe(hosts=None, mem_min=None, per_gpu=1):
+    """Return list of (host, gpu, arch) slots that are currently free enough.
+
+    `mem_min` overrides the default headroom, and `per_gpu` yields a GPU more
+    than once.  Both exist because the panels here are 0.6B runs that peak
+    around 12 GiB, while the default 60 GiB threshold was set for 7B/8B work:
+    on a SHARED cluster the conservative default hides most of the capacity,
+    but claiming a slot needs room for `per_gpu` of our jobs on top of whatever
+    else is resident, so the caller states the per-job footprint rather than
+    the scheduler guessing it.
+    """
+    mem_min = MEM_FREE_MIN if mem_min is None else mem_min
     out = []
     for host, (arch, gpus) in POOL.items():
         if hosts and host not in hosts:
@@ -44,8 +54,8 @@ def probe(hosts=None):
             print(f"  {host}: {e}"); continue
         for line in r.stdout.strip().split("\n"):
             i, used, total, util = [int(x.strip()) for x in line.split(",")]
-            if i in gpus and (total - used) >= MEM_FREE_MIN:
-                out.append((host, i, arch))
+            if i in gpus and (total - used) >= mem_min * per_gpu:
+                out.extend([(host, i, arch)] * per_gpu)
     return out
 
 
@@ -111,8 +121,10 @@ def run(jobs, slots, logdir, py_key=None, dry=False, env_extra=""):
     return fails
 
 
-def main(jobs, tag, logdir, arch="a100", hosts=None, dry=False):
-    slots = [s for s in probe(hosts) if s[2] == arch]
+def main(jobs, tag, logdir, arch="a100", hosts=None, dry=False,
+         mem_min=None, per_gpu=1):
+    slots = [s for s in probe(hosts, mem_min=mem_min, per_gpu=per_gpu)
+             if s[2] == arch]
     print(f"{len(jobs)} jobs, {len(slots)} free {arch} slots: "
           + ", ".join(f"{h}:{g}" for h, g, _ in slots))
     if not slots:

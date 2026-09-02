@@ -16,6 +16,13 @@ cost one forward+backward pass to measure:
             activation covariance Sigma, which is also a property of the
             pretrained model alone.
 
+It also measures, without training, how much room the ADAPTER GAUGE leaves at
+each scale: the span of Lambda_1 over the gauge orbit of a fixed random A, from
+the gradient-metric eigenframe through the flat-diagonal frame to the direct
+argmax.  That span is the dose available to the frame intervention, so it is a
+prediction of how much the frame can matter at 8B, made from forward passes
+alone before any 8B training.
+
 If the outlier-feature structure of LLMs sharpens with scale -- as the
 quantisation literature reports -- then PR falls and the anisotropy of Sigma
 rises, and BOTH effects are predicted to grow.  If instead these statistics are
@@ -30,6 +37,8 @@ import torch
 import torch.nn as nn
 from common.gauge import make_R, fold_rmsnorm_gains
 from common.pinit import kaiming_A
+from common.intrinsic import (frame_ladder, l1_flatness, offdiag_mass,
+                              max_l1_frame)
 from common.data import build_sft, FixedOrderLoader
 from common.train import load_model
 
@@ -120,7 +129,30 @@ def main():
             V = V * (A.norm() / V.norm())
             evar.append(float(((V @ C) * V).sum()) / max(float(((A @ C) * A).sum()), 1e-30))
 
+        # --- the frame: how much room the gauge orbit leaves at this scale.
+        #     Purely a property of the pretrained model plus a random A, so it
+        #     is a PREDICTION of how much the frame can matter at 8B, made
+        #     before any 8B training.
+        lam_eig, lam_flat, lam_opt, off_g, off_x = [], [], [], [], []
+        for n, C in cov.items():
+            gn = n  # the q_proj whose input covariance this is
+            G = mods[gn].weight.grad.detach().double().cuda()
+            Ad = A.double()
+            Mg = Ad @ (G.T @ G) @ Ad.T
+            Q0, Q1 = frame_ladder(Mg, [0.0, 1.0])
+            lam_eig.append(l1_flatness(Q0 @ Ad, G)[0])
+            lam_flat.append(l1_flatness(Q1 @ Ad, G)[0])
+            lam_opt.append(max_l1_frame(G @ Ad.T, iters=200)[1])
+            off_g.append(offdiag_mass(Mg))
+            off_x.append(offdiag_mass(Ad @ C.double().cuda() @ Ad.T))
+
         rows[mid] = dict(d_model=d,
+                         lam1_eigframe=st.mean(lam_eig),
+                         lam1_flatframe=st.mean(lam_flat),
+                         lam1_maxframe=st.mean(lam_opt),
+                         lam1_reach=st.mean(lam_opt) / st.mean(lam_eig),
+                         offdiag_x_random_frame=st.mean(off_x),
+                         offdiag_g_random_frame=st.mean(off_g),
                          PR_pretrained=st.mean(pr0),
                          PR_rotated=st.mean(pr1),
                          PR_ratio=st.mean(pr1) / st.mean(pr0),
@@ -135,6 +167,11 @@ def main():
               f"r_eff^Sigma(rand A)={r['r_eff_sigma_random_A']:.2f}  "
               f"tr(PSigma) top-r/rand={r['trPSigma_topr_over_random']:.1f}x",
               flush=True)
+        print(f"{'':26s}    frame reach: Lambda_1 "
+              f"{r['lam1_eigframe']:.3f} (eig) .. {r['lam1_flatframe']:.3f} "
+              f"(flat) .. {r['lam1_maxframe']:.3f} (max) = "
+              f"{r['lam1_reach']:.2f}x;  Off_x at a random frame "
+              f"{r['offdiag_x_random_frame']:.3f}", flush=True)
         del model
         torch.cuda.empty_cache()
     json.dump(rows, open(a.out, "w"), indent=2)
