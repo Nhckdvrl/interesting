@@ -1,15 +1,8 @@
 # LOCAL:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag rot --cond gradsub --lr 0.003 --steps 300 --grad_clip 1e9 --match trace --optimizer muon --momentum 0.95 --warmup 0
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag rot --cond eva --lr 0.003 --steps 300 --grad_clip 1e9 --match trace --optimizer muon --momentum 0.95 --warmup 0
 
     step 0/300 loss=1.1613 (1s)
-    step 30/300 loss=1.2739 (28s)
-    step 60/300 loss=1.2059 (58s)
-    step 90/300 loss=0.9581 (86s)
-    step 120/300 loss=0.9144 (114s)
-    step 150/300 loss=0.9047 (143s)
-    step 180/300 loss=0.8144 (176s)
-    step 210/300 loss=0.8021 (204s)
-    step 240/300 loss=0.7935 (234s)
-    step 270/300 loss=0.7979 (262s)
-    step 299/300 loss=0.7400 (291s)
-[gradsub_lr0.003_s0_muon] base=0.83113 final=0.88972 (294s)
+    step 30/300 loss=1.3224 (29s)
+    step 60/300 loss=1.3106 (58s)
+    step 90/300 loss=1.0179 (88s)
+    step 120/300 loss=0.9641 (116s)

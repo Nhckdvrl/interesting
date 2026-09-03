@@ -10,37 +10,44 @@ Three topics were registered from the Normalized LoRA (NoRA) mother paper.
 Topics **01** and **02** converged on a single object and are now one line of
 work; topic **03** is a scoped non-reproduction. The line is:
 
-> Neural-network parameterisations carry exact reparameterisation symmetries,
-> and **which of them the optimizer respects decides what an initialisation
-> is.** SGD and Muon respect LoRA's `O(r)` adapter gauge exactly -- two
-> gauge-related initialisations are literally the same run in rotated
-> coordinates -- so they can only see gauge *invariants*. AdamW descends in the
-> elementwise `l_inf` geometry, whose symmetry group is only the signed
-> permutations, so it can also see the **frame**. The frame is therefore a free
-> degree of freedom that the whole initialisation literature has been setting
-> by accident, and it is worth as much as the differences those papers report.
+> LoRA's factorisation carries a `GL(r)` reparameterisation ambiguity, and by
+> polar decomposition it splits into a **rotation** part `O(r)` and a
+> **scaling** part. Optimizers form a strict hierarchy of what they are blind
+> to, so **what an initialisation is -- how many degrees of freedom it actually
+> has -- depends on which optimizer will consume it.** AdamW has the smallest
+> symmetry group of any method in common use, and the extra coordinate it alone
+> can see is one the initialisation literature varies by 4.3x without reporting.
 
-Measured on one gauge orbit of the vanilla draw -- every invariant identical to
-1.5e-8, only the frame moving:
+Measured over 25 steps in float64 (`01-.../src/hierarchy.py`):
 
-| optimizer | norm | orthogonally invariant | spread |
+| optimizer | signed perms | `O(r)` rotation | `GL(r)` scaling |
 |---|---|---|---|
-| SGD | Frobenius | yes | 0.00001 nats |
-| Muon | spectral | yes | 0.00026 nats |
-| AdamW | elementwise max | **no** | **0.00222 nats** (8.2x the null) |
+| SGD | 2.2e-16 | **2.2e-16** | 9.8e-03 |
+| Muon | 2.5e-09 | **4.4e-09** | 1.2e-02 |
+| matrix-preconditioned Adam | 2.2e-16 | **2.2e-16** | 1.5e-02 |
+| **AdamW** | 0.0e+00 | **1.7e-03** | 3.2e-02 |
 
-and the effect is **structurally zero at rank 1** -- where `O(1)` *is* the
-signed-permutation group -- growing with `r(r-1)/2` thereafter.
+```
+   signed perms  <  O(r)  <  GL(r)
+      AdamW         SGD       LoRA-RITE
+                    Muon      Riemannion (ICLR 2026)
+                    matrix-preconditioned Adam
+```
 
-The invariant part of the state is the `O(r)`-conjugacy class of the metric
-triple `(A Aᵀ, A Σ Aᵀ, A C_g Aᵀ)`, for which we give a complete order-`<=2`
-basis; Schur-Horn bounds the frame's reachable range given the invariants.
+Four recent works -- LoRA-RITE, Balanced LoRA, FedRot-LoRA and Riemannion --
+all treat this ambiguity as a defect to remove. None asks what it is worth, or
+which part of it a given optimizer sees. Riemannion motivates itself by saying
+per-factor Muon is not invariant to "scalings **or rotations**"; the rotation
+half of that is wrong by six orders of magnitude, and it is exactly the part
+that matters.
 
 ## Where to read, in order
 
 | file | what it is |
 |---|---|
-| **`paper/NARRATIVE.md`** | the main-line document: claims, evidence, positioning against the closest work. **Read this first.** |
+| **`paper/STORY.md`** | the current framing: the symmetry hierarchy, what each optimizer can see, and why the prescription is a section rather than the thesis. **Read this first.** |
+| `paper/NARRATIVE.md` | the longer main-line document: claims, evidence, positioning |
+| `paper/SCOPE.md` | what NoRA actually runs, and what we need to match it |
 | `paper/RESULTS.md` | every headline number, generated from the run files by `paper/make_results.py` |
 | `01-hidden-preconditioner/STATUS.md` | topic-01 record: what was run, what it showed, what was falsified |
 | `02-representation-gauge/STATUS.md` | topic-02 record |

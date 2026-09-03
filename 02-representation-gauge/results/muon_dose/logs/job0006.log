@@ -1,0 +1,15 @@
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/02-representation-gauge/src/run_dose.py --tag muon_dose --method lora --gauge rand --lr 0.0003 --optimizer muon --momentum 0.95 --steps 500
+
+    step 0/500 loss=0.6461 (1s)
+    step 50/500 loss=0.3446 (69s)
+    step 100/500 loss=0.6514 (153s)
+    step 150/500 loss=0.4114 (238s)
+    step 200/500 loss=0.3879 (320s)
+    step 250/500 loss=0.4459 (404s)
+    step 300/500 loss=0.5295 (486s)
+    step 350/500 loss=0.5132 (566s)
+    step 400/500 loss=0.4496 (648s)
+    step 450/500 loss=0.5917 (732s)
+    step 499/500 loss=0.6371 (813s)
+[lora_muon_randg0_lr0.0003_s0] base=0.553113 final=0.497201 (826s)

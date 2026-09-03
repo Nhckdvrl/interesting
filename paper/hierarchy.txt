@@ -1,0 +1,20 @@
+max |loss(transformed) - loss(original)| over 25 steps, float64, B_0 != 0
+
+                 optimizer    signed perms   O(r) rotation   GL(r) scaling
+                       SGD        2.22e-16        2.22e-16        9.82e-03
+                      Muon        2.48e-09        4.42e-09        1.20e-02
+       matrix-precond Adam        2.22e-16        2.22e-16        1.52e-02
+                     AdamW        0.00e+00        1.74e-03        3.18e-02
+
+(An `inf` in the GL(r) column means the transformed run diverged where
+ the original did not -- non-invariance in its loudest form, not a bug.)
+
+Every optimizer is blind inside its group and sensitive outside it:
+  signed perms  <  O(r)  <  GL(r)
+     AdamW         SGD       LoRA-RITE
+                   Muon      Riemannion
+                   matrix-precond Adam
+
+So what an initialisation IS -- how many degrees of freedom it has
+-- depends on which optimizer will consume it.  AdamW is the one
+with the smallest symmetry group, and the one everybody uses.

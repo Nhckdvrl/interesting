@@ -1,0 +1,19 @@
+# fvcrc20:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/02-representation-gauge/src/run_dose.py --tag muon_dose --method lora --gauge none --lr 0.003 --optimizer muon --momentum 0.95 --steps 500
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+    step 0/500 loss=0.6461 (2s)
+[W903 02:01:29.484457603 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3724541952 bytes (free: 1106509824, total: 101971722240).
+[W903 02:01:29.555827082 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3735027712 bytes (free: 989069312, total: 101971722240).
+    step 50/500 loss=0.4885 (84s)
+    step 100/500 loss=0.8389 (180s)
+    step 150/500 loss=0.5951 (276s)
+    step 200/500 loss=0.5273 (369s)
+    step 250/500 loss=0.5819 (463s)
+    step 300/500 loss=0.6556 (555s)
+    step 350/500 loss=0.6021 (647s)
+    step 400/500 loss=0.5298 (742s)
+    step 450/500 loss=0.6764 (835s)
+    step 499/500 loss=0.7419 (927s)
+[lora_muon_noneg0_lr0.003_s0] base=0.553113 final=0.568607 (935s)

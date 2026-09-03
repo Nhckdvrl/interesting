@@ -1,3 +1,21 @@
+> **Current framing is in `paper/STORY.md`.** The line moved twice since this
+> file was written. Stage 1 audited published initializers and found them
+> indistinguishable; Stage 2 found the missing coordinate is the gauge *frame*;
+> Stage 3 found that the frame is one part of a `GL(r)` ambiguity that splits
+> into rotation and scaling, and that optimizers form a strict hierarchy of what
+> they are blind to.
+>
+> Two of our own results were corrected after being reported, and both
+> corrections are recorded rather than quietly folded in:
+>
+> * the 8B "reversal" (kaiming better by 0.00202) reverses back to frame0 better
+>   by 0.00280 once the probe is 4x larger -- it was an estimation artefact, not
+>   a scale effect;
+> * the r = 128 "sign reversal" was read off a grid whose bottom rung held
+>   frame0's optimum; extended, the ordering matches r = 1..64. See
+>   `PREDICTIONS_r128.md`, where the original reading is left in place above the
+>   correction.
+
 > **Superseded in part.** This file is the Stage-1 record (the audit of
 > published initializers). Stage 2 found what Stage 1 was missing, and it is
 > not another invariant: it is the **gauge frame**. See `paper/NARRATIVE.md`

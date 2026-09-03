@@ -1,0 +1,16 @@
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/02-representation-gauge/src/run_dose.py --tag muon_dose --method lora --gauge rand --lr 0.001 --optimizer muon --momentum 0.95 --steps 500
+
+    step 0/500 loss=0.6461 (1s)
+[W903 01:59:59.650100592 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3724541952 bytes (free: 682622976, total: 101971591168).
+    step 50/500 loss=0.3869 (69s)
+    step 100/500 loss=0.6825 (153s)
+    step 150/500 loss=0.4413 (238s)
+    step 200/500 loss=0.4099 (322s)
+    step 250/500 loss=0.4749 (408s)
+    step 300/500 loss=0.5522 (492s)
+    step 350/500 loss=0.5352 (575s)
+    step 400/500 loss=0.4484 (659s)
+    step 450/500 loss=0.6010 (742s)
+    step 499/500 loss=0.6567 (825s)
+[lora_muon_randg0_lr0.001_s0] base=0.553113 final=0.511471 (840s)
