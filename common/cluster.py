@@ -31,6 +31,42 @@ MEM_FREE_MIN = 60000   # MiB required free to claim a slot
 # every adapted module before moving them to CPU.
 
 
+_HEALTH = {}
+
+
+def _usable(host, gpu):
+    """Can a process actually allocate on this GPU?
+
+    nvidia-smi is not enough.  A card can report normal memory and still raise
+    "No CUDA GPUs are available" on every job handed to it -- that happened here
+    and silently killed twelve runs, which then looked like missing cells rather
+    than failures.  One tiny allocation per GPU, cached for the life of the
+    process, is cheap next to a 300-step run.
+    """
+    key = (host, gpu)
+    if key in _HEALTH:
+        return _HEALTH[key]
+    py = PY["blackwell"] if host == "LOCAL" else PY["a100"]
+    code = "import torch; torch.zeros(8, device='cuda')"
+    cmd = f"CUDA_VISIBLE_DEVICES={gpu} {py} -c \"{code}\""
+    try:
+        if host == "LOCAL":
+            r = subprocess.run(cmd, shell=True, capture_output=True,
+                               text=True, timeout=120)
+        else:
+            r = subprocess.run(["ssh", "-o", "BatchMode=yes", host,
+                                f"cd {REPO} && {cmd}"],
+                               capture_output=True, text=True, timeout=150)
+        ok = r.returncode == 0
+    except Exception:
+        ok = False
+    if not ok:
+        print(f"  {host}:{gpu} reports free memory but cannot allocate -- "
+              f"excluding")
+    _HEALTH[key] = ok
+    return ok
+
+
 def probe(hosts=None, mem_min=None, per_gpu=1):
     """Return list of (host, gpu, arch) slots that are currently free enough.
 
@@ -69,7 +105,8 @@ def probe(hosts=None, mem_min=None, per_gpu=1):
             except ValueError:
                 print(f"  {host}: skipping unparseable line {line!r}")
                 continue
-            if i in gpus and (total - used) >= mem_min * per_gpu:
+            if i in gpus and (total - used) >= mem_min * per_gpu \
+                    and _usable(host, i):
                 out.extend([(host, i, arch)] * per_gpu)
     return out
 
