@@ -15,3 +15,4 @@ Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
     step 240/300 loss=0.4367 (160s)
     step 270/300 loss=0.5013 (179s)
     step 299/300 loss=0.5893 (199s)
+[lora_one@frame0_lr0.0001_s0_mnone] base=0.91147 final=0.55827 (203s)
