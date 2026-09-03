@@ -56,6 +56,14 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--every_layer", type=int, default=4)
     ap.add_argument("--probe_batches", type=int, default=4)
+    ap.add_argument("--dtype", default="float32",
+                    choices=["float32", "bfloat16"],
+                    help="backbone dtype for the probe.  The audit measures "
+                         "EIGENVECTOR DIRECTIONS of r x r metrics, and every "
+                         "linear-algebra step is promoted to float64 anyway, "
+                         "so bf16 weights are adequate and halve both the "
+                         "weights and the per-module gradients -- which is "
+                         "what an 8B probe cannot otherwise fit.")
     ap.add_argument("--extra", default="",
                     help="comma-separated extra conditions, e.g. "
                          "frame0,frame1,gradsub@frame1 -- each may carry a "
@@ -65,7 +73,7 @@ def main():
         REPO, "01-hidden-preconditioner", "results", "second_order.json"))
     a = ap.parse_args()
 
-    model, tok = load_model(a.model, dtype=torch.float32)
+    model, tok = load_model(a.model, dtype=getattr(torch, a.dtype))
     tr, _ = build_sft(tok, a.task, 6000, 256, 384, seed=0)
     ld = FixedOrderLoader(tr, 16, tok.pad_token_id, seed=0)
     T = ("q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj",
