@@ -10,8 +10,8 @@ cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONT
     step 240/300 loss=0.2373 (1112s)
     step 270/300 loss=0.1972 (1245s)
     step 299/300 loss=0.2300 (1375s)
- last):
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+[frame1_lr0.0005_s0] base=0.72342 final=0.40027 (1397s)
+ditioner/src/run_lit.py", line 409, in <module>
     main()
   File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 206, in main
     G = collect_grads(model, mods, probe_ld, args.probe_batches)
