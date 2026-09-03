@@ -27,7 +27,18 @@ def p_stats(A, s=1.0, eps=1e-12):
     dg = s2 * A.pow(2).sum(0)                     # (d_in,)  diag P
     m = trP / d_in                                # mean diagonal gain
     diag_var = float(dg.var(unbiased=False))
-    lam = torch.linalg.eigvalsh(K).clamp_min(0) * s2
+    # eigvalsh can fail to converge on an ill-conditioned K.  These eigenvalues
+    # are DIAGNOSTIC only -- nothing downstream of training reads them -- so a
+    # failure here must not take the run with it.  Retry in float64, then fall
+    # back to reporting them as unavailable.
+    try:
+        lam = torch.linalg.eigvalsh(K).clamp_min(0) * s2
+    except Exception:                                        # noqa: BLE001
+        try:
+            lam = torch.linalg.eigvalsh(K.double()).clamp_min(0).to(K.dtype) * s2
+        except Exception:                                    # noqa: BLE001
+            lam = torch.full((r,), float("nan"), device=K.device,
+                             dtype=K.dtype)
 
     diag_sq = float(dg.pow(2).sum())
     cross2 = max(frob2 - diag_sq, 0.0)            # ||P - Diag P||_F^2

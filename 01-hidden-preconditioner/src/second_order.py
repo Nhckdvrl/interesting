@@ -79,6 +79,12 @@ def main():
     print(f"{len(mods)} sampled modules of {len(allm)}", flush=True)
     s = a.alpha / a.r
 
+    # Move the backbone to CPU before accumulating per-module probes: it is
+    # only needed afterwards for the weight-derived initialisers, which read one
+    # module at a time.  Holding 33 GB of fp32 weights alongside the covariances
+    # is what OOMed the 8B audit twice.
+    model.cpu()
+    torch.cuda.empty_cache()
     P = {}
     for name in mods:
         key = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
@@ -138,7 +144,7 @@ def main():
             g = torch.Generator().manual_seed(h)
             base = kaiming_A(a.r, d_in, g, "cpu")
             ref_tr = float(base.pow(2).sum())
-            Wt = mod.weight.detach().float()
+            Wt = mod.weight.detach().float().cuda()
             A, B = None, None
             if cond == "kaiming":
                 A = base
