@@ -65,11 +65,21 @@ def main():
 
     print("\nseparation (every frame-based method above every data-aware one):")
     for m, L in tabs:
-        da = [L[n] for n in L if n in DATA_AWARE]
-        fb = [L[n] for n in L if n not in DATA_AWARE]
-        ok = da and fb and max(da) < min(fb)
-        print(f"  {m:>13s}  span {max(L.values())/min(L.values()):4.1f}x   "
-              f"{'PERFECT' if ok else 'not clean'}")
+        da = {n: L[n] for n in L if n in DATA_AWARE}
+        fb = {n: L[n] for n in L if n not in DATA_AWARE}
+        if not (da and fb):
+            continue
+        hi, lo = max(da, key=da.get), min(fb, key=fb.get)
+        ok = da[hi] < fb[lo]
+        note = "PERFECT" if ok else (
+            f"one pair crosses: {hi} {da[hi]:.4f} over {lo} {fb[lo]:.4f} "
+            f"(+{da[hi]-fb[lo]:.4f})")
+        print(f"  {m:>13s}  span {max(L.values())/min(L.values()):4.1f}x   {note}")
+    print("\n  Where it breaks, it breaks at the boundary pair -- the least"
+          "\n  data-aware method (OLoRA: a QR of the pretrained weight, using"
+          "\n  neither gradients nor activations) against the most structured"
+          "\n  frame-based one (BiMI).  The two categories are ours, and they"
+          "\n  blur for exactly the methods that sit on the line between them.")
 
     if len(tabs) >= 3:
         print(f"\nis the coordinate a property of the METHOD?")

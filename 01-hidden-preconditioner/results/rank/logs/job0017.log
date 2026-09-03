@@ -4,3 +4,19 @@ cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONT
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
     step 0/300 loss=1.1613 (1s)
+[W903 15:11:45.140523636 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3735027712 bytes (free: 1146552320, total: 101971722240).
+[W903 15:11:45.492074116 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 2306867200 bytes (free: 1050083328, total: 101971722240).
+[W903 15:11:45.492587910 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 2306867200 bytes (free: 1050083328, total: 101971722240).
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 390, in main
+    log = train(model, adapters, params, trl, tel, cfg, callback=cb, log_every=5,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 170, in train
+    loss_sum = nn.functional.cross_entropy(logits[mask], labels[mask],
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/functional.py", line 3555, in cross_entropy
+    return torch._C._nn.cross_entropy_loss(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.15 GiB. GPU 0 has a total capacity of 94.97 GiB of which 1001.44 MiB is free. Process 202071 has 26.00 GiB memory in use. Process 300774 has 40.20 GiB memory in use. Including non-PyTorch memory, this process has 27.76 GiB memory in use. Of the allocated memory 25.95 GiB is allocated by PyTorch, and 1.11 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

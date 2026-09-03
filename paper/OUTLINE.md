@@ -104,14 +104,25 @@ reachable range given the invariants, so the two labels are not independent.
 
 ## 5. Where the literature sits
 
-Applying the labels to 20 published configurations across **seven model
-families**, with no training (`src/analyze_audit.py`):
+Applying the labels to 20 published configurations across four model families
+so far, with no training (`src/analyze_audit.py`):
 
-* the zoo spans the frame coordinate 3–4.3×;
-* the separation is perfect on every model — every frame-based method above
-  every data-aware one;
-* the ordering is stable across architectures, so the frame is a property of the
-  **method**, not the backbone: one number per method, computable in a minute.
+| model | span | separation |
+|---|---|---|
+| Qwen3-0.6B | 4.3× | perfect |
+| Llama-3.2-3B | 3.0× | perfect |
+| Qwen3-8B | 3.5× | perfect |
+| OLMo-2-1B | 3.9× | one adjacent pair crosses, by 0.015 |
+
+* the zoo spans the frame coordinate 3–4.3× on every backbone;
+* the separation between frame-based and data-aware methods is perfect on three
+  of four. Where it breaks it breaks at the **boundary pair** — OLoRA, the least
+  data-aware of that group (a QR of the pretrained weight, using neither
+  gradients nor activations), over BiMI, the most structured of the other. The
+  two categories are ours and they blur for exactly the methods on the line;
+* the coordinate is a property of the **method**, not the backbone: median
+  across-model CV **6.9%**, median Kendall τ between model pairs **+0.82**. So
+  one number per method, computable in a minute, characterises it.
 
 This is what the classification buys: a published initialiser now has a label,
 and the labels are informative — they recover the data-aware/frame-based

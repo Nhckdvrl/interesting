@@ -26,3 +26,10 @@ skipping the atlas cache
   gradsub                    none       Lam1=0.1947 E_g=0.4204 Off_x=0.5482 D_g=0.1567 Psi_0x=0.9999
   gradsub                    trace      Lam1=0.1947 E_g=0.4204 Off_x=0.5482 D_g=0.1567 Psi_0x=0.9999
   gradsub                    trace_act  Lam1=0.1947 E_g=0.4204 Off_x=0.5482 D_g=0.1567 Psi_0x=0.9999
+  pissa                      none       Lam1=0.2310 E_g=0.5210 Off_x=0.2800 D_g=0.0929 Psi_0x=1.6090
+  pissa                      trace      Lam1=0.2310 E_g=0.5210 Off_x=0.2800 D_g=0.0929 Psi_0x=1.6090
+  pissa_minor                none       Lam1=0.3372 E_g=0.7065 Off_x=0.5048 D_g=0.1258 Psi_0x=1.2011
+  olora                      none       Lam1=0.3602 E_g=0.7729 Off_x=0.7121 D_g=0.1061 Psi_0x=2.4892
+  lora_one                   none       Lam1=0.1068 E_g=0.2356 Off_x=0.3385 D_g=0.1010 Psi_0x=3.4680
+  lora_one                   trace      Lam1=0.1068 E_g=0.2356 Off_x=0.3385 D_g=0.1010 Psi_0x=3.4680
+wrote /home/xiang/interesting/01-hidden-preconditioner/results/second_order_olmo1b.json (23 rows)
