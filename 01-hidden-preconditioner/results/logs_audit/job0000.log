@@ -1,34 +1,28 @@
 # fvcrc20:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/second_order.py --model unsloth/Llama-3.2-3B --no_atlas --every_layer 8 --probe_batches 4 --out /home/xiang/interesting/01-hidden-preconditioner/results/second_order_llama3b.json
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/second_order.py --model Qwen/Qwen3-8B-Base --no_atlas --every_layer 16 --probe_batches 4 --out /home/xiang/interesting/01-hidden-preconditioner/results/second_order_q8b.json
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:04<00:04,  4.26s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.52s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.78s/it]
-28 sampled modules of 196
-probes done
-skipping the atlas cache
-0 cached atlas constructions
-  kaiming                    trace      Lam1=0.3993 E_g=0.9043 Off_x=0.3692 D_g=0.1977 Psi_0x=1.0040
-  left_gauge                 trace      Lam1=0.4015 E_g=0.9110 Off_x=0.3676 D_g=0.1977 Psi_0x=1.0040
-  nora                       trace      Lam1=0.4006 E_g=0.9065 Off_x=0.3639 D_g=0.2009 Psi_0x=1.0037
-  nora_unit                  none       Lam1=0.4006 E_g=0.9065 Off_x=0.3639 D_g=0.2009 Psi_0x=1.0037
-  nora_unit                  trace      Lam1=0.4006 E_g=0.9065 Off_x=0.3639 D_g=0.2009 Psi_0x=1.0037
-  bimi                       none       Lam1=0.3872 E_g=0.8769 Off_x=0.3581 D_g=0.1862 Psi_0x=1.0000
-  bimi                       trace      Lam1=0.3872 E_g=0.8769 Off_x=0.3581 D_g=0.1862 Psi_0x=1.0000
-  etf                        none       Lam1=0.3939 E_g=0.8818 Off_x=0.3910 D_g=0.1861 Psi_0x=1.0000
-  etf                        trace      Lam1=0.3939 E_g=0.8818 Off_x=0.3910 D_g=0.1861 Psi_0x=1.0000
-  flatspec_flatdiag          trace      Lam1=0.3888 E_g=0.8781 Off_x=0.4196 D_g=0.1782 Psi_0x=1.0000
-  geomspec_flatdiag0.5       trace      Lam1=0.1613 E_g=0.3640 Off_x=0.0510 D_g=0.1324 Psi_0x=5.1027
-  eva                        none       Lam1=0.2804 E_g=0.6554 Off_x=0.0000 D_g=0.1522 Psi_0x=1.0000
-  eva                        trace      Lam1=0.2804 E_g=0.6554 Off_x=0.0000 D_g=0.1522 Psi_0x=1.0000
-  eva                        trace_act  Lam1=0.2804 E_g=0.6554 Off_x=0.0000 D_g=0.1522 Psi_0x=1.0000
-  gradsub                    none       Lam1=0.2287 E_g=0.5172 Off_x=0.4362 D_g=0.2025 Psi_0x=0.9999
-  gradsub                    trace      Lam1=0.2287 E_g=0.5172 Off_x=0.4362 D_g=0.2025 Psi_0x=0.9999
-  gradsub                    trace_act  Lam1=0.2287 E_g=0.5172 Off_x=0.4362 D_g=0.2025 Psi_0x=0.9999
-  pissa                      none       Lam1=0.2817 E_g=0.6102 Off_x=0.3140 D_g=0.1154 Psi_0x=1.4872
-  pissa                      trace      Lam1=0.2817 E_g=0.6102 Off_x=0.3140 D_g=0.1154 Psi_0x=1.4872
-  pissa_minor                none       Lam1=0.3622 E_g=0.8089 Off_x=0.4639 D_g=0.1573 Psi_0x=1.1258
-  olora                      none       Lam1=0.3545 E_g=0.7895 Off_x=0.6262 D_g=0.1260 Psi_0x=2.6442
-  lora_one                   none       Lam1=0.1339 E_g=0.3088 Off_x=0.2208 D_g=0.1189 Psi_0x=3.2626
-  lora_one                   trace      Lam1=0.1339 E_g=0.3088 Off_x=0.2208 D_g=0.1189 Psi_0x=3.2626
-wrote /home/xiang/interesting/01-hidden-preconditioner/results/second_order_llama3b.json (23 rows)
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:01<00:05,  1.40s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:03<00:04,  1.57s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:04<00:02,  1.42s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:05<00:01,  1.25s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:05<00:00,  1.06it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:05<00:00,  1.15s/it]
+[W903 12:49:59.655153329 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 106954752 bytes (free: 161611776, total: 101971722240).
+[W903 12:50:01.717143656 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 123731968 bytes (free: 77725696, total: 101971722240).
+[W903 12:50:02.653023647 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1507852288 bytes (free: 1348599808, total: 101971722240).
+[W903 12:50:04.412776310 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 136314880 bytes (free: 207749120, total: 101971722240).
+[W903 12:50:05.430987112 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1033895936 bytes (free: 641859584, total: 101971722240).
+[W903 12:50:05.432355312 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1033895936 bytes (free: 734134272, total: 101971722240).
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/second_order.py", line 206, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/second_order.py", line 75, in main
+    G = collect_grads(model, allm, ld, a.probe_batches)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 69, in collect_grads
+    (loss / n_batches).backward()
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/_tensor.py", line 623, in backward
+    torch.autograd.backward(
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/__init__.py", line 395, in backward
+    _engine_run_backward(
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/graph.py", line 979, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 986.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 700.12 MiB is free. Including non-PyTorch memory, this process has 94.26 GiB memory in use. Of the allocated memory 92.37 GiB is allocated by PyTorch, and 1.25 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
