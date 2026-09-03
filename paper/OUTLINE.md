@@ -141,14 +141,27 @@ being compared.
 
 ## Evidence inventory
 
-| section | source | runs |
-|---|---|---|
-| 2 | `src/hierarchy.py` | analytic, 9 optimizers |
-| 3 | `results/frame` | 130+ |
-| 3 (rank) | `results/rank` | 80+ |
-| 4 | `results/second_order_*.json` | 0 (training-free), N models |
-| 5 | `results/rot` | 96 |
-| 6 | `results/rot` (Muon arm) | 44 |
-| 7 | `results/q8b`, `q8bprobe`, `frame_bf16`, `acc`, `long` | 100+ |
+Counted honestly: only runs that carry a main-line claim. The project has 2348
+trained runs in total, but most are exploration and abandoned lines (the
+synthetic atlas, the g1 panels, the out-of-distribution closure) that the paper
+does not cite. Quoting that number as "experiment volume" would be misleading.
 
-Total trained runs in the project: **2348**.
+| section | claim | source | runs | model coverage |
+|---|---|---|---|---|
+| 2 | the hierarchy | `src/hierarchy.py` | analytic, 9 optimizers | — |
+| 3 | the frame ladder | `results/frame` | 128 | **needs 3 families** |
+| 3 | the rank series | `results/rank` | 50 | r = 1, 4, 16, 64, 128 |
+| 4 | the audit | `second_order_*.json` | **0**, training-free | up to 7 families |
+| 5 | the zoo rotation | `results/rot` | 96 | **needs 3 families** |
+| 6 | transfer under Muon | `results/rot` | 44 | **needs 3 families** |
+| 7 | limits | `q8b`, `q8bprobe`, `frame_bf16`, `acc`, `long` | 81 | 0.6B, 8B |
+| — | breadth | `llama3b`, `llama_zoo`, `task_*`, `dolly_frame` | 134 | Llama-3B, 3 tasks |
+
+**Main-line total: 533**, plus the Stage-1 audit (`lit` 414, `lit_dolly` 168)
+cited in section 4, so about **1100**.
+
+The gap is not volume. It is that sections 3, 5 and 6 -- the three core
+empirical claims -- each rested on a single model, so "is this a Qwen artefact"
+had no answer. Llama-3.2-3B is filling the second family and OLMo-2-1B the
+third (different family, tokenizer, and pretraining corpus), for 66 + 63 cells.
+Nothing exploratory is being added.
