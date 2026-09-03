@@ -2,3 +2,41 @@
 cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/second_order.py --model Qwen/Qwen3-8B-Base --no_atlas --every_layer 16 --probe_batches 4 --dtype bfloat16 --out /home/xiang/interesting/01-hidden-preconditioner/results/second_order_q8b.json
 
 Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:00<00:00, 135.55it/s]
+[W903 13:54:24.338211129 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 723517440 bytes (free: 357761024, total: 101971591168).
+[W903 13:54:25.086858931 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 62914560 bytes (free: 80936960, total: 101971591168).
+[W903 13:54:25.508877128 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 912261120 bytes (free: 439549952, total: 101971591168).
+[W903 13:54:25.513285667 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1499463680 bytes (free: 294846464, total: 101971591168).
+[W903 13:54:26.435091397 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 69206016 bytes (free: 120782848, total: 101971591168).
+[W903 13:54:27.695929431 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 836763648 bytes (free: 385024000, total: 101971591168).
+[W903 13:54:27.734548195 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 836763648 bytes (free: 508755968, total: 101971591168).
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/second_order.py", line 220, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/second_order.py", line 83, in main
+    G = collect_grads(model, allm, ld, a.probe_batches)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 65, in collect_grads
+    out = model(input_ids=b["input_ids"], attention_mask=b["attention_mask"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/utils/generic.py", line 918, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 494, in forward
+    logits = self.lm_head(hidden_states[:, slice_indices, :])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 134, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 798.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 485.19 MiB is free. Process 25307 has 7.55 GiB memory in use. Process 1624953 has 34.46 GiB memory in use. Including non-PyTorch memory, this process has 52.45 GiB memory in use. Of the allocated memory 49.06 GiB is allocated by PyTorch, and 2.74 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
