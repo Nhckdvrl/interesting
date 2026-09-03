@@ -139,9 +139,16 @@ every optimizer here):
 
 | optimizer | tuned lr | frame spread | own floor | ratio | class |
 |---|---|---|---|---|---|
+| SGD | 0.1 | 0.00010 | — (spread *is* the floor) | 1× | `O(r)` (blind) |
 | Muon | 3e-4 | 0.000058 | 0.000027 | 2.2× | `O(r)` (blind) |
-| AdamW | 3e-4 | 0.00165 | — | — | frame (sees it) |
+| AdamW | 3e-4 | 0.00165 | 0.00016 (n=2) | **10.3×** | frame (sees it) |
 | Lion | 1e-4 | 0.00388 | 0.000039 | 99× | frame (sees it) |
+
+The split is unambiguous: the blind optimizers sit at **1–2.2×** their own floor,
+the sighted ones at **10–99×**. AdamW's floor is its own signed-permutation
+spread (0.00016), *not* SGD's (2.9e-8) — the two differ by ~5500× here, and
+dividing by SGD's would have reported a spurious 63000× where the honest number
+is 10.3×. This is the second standing rule paying for itself.
 
 matprec is the wrinkle, and it resolves in our favour. At its tuned lr (0.01) it
 reads 6.2× its floor — apparently frame-sensitive, contradicting the analytic
@@ -168,15 +175,24 @@ carrying its own floor** — SGD is exactly gauge-covariant, so wherever it appe
 its spread *is* that panel's reproducibility floor, measured rather than
 imported:
 
-| family | kaiming | frame0 | frame1 | AdamW spread | SGD floor | ratio |
-|---|---|---|---|---|---|---|
-| Qwen3-0.6B | 0.44551 | **0.44329** | 0.44506 | 0.00222 | 1.0e-05 | 200× |
-| Llama-3.2-3B | 0.51783 | **0.51615** | 0.51853 | 0.00239 | 2.6e-04 | 9× |
-| OLMo-2-1B | 0.54168 | **0.54004** | 0.54164 | 0.00165 | 2.6e-08 | 63000× |
+| family | kaiming | frame0 | frame1 | AdamW spread | AdamW own floor | ratio | SGD covariance |
+|---|---|---|---|---|---|---|---|
+| Qwen3-0.6B | 0.44551 | **0.44329** | 0.44506 | 0.00222 | 0.00021 | 11× | 1.0e-05 |
+| Llama-3.2-3B | 0.51783 | **0.51615** | 0.51853 | 0.00239 | 0.00040 | 6× | 2.6e-04 |
+| OLMo-2-1B | 0.54168 | **0.54004** | 0.54164 | 0.00165 | 0.00016 | 10× | 2.6e-08 |
 
-`frame0` is best on all three, with the same ordering. On OLMo the four
-gauge-related initialisations agree under SGD to **eight decimal places**
-(2.6e-08) while AdamW separates them by 0.00165.
+`frame0` is best on all three, with the same ordering. The ratio is against
+AdamW's **own** reduction-order floor (its signed-permutation spread), which is
+the like-for-like comparison and lands at a consistent **6–11×** on all three
+families. The last column is a separate check: under SGD, which is exactly
+gauge-covariant, the four gauge-related draws agree to between five and eight
+decimal places — on OLMo to **eight** (2.6e-08) — confirming they carry
+identical preconditioner content and that the AdamW spread is a pure frame
+effect. (Reading the ratio against that covariance floor instead, as an earlier
+draft did, gave a spurious 200×/9×/63000× — the SGD floor swings four orders
+across families and is not AdamW's floor. Qwen's and Llama's own floors come from
+`gradsub@frame0`, an exact identity map under AdamW, and from the sister
+`llama_map` panel; OLMo's from its AdamW signed-permutation seeds.)
 
 Five optimizers on the Qwen3-0.6B orbit, ordered by what the map in §3 predicts:
 
@@ -320,7 +336,7 @@ hindsight, and this table is the thing to re-read *before* acting, not after.
 | **must NOT narrow because an experiment failed** | **structurally fixed** | The map is the contribution. The prescription's fragility, the accuracy null and the collinear mechanism cannot narrow it, because none of them is load-bearing. Previously all three forced a retreat. |
 | **no defensive experiments** | watch | Ban: further probe-size controls, further precision controls, further seed replication. Those exist and are enough. Any new panel must extend coverage or test a prediction. |
 | **main-line experiment volume** | ok | ~750 once the third family lands, plus the 582-run Stage-1 audit. Not 2348 — most of that is exploration the paper does not cite, and quoting it would be misleading. |
-| **model coverage** | **in progress** | Training: Qwen3-0.6B, Llama-3.2-3B, OLMo-2-1B (running), plus Qwen3-8B for scope. Audit: seven families. The three core claims were single-model, which was the real gap. |
+| **model coverage** | **in progress** | Every main line now on three families {Qwen3-0.6B, OLMo-2-1B, Llama-3.2-3B}. The central map (§3) was the last on two; its third family (Llama-3.2-3B, five optimizers, true fp32) is running on the A100 pool — AdamW arm done at an interior optimum (lr 2e-4), blind/sighted optimizers filling in. Plus Qwen3-8B for scope (fp32 ladder complete + its own SGD floor; AdamW floor running). Audit: seven families. |
 | **mother paper is NoRA** | ok | §5 explains NoRA's own ablation: its whole family sits at vanilla's frame value, which is why those five conditions are mutually indistinguishable. |
 
 **Standing rule.** Before adding any experiment, name which row of this table it

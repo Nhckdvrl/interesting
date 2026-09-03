@@ -1,0 +1,15 @@
+# fvcrc11:0 (a100)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model unsloth/Llama-3.2-3B --tag llama_map --steps 300 --grad_clip 1e9 --micro_bs 4 --probe_bs 8 --probe_batches 4 --amp none --cond frame0.5 --lr 3e-05 --optimizer lion --warmup 0
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc11' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.78s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.67s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.83s/it]
+    step 0/300 loss=1.4693 (3s)
+    step 30/300 loss=0.5693 (156s)
+    step 60/300 loss=0.5451 (309s)
+    step 90/300 loss=0.6221 (461s)
+    step 120/300 loss=0.5534 (613s)
+    step 150/300 loss=0.4724 (766s)
+    step 180/300 loss=0.5237 (950s)
+    step 210/300 loss=0.6166 (1101s)
+    step 240/300 loss=0.4188 (1243s)
