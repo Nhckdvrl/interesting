@@ -99,7 +99,58 @@ too.
 | 4. …and structural | rank series | exactly zero at r=1, where `O(1)` *is* AdamW's own group; grows through r=64 |
 | 5. The audit | 20 configurations, no training | 4.3x span, perfect separation, 2.5x the adjacent gap |
 | 6. Consequences | zoo rotated both ways, 96 runs | 6/6 helped-or-neutral one way, 6/6 hurt-or-neutral the other |
+| 6. …and transfer | the same zoo under Muon, 44 runs | the ranking survives (tau = +0.87) but ~30% of the gap does not |
 | 7. Limits | 8B, r=128, probe controls | where the prescription fails, and that a 4x probe reverses 8B back |
+
+## Section 6, answered: the ranking transfers, a third of the gap does not
+
+We asked whether "which initialiser is best" depends on the optimizer, by
+running the same six published initialisers under AdamW and under Muon. **The
+answer is no**, and the paper says so:
+
+```
+AdamW: kaiming > bimi > gradsub > eva > pissa > lora_one
+Muon : kaiming > bimi > gradsub > pissa > eva > lora_one
+```
+
+Kendall tau = **+0.87**, one discordant pair in fifteen, and that pair (EVA vs
+PiSSA) is separated by 0.00001 nats under Muon -- noise. The orbit channel,
+which every optimizer sees, dominates the ordering.
+
+What does not transfer is the **size** of the gaps. The amount by which vanilla
+Kaiming beats each data-aware method, under AdamW and under a frame-blind
+optimizer:
+
+| method | gap under AdamW | gap under Muon | lost |
+|---|---|---|---|
+| gradsub | +0.00943 | +0.00652 | **31%** |
+| EVA | +0.01023 | +0.00722 | **29%** |
+| PiSSA | +0.01140 | +0.00722 | **37%** |
+| LoRA-One | +0.01177 | +0.01085 | 8% |
+
+(BiMI is omitted: its AdamW gap is 0.00042, at the reproducibility floor, so
+the ratio is meaningless.)
+
+So about a third of what vanilla Kaiming appears to gain over data-aware
+initialisation under AdamW is frame, and it is gone under an optimizer that
+cannot see the frame. That is the transferability claim in its honest form: not
+"your ranking is wrong", but "a third of your margin is optimizer-specific and
+nobody reports which third".
+
+## The audit replicates across model families
+
+The punchline was measured on Qwen3-0.6B, where 97% of this project's runs sit.
+It costs nothing to check elsewhere -- the coordinate needs no training -- and
+it holds:
+
+| model | `Lambda_1` span | separation |
+|---|---|---|
+| Qwen3-0.6B | 4.3x | **perfect** |
+| Llama-3.2-3B | 3.0x | **perfect** |
+
+Different architecture, different tokenizer, same structure: every data-aware
+method below every frame-based one, and even the within-group order almost
+unchanged (only PiSSA/EVA and Kaiming/NoRA swap).
 
 ## The prescription is a section, not the thesis
 
