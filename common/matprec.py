@@ -92,3 +92,41 @@ class MatPrecAdam(torch.optim.Optimizer):
                     p.mul_(1 - g["lr"] * g["wd"])
                 p.add_(upd, alpha=-g["lr"])
         return loss
+
+
+class Lion(torch.optim.Optimizer):
+    """Lion (Chen et al., 2023): update = sign(beta1*m + (1-beta1)*g).
+
+    Included to turn the symmetry hierarchy from a table of four measured points
+    into a law with a prediction.  Lion is pure sign descent -- no second
+    moment at all -- so it is diagonal in the strictest sense and should sit at
+    the SAME place as AdamW in the hierarchy (invariant only under signed
+    permutations) while being MORE frame-sensitive, because AdamW's second
+    moment partially smooths the per-coordinate normalisation that Lion applies
+    raw.
+
+    That is a directional prediction, registered before the measurement.
+    """
+
+    def __init__(self, params, lr=1e-4, betas=(0.9, 0.99), wd=0.0):
+        super().__init__(params, dict(lr=lr, betas=betas, wd=wd))
+
+    @torch.no_grad()
+    def step(self, closure=None):
+        loss = closure() if closure is not None else None
+        for g in self.param_groups:
+            b1, b2 = g["betas"]
+            for p in g["params"]:
+                if p.grad is None:
+                    continue
+                d = p.grad
+                st = self.state[p]
+                if "m" not in st:
+                    st["m"] = torch.zeros_like(d)
+                m = st["m"]
+                upd = (m.mul(b1) + d * (1 - b1)).sign_()
+                if g["wd"]:
+                    p.mul_(1 - g["lr"] * g["wd"])
+                p.add_(upd, alpha=-g["lr"])
+                m.mul_(b2).add_(d, alpha=1 - b2)
+        return loss

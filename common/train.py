@@ -97,6 +97,12 @@ def make_optimizer(params, kind, lr, wd=0.0, betas=(0.9, 0.999), eps=1e-8,
         return torch.optim.AdamW(params, lr=lr, weight_decay=wd, betas=betas, eps=eps)
     if kind == "sgd":
         return torch.optim.SGD(params, lr=lr, weight_decay=wd, momentum=momentum)
+    if kind == "lion":
+        # pure sign descent, no second moment: the strictest diagonal method,
+        # predicted to sit with AdamW in the hierarchy but be MORE
+        # frame-sensitive.
+        from common.matprec import Lion
+        return Lion(params, lr=lr, wd=wd)
     if kind == "matprec":
         # Adam with a full-matrix second moment contracted on the rank index --
         # exactly gauge-covariant (verified to 3e-16 over a trajectory), which

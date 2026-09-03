@@ -17,7 +17,7 @@ import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 import torch
 from common.muon import Muon
-from common.matprec import MatPrecAdam
+from common.matprec import MatPrecAdam, Lion
 
 R, DIN, DOUT, STEPS = 8, 64, 48, 25
 
@@ -28,7 +28,8 @@ def trajectory(A0, B0, kind, X, T, lr=1e-2):
     opt = {"sgd": lambda: torch.optim.SGD([A, B], lr=lr),
            "adamw": lambda: torch.optim.AdamW([A, B], lr=lr, weight_decay=0.0),
            "muon": lambda: Muon([A, B], lr=lr, momentum=0.9),
-           "matprec": lambda: MatPrecAdam([A, B], lr=lr)}[kind]()
+           "matprec": lambda: MatPrecAdam([A, B], lr=lr),
+           "lion": lambda: Lion([A, B], lr=lr)}[kind]()
     out = []
     for _ in range(STEPS):
         loss = ((X @ (B @ A).T - T) ** 2).mean()
@@ -53,7 +54,8 @@ def main(seed=0):
           f"{STEPS} steps, float64, B_0 != 0\n")
     print(f"{'optimizer':>26s} " + " ".join(f"{n:>15s}" for n, _, _ in acts))
     for kind, label in (("sgd", "SGD"), ("muon", "Muon"),
-                        ("matprec", "matrix-precond Adam"), ("adamw", "AdamW")):
+                        ("matprec", "matrix-precond Adam"), ("adamw", "AdamW"),
+                        ("lion", "Lion (sign descent)")):
         base = trajectory(A0, B0, kind, X, T)
         row = []
         for _, Ai, Bi in acts:

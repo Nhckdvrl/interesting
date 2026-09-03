@@ -5,6 +5,7 @@ max |loss(transformed) - loss(original)| over 25 steps, float64, B_0 != 0
                       Muon        2.48e-09        4.42e-09        1.20e-02
        matrix-precond Adam        2.22e-16        2.22e-16        1.52e-02
                      AdamW        0.00e+00        1.74e-03        3.18e-02
+       Lion (sign descent)        2.22e-16        1.32e-03        5.79e-02
 
 (An `inf` in the GL(r) column means the transformed run diverged where
  the original did not -- non-invariance in its loudest form, not a bug.)
