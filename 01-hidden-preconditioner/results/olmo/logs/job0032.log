@@ -1,0 +1,18 @@
+# fvcrc20:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond frame0.5 --lr 0.0001 --optimizer lion --warmup 0
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 45.67it/s]
+    step 0/300 loss=0.9991 (1s)
+    step 30/300 loss=0.4873 (21s)
+    step 60/300 loss=0.4340 (41s)
+    step 90/300 loss=0.5071 (60s)
+    step 120/300 loss=0.5244 (80s)
+    step 150/300 loss=0.5854 (100s)
+    step 180/300 loss=0.4275 (124s)
+    step 210/300 loss=0.5665 (144s)
+    step 240/300 loss=0.4100 (163s)
+    step 270/300 loss=0.4893 (183s)
+    step 299/300 loss=0.5819 (202s)
+[frame0.5_lr0.0001_s0_lion] base=0.91147 final=0.53856 (206s)

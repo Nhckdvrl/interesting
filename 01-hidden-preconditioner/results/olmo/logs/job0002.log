@@ -1,18 +1,18 @@
 # fvcrc20:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond kaiming --lr 0.001 --optimizer muon --momentum 0.95 --warmup 0
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond signperm3 --lr 0.0003 --optimizer muon --momentum 0.95 --warmup 0
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 49.93it/s]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 42.63it/s]
     step 0/300 loss=0.9991 (1s)
-    step 30/300 loss=0.4943 (29s)
-    step 60/300 loss=0.4245 (57s)
-    step 90/300 loss=0.5088 (84s)
-    step 120/300 loss=0.5329 (111s)
-    step 150/300 loss=0.5884 (139s)
-    step 180/300 loss=0.4402 (171s)
-    step 210/300 loss=0.5872 (198s)
-    step 240/300 loss=0.4144 (226s)
-    step 270/300 loss=0.4969 (253s)
-    step 299/300 loss=0.5863 (280s)
-[kaiming_lr0.001_s0_muon] base=0.91147 final=0.54413 (283s)
+    step 30/300 loss=0.4947 (30s)
+    step 60/300 loss=0.4378 (59s)
+    step 90/300 loss=0.5150 (87s)
+    step 120/300 loss=0.5249 (116s)
+    step 150/300 loss=0.5888 (145s)
+    step 180/300 loss=0.4298 (178s)
+    step 210/300 loss=0.5635 (207s)
+    step 240/300 loss=0.4288 (236s)
+    step 270/300 loss=0.4951 (264s)
+    step 299/300 loss=0.5752 (292s)
+[signperm3_lr0.0003_s0_muon] base=0.91147 final=0.54250 (297s)
