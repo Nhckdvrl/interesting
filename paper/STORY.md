@@ -100,7 +100,7 @@ too.
 | 5. The audit | 20 configurations, no training | 4.3x span, perfect separation, 2.5x the adjacent gap |
 | 6. Consequences | zoo rotated both ways, 96 runs | 6/6 helped-or-neutral one way, 6/6 hurt-or-neutral the other |
 | 6. …and transfer | the same zoo under Muon, 44 runs | the ranking survives (tau = +0.87) but ~30% of the gap does not |
-| 7. Limits | 8B, r=128, probe controls | where the prescription fails, and that a 4x probe reverses 8B back |
+| 7. Limits | 8B, r=128, probe and precision controls | both apparent failures are estimation quality, not scale |
 
 ## Section 6, answered: the ranking transfers, a third of the gap does not
 
@@ -155,10 +155,17 @@ unchanged (only PiSSA/EVA and Kaiming/NoRA swap).
 ## The prescription is a section, not the thesis
 
 It holds at 0.6B in fp32 (-0.00222, 11x floor, 3/3 seeds) and bf16 (-0.00322),
-on Llama-3.2-3B (-0.00086), at 1000 steps (-0.00098), and at 8B **once the
-probe is large enough** (+0.00202 with a 16-example probe, -0.00280 with 64).
-It fails at r=128, where a pre-registered prediction was falsified with the
-sign wrong.
+on Llama-3.2-3B (-0.00086), at 1000 steps (-0.00098), at r = 128 (-0.00170),
+and at 8B **once the probe is large enough** (+0.00202 with a 16-example probe,
+-0.00280 with 64).
+
+Both apparent failures turned out to be estimation, not scale. The 8B reversal
+reverses back with a 4x probe. The r = 128 reversal was read off a grid whose
+bottom rung held `frame0`'s optimum; extended to 1e-5, the ordering matches
+r = 1..64. What is genuinely falsified is the reach law's *magnitude* an octave
+out, and the lesson that a fixed-learning-rate contrast is the wrong statistic
+when conditions have different optima -- both recorded in
+`PREDICTIONS_r128.md`, prediction unedited.
 
 Written as a thesis this is a wound. Written as **section 7, "when the frame
 can be estimated well enough to act on"**, it is the paper being honest about
