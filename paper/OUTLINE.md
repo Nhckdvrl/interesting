@@ -174,17 +174,39 @@ Rotating published initialisers within their own orbit (`results/rot`, three
 families) helps or is neutral 6/6 one way and hurts or is neutral 6/6 the other,
 with `BA`, `P` and all nine invariants preserved to 1e-15.
 
-## 7. The consequence for practice
+## 7. The consequence: which initialiser is best depends on the optimizer
 
 Because the class depends on the optimizer, so does the comparison. Running the
-same six published initialisers under a frame-sighted and a frame-blind
-optimizer: the **ordering is preserved** (Kendall τ = +0.87), while the
-**margins are not** — Kaiming's advantage over gradsub, EVA and PiSSA falls 31%,
-29% and 37%.
+same six published initialisers under a frame-sighted optimizer (AdamW) and a
+frame-blind one (Muon), on three model families, with every cell at an interior
+optimum and each panel carrying its own SGD-measured floor:
 
-So roughly a third of the margin between published LoRA initialisers is a
-property of the optimizer, not of the method. The label in §4 says how much,
-before any training.
+| family | floor | pairs that reverse | reversals above 2× the floor on **both** |
+|---|---|---|---|
+| Qwen3-0.6B | 1.1e-05 | 1/15 | **0** |
+| Llama-3.2-3B | 2.6e-04 | 6/15 | **4** |
+| OLMo-2-1B | 2.6e-08 | 3/15 | **3** |
+
+On Llama and OLMo — two independent families, different vendors, different
+tokenizers, different pretraining corpora — **the same three pairs reverse**,
+and together they are a complete reversal of one triple:
+
+```
+                    AdamW                          Muon
+Llama-3.2-3B   gradsub < eva < pissa   ->   pissa < eva < gradsub
+OLMo-2-1B      gradsub < eva < pissa   ->   pissa < eva < gradsub
+```
+
+Gradient-subspace initialisation is the best of the three under AdamW and the
+**worst** under Muon, on both models, with every gap more than twice the panel's
+own floor. So "which LoRA initialiser is better" is not a property of the
+initialiser alone.
+
+**It is model-dependent, and we say so.** Qwen3-0.6B shows zero reversals above
+its floor; there the ordering is stable (τ = +0.87). What travels is not "the
+ranking always reverses" but "the ranking is not safe to quote without naming
+the optimizer" — on two of three families it does reverse, reproducibly and in
+the same place.
 
 ## 8. Scope
 
