@@ -1,18 +1,7 @@
-# fvcrc20:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model unsloth/Llama-3.2-3B --steps 300 --grad_clip 1e9 --micro_bs 4 --probe_bs 8 --probe_batches 4 --amp bf16 --tag llama3b --cond frame0 --lr 3e-05 --optimizer lion --warmup 0
+# fvcrc20:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model unsloth/Llama-3.2-3B --steps 300 --grad_clip 1e9 --micro_bs 4 --probe_bs 8 --probe_batches 4 --amp bf16 --tag llama3b --cond frame1 --lr 0.03 --optimizer sgd --momentum 0 --warmup 0
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:04<00:04,  4.71s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.57s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.89s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.07s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.14s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.28s/it]
     step 0/300 loss=1.4704 (2s)
-    step 30/300 loss=0.6015 (51s)
-    step 60/300 loss=0.5572 (101s)
-    step 90/300 loss=0.6255 (151s)
-    step 120/300 loss=0.5615 (202s)
-    step 150/300 loss=0.4743 (252s)
-    step 180/300 loss=0.5233 (306s)
-    step 210/300 loss=0.6200 (357s)
-    step 240/300 loss=0.4247 (408s)
-    step 270/300 loss=0.4547 (459s)
-    step 299/300 loss=0.5492 (507s)
-[frame0_lr3e-05_s0_lion] base=1.36334 final=0.52528 (510s)

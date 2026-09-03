@@ -1,16 +1,16 @@
 # LOCAL:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model unsloth/Llama-3.2-3B --steps 300 --grad_clip 1e9 --micro_bs 4 --probe_bs 8 --probe_batches 4 --amp bf16 --tag llama3b --cond kaiming --lr 1e-05 --optimizer lion --warmup 0
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model unsloth/Llama-3.2-3B --steps 300 --grad_clip 1e9 --micro_bs 4 --probe_bs 8 --probe_batches 4 --amp bf16 --tag llama3b --cond frame0 --lr 0.0001 --optimizer muon --momentum 0.95 --warmup 0
 
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.91s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.75s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.92s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.27s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.25s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.41s/it]
     step 0/300 loss=1.4704 (1s)
-    step 30/300 loss=1.0061 (19s)
-    step 60/300 loss=0.7613 (39s)
-    step 90/300 loss=0.7434 (58s)
-    step 120/300 loss=0.6476 (77s)
-    step 150/300 loss=0.5420 (95s)
-    step 180/300 loss=0.5970 (116s)
-    step 210/300 loss=0.6709 (135s)
-    step 240/300 loss=0.4941 (153s)
-    step 270/300 loss=0.4854 (172s)
-    step 299/300 loss=0.5768 (190s)
-[kaiming_lr1e-05_s0_lion] base=1.36334 final=0.56676 (192s)
+    step 30/300 loss=0.8170 (39s)
+    step 60/300 loss=0.6421 (77s)
+    step 90/300 loss=0.6743 (114s)
+    step 120/300 loss=0.5811 (150s)
+    step 150/300 loss=0.5002 (187s)
+    step 180/300 loss=0.5539 (213s)
+    step 210/300 loss=0.6386 (237s)
+    step 240/300 loss=0.4460 (261s)
+    step 270/300 loss=0.4632 (284s)
+    step 299/300 loss=0.5613 (319s)
+[frame0_lr0.0001_s0_muon] base=1.36334 final=0.54489 (325s)

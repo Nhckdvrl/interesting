@@ -1,18 +1,18 @@
-# fvcrc20:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --tag olmo --cond kaiming --lr 0.0002
+# fvcrc20:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --tag olmo --cond kaiming --lr 0.0005
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 34.52it/s]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 48.69it/s]
     step 0/300 loss=0.9991 (1s)
-    step 30/300 loss=0.4891 (41s)
-    step 60/300 loss=0.4325 (81s)
-    step 90/300 loss=0.5128 (120s)
-    step 120/300 loss=0.5383 (158s)
-    step 150/300 loss=0.5882 (197s)
-    step 180/300 loss=0.4327 (245s)
-    step 210/300 loss=0.5669 (284s)
-    step 240/300 loss=0.4266 (307s)
-    step 270/300 loss=0.4968 (327s)
-    step 299/300 loss=0.5783 (347s)
-[kaiming_lr0.0002_s0] base=0.91147 final=0.54523 (352s)
+    step 30/300 loss=0.4950 (22s)
+    step 60/300 loss=0.4361 (43s)
+    step 90/300 loss=0.5112 (63s)
+    step 120/300 loss=0.5334 (83s)
+    step 150/300 loss=0.5842 (104s)
+    step 180/300 loss=0.4345 (129s)
+    step 210/300 loss=0.5706 (149s)
+    step 240/300 loss=0.4123 (169s)
+    step 270/300 loss=0.4945 (189s)
+    step 299/300 loss=0.5833 (210s)
+[kaiming_lr0.0005_s0] base=0.91147 final=0.54385 (214s)

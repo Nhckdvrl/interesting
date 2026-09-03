@@ -1,18 +1,16 @@
-# fvcrc20:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --tag olmo --cond kaiming --lr 0.1 --optimizer sgd --momentum 0 --warmup 0
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --tag olmo --cond frame0.5 --lr 0.0005
 
-Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
-Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 35.03it/s]
-    step 0/300 loss=0.9991 (1s)
-    step 30/300 loss=0.5141 (21s)
-    step 60/300 loss=0.4990 (45s)
-    step 90/300 loss=0.5455 (87s)
-    step 120/300 loss=0.5792 (140s)
-    step 150/300 loss=0.6010 (196s)
-    step 180/300 loss=0.4721 (262s)
-    step 210/300 loss=0.5883 (318s)
-    step 240/300 loss=0.4681 (371s)
-    step 270/300 loss=0.5212 (423s)
-    step 299/300 loss=0.6056 (477s)
-[kaiming_lr0.1_s0_sgd] base=0.91147 final=0.58331 (490s)
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 104.08it/s]
+    step 0/300 loss=0.9991 (0s)
+    step 30/300 loss=0.4965 (19s)
+    step 60/300 loss=0.4383 (38s)
+    step 90/300 loss=0.5113 (57s)
+    step 120/300 loss=0.5346 (75s)
+    step 150/300 loss=0.5877 (95s)
+    step 180/300 loss=0.4300 (136s)
+    step 210/300 loss=0.5753 (169s)
+    step 240/300 loss=0.4257 (202s)
+    step 270/300 loss=0.4955 (235s)
+    step 299/300 loss=0.5887 (268s)
+[frame0.5_lr0.0005_s0] base=0.91147 final=0.54660 (275s)
