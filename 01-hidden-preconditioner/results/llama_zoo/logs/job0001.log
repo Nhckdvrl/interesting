@@ -1,18 +1,18 @@
 # fvcrc20:1 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model unsloth/Llama-3.2-3B --steps 300 --grad_clip 1e9 --micro_bs 4 --probe_bs 8 --probe_batches 4 --amp bf16 --tag llama_zoo --cond lora_one --lr 0.0001 --match none
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model unsloth/Llama-3.2-3B --steps 300 --grad_clip 1e9 --micro_bs 4 --probe_bs 8 --probe_batches 4 --amp bf16 --tag llama_zoo --cond lora_one --lr 0.0003 --match none --optimizer muon --momentum 0.95 --warmup 0
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:08<00:08,  8.59s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:11<00:00,  5.13s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:11<00:00,  5.65s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:09<00:09,  9.20s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:11<00:00,  5.28s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:11<00:00,  5.87s/it]
     step 0/300 loss=1.1956 (2s)
-    step 30/300 loss=0.5003 (51s)
-    step 60/300 loss=0.5105 (101s)
-    step 90/300 loss=0.6112 (150s)
-    step 120/300 loss=0.5637 (199s)
-    step 150/300 loss=0.4742 (249s)
-    step 180/300 loss=0.5231 (301s)
-    step 210/300 loss=0.6287 (350s)
-    step 240/300 loss=0.4264 (400s)
-    step 270/300 loss=0.4846 (448s)
-    step 299/300 loss=0.5697 (495s)
-[lora_one_lr0.0001_s0_mnone] base=1.18028 final=0.53667 (498s)
+    step 30/300 loss=0.4954 (67s)
+    step 60/300 loss=0.5369 (130s)
+    step 90/300 loss=0.6264 (194s)
+    step 120/300 loss=0.5877 (257s)
+    step 150/300 loss=0.4895 (321s)
+    step 180/300 loss=0.5312 (386s)
+    step 210/300 loss=0.6399 (449s)
+    step 240/300 loss=0.4399 (512s)
+    step 270/300 loss=0.5017 (574s)
+    step 299/300 loss=0.5865 (635s)
+[lora_one_lr0.0003_s0_mnone_muon] base=1.18028 final=0.55244 (637s)

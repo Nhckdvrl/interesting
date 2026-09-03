@@ -235,3 +235,12 @@ hindsight, and this table is the thing to re-read *before* acting, not after.
 
 **Standing rule.** Before adding any experiment, name which row of this table it
 moves. If it moves none, it is defensive and does not get run.
+
+**Second standing rule, learned the hard way.** A reproducibility floor is a
+property of *a panel*, not of the project. It must be measured inside the panel
+it is used on — by SGD, which is exactly gauge-covariant, or by a
+signed-permutation control — never imported from another model or another
+precision. Importing Qwen3-0.6B's fp32 floor of 2e-4 onto a bf16 Llama panel
+turned a null (AdamW 0.00104 against that panel's own SGD floor of 0.00090, a
+ratio of 1.2) into a reported "5.2x". Every panel that carries a claim must
+contain its own floor.
