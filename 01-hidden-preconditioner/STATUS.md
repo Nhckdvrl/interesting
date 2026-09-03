@@ -1,4 +1,4 @@
-> **Current framing is in `paper/STORY.md`.** The line moved twice since this
+> **Current framing is in `paper/OUTLINE.md`.** The line moved twice since this
 > file was written. Stage 1 audited published initializers and found them
 > indistinguishable; Stage 2 found the missing coordinate is the gauge *frame*;
 > Stage 3 found that the frame is one part of a `GL(r)` ambiguity that splits
@@ -18,7 +18,7 @@
 
 > **Superseded in part.** This file is the Stage-1 record (the audit of
 > published initializers). Stage 2 found what Stage 1 was missing, and it is
-> not another invariant: it is the **gauge frame**. See `paper/NARRATIVE.md`
+> not another invariant: it is the **gauge frame**. See `paper/OUTLINE.md`
 > for the current main line and `paper/POSITION.md` for how it sits against
 > LoRA-RITE, Balanced LoRA and FedRot-LoRA.
 >

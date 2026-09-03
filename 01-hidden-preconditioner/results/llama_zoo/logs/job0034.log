@@ -1,0 +1,16 @@
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model unsloth/Llama-3.2-3B --steps 300 --grad_clip 1e9 --micro_bs 4 --probe_bs 8 --probe_batches 4 --amp bf16 --tag llama_zoo --cond bimi --lr 0.1 --match trace --optimizer muon --momentum 0.95 --warmup 0
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.09s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.80s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.99s/it]
+    step 0/300 loss=1.4704 (1s)
+    step 30/300 loss=6.6755 (26s)
+    step 60/300 loss=5.7876 (50s)
+    step 90/300 loss=5.6164 (75s)
+    step 120/300 loss=4.9341 (99s)
+    step 150/300 loss=4.9381 (123s)
+    step 180/300 loss=4.8170 (150s)
+    step 210/300 loss=4.9549 (174s)
+    step 240/300 loss=4.9591 (204s)
+    step 270/300 loss=4.6148 (241s)
+    step 299/300 loss=5.0335 (274s)
+[bimi_lr0.1_s0_muon] base=1.36334 final=5.16026 (277s)

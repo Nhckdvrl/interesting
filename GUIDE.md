@@ -7,56 +7,45 @@ the current main line is.
 ## The main line, in one paragraph
 
 Three topics were registered from the Normalized LoRA (NoRA) mother paper.
-Topics **01** and **02** converged on a single object and are now one line of
-work; topic **03** is a scoped non-reproduction. The line is:
+Topics **01** and **02** converged and are now one line of work; topic **03** is
+a scoped non-reproduction. The line is:
 
-> LoRA's factorisation carries a `GL(r)` reparameterisation ambiguity, and by
-> polar decomposition it splits into a **rotation** part `O(r)` and a
-> **scaling** part. Optimizers form a strict hierarchy of what they are blind
-> to, so **what an initialisation is -- how many degrees of freedom it actually
-> has -- depends on which optimizer will consume it.** AdamW has the smallest
-> symmetry group of any method in common use, and the extra coordinate it alone
-> can see is one the initialisation literature varies by 4.3x without reporting.
+> LoRA's factorisation `ΔW = sBA` carries a `GL(r)` redundancy -- `(SA, BS⁻¹)`
+> is the same function for every invertible `S`. **Optimizers do not all see the
+> same part of it**, and which part they see is decided by one structural
+> property of the update rule: whether the preconditioner is diagonal in the
+> coordinates the group acts on. We give the map, a training-free label for the
+> part that separates optimizers, and the consequence for how LoRA
+> initialisations are compared.
 
-Measured over 25 steps in float64 (`01-.../src/hierarchy.py`):
-
-| optimizer | signed perms | `O(r)` rotation | `GL(r)` scaling |
-|---|---|---|---|
-| SGD | 2.2e-16 | **2.2e-16** | 9.8e-03 |
-| Muon | 2.5e-09 | **4.4e-09** | 1.2e-02 |
-| matrix-preconditioned Adam | 2.2e-16 | **2.2e-16** | 1.5e-02 |
-| **AdamW** | 0.0e+00 | **1.7e-03** | 3.2e-02 |
+Nine optimizers, each normalised by its own noise floor
+(`01-.../src/hierarchy.py`):
 
 ```
-   signed perms  <  O(r)  <  GL(r)
-      AdamW         SGD       LoRA-RITE
-                    Muon      Riemannion (ICLR 2026)
-                    matrix-preconditioned Adam
+   signed permutations  ⊂  O(r)  ⊂  GL(r)
+
+   sees O(r) only:            SGD, SGD+momentum, Muon, matrix-preconditioned Adam
+   sees O(r) AND the frame:   AdamW, Lion, RMSprop, Adagrad, Adadelta
 ```
 
-Four recent works -- LoRA-RITE, Balanced LoRA, FedRot-LoRA and Riemannion --
-all treat this ambiguity as a defect to remove. None asks what it is worth, or
-which part of it a given optimizer sees. Riemannion motivates itself by saying
-per-factor Muon is not invariant to "scalings **or rotations**"; the rotation
-half of that is wrong by six orders of magnitude, and it is exactly the part
-that matters.
+Twelve orders of magnitude separate the two groups. The frame carries **zero
+function-space information** -- `(A,B)` and `(QA,BQᵀ)` have the same function,
+loss and gradient -- yet five of the nine respond to it, including every
+optimizer in common use.
 
 ## Where to read, in order
 
 | file | what it is |
 |---|---|
-| **`paper/STORY.md`** | the current framing: the symmetry hierarchy, what each optimizer can see, and why the prescription is a section rather than the thesis. **Read this first.** |
-| `paper/NARRATIVE.md` | the longer main-line document: claims, evidence, positioning |
-| `paper/SCOPE.md` | what NoRA actually runs, and what we need to match it |
-| `paper/RESULTS.md` | every headline number, generated from the run files by `paper/make_results.py` |
-| `01-hidden-preconditioner/STATUS.md` | topic-01 record: what was run, what it showed, what was falsified |
-| `02-representation-gauge/STATUS.md` | topic-02 record |
-| `03-stochastic-batch-geometry/STATUS.md` | topic-03 record (non-reproduction, scoped) |
-| `paper/POSITION.md` | what is ours and what is already known (LoRA-RITE, Balanced LoRA, FedRot-LoRA all treat the gauge as a defect to remove; we treat it as a coordinate to set) |
-| `01-hidden-preconditioner/PREDICTIONS_frame.md` | predictions committed before the gauge-frame panel ran. One of them was falsified in sign, and the file is unedited |
-| `01-hidden-preconditioner/PREDICTIONS_mechanism.md` | predictions committed before the mechanism panel ran; the named matrix was wrong |
-| `paper/8b_predictions.md` | predictions committed before any 8B training |
-| `README.md`, `0*/README.md` | the original registrations — the pre-registered questions and kill criteria |
+| **`paper/OUTLINE.md`** | **the main line.** Eight sections, each naming the experiment that carries it, plus a requirements table to re-read before every step. **Start here.** |
+| `paper/POSITION.md` | related work (four papers treat this gauge as a defect to remove) and scale calibration against NoRA and the nearest comparable paper |
+| `paper/RESULTS.md` | every headline number, regenerated from the run files by `paper/make_results.py` |
+| `paper/hierarchy.txt` | the optimizer→class map as the script prints it |
+| `01-hidden-preconditioner/results/README.md` | index of ~30 result directories |
+| `0*/STATUS.md` | per-topic records: what was run, what it showed, what was falsified |
+| `01-.../PREDICTIONS_*.md`, `paper/8b_predictions.md` | four pre-registrations, predictions unedited, outcomes appended -- two were falsified |
+| `paper/superseded/` | two earlier framings and why each was replaced |
+| `README.md`, `0*/README.md` | the original registrations |
 
 ## Reproducing the numbers
 

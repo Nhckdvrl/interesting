@@ -4,7 +4,7 @@
 > signed-permutation rung that is an exact zero-dose control because that is
 > precisely AdamW's own symmetry group.
 >
-> The unified statement is in `paper/NARRATIVE.md`: **which reparameterisation
+> The unified statement is in `paper/OUTLINE.md`: **which reparameterisation
 > symmetries the optimizer respects decides what an initialisation is.** SGD
 > (Frobenius norm) and Muon (spectral norm) descend in orthogonally invariant
 > geometries and are exactly covariant under both gauges; AdamW (elementwise

@@ -1,0 +1,32 @@
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/second_order.py --model Qwen/Qwen3-8B-Base --no_atlas --every_layer 16 --probe_batches 4 --dtype bfloat16 --out /home/xiang/interesting/01-hidden-preconditioner/results/second_order_q8b.json
+
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:00<00:00, 139.22it/s]
+21 sampled modules of 252
+probes done
+skipping the atlas cache
+0 cached atlas constructions
+  kaiming                    trace      Lam1=0.3732 E_g=0.8823 Off_x=0.3955 D_g=0.1717 Psi_0x=1.0040
+  left_gauge                 trace      Lam1=0.3731 E_g=0.8834 Off_x=0.3918 D_g=0.1717 Psi_0x=1.0040
+  nora                       trace      Lam1=0.3742 E_g=0.8855 Off_x=0.3986 D_g=0.1703 Psi_0x=1.0040
+  nora_unit                  none       Lam1=0.3742 E_g=0.8855 Off_x=0.3986 D_g=0.1703 Psi_0x=1.0040
+  nora_unit                  trace      Lam1=0.3742 E_g=0.8855 Off_x=0.3986 D_g=0.1703 Psi_0x=1.0040
+  bimi                       none       Lam1=0.3461 E_g=0.8255 Off_x=0.3525 D_g=0.1689 Psi_0x=1.0000
+  bimi                       trace      Lam1=0.3461 E_g=0.8255 Off_x=0.3525 D_g=0.1689 Psi_0x=1.0000
+  etf                        none       Lam1=0.3775 E_g=0.8894 Off_x=0.4208 D_g=0.1703 Psi_0x=1.0000
+  etf                        trace      Lam1=0.3775 E_g=0.8894 Off_x=0.4208 D_g=0.1703 Psi_0x=1.0000
+  flatspec_flatdiag          trace      Lam1=0.3612 E_g=0.8604 Off_x=0.4500 D_g=0.1624 Psi_0x=1.0000
+  geomspec_flatdiag0.5       trace      Lam1=0.1515 E_g=0.3598 Off_x=0.0917 D_g=0.1242 Psi_0x=5.2474
+  eva                        none       Lam1=0.2705 E_g=0.6571 Off_x=0.0000 D_g=0.1425 Psi_0x=1.0000
+  eva                        trace      Lam1=0.2705 E_g=0.6571 Off_x=0.0000 D_g=0.1425 Psi_0x=1.0000
+  eva                        trace_act  Lam1=0.2705 E_g=0.6571 Off_x=0.0000 D_g=0.1425 Psi_0x=1.0000
+  gradsub                    none       Lam1=0.1869 E_g=0.4422 Off_x=0.4466 D_g=0.1761 Psi_0x=0.9999
+  gradsub                    trace      Lam1=0.1869 E_g=0.4422 Off_x=0.4466 D_g=0.1761 Psi_0x=0.9999
+  gradsub                    trace_act  Lam1=0.1869 E_g=0.4422 Off_x=0.4466 D_g=0.1761 Psi_0x=0.9999
+  pissa                      none       Lam1=0.2318 E_g=0.5711 Off_x=0.3188 D_g=0.1173 Psi_0x=1.4368
+  pissa                      trace      Lam1=0.2318 E_g=0.5711 Off_x=0.3188 D_g=0.1173 Psi_0x=1.4368
+  pissa_minor                none       Lam1=0.3128 E_g=0.7315 Off_x=0.5611 D_g=0.1175 Psi_0x=1.1258
+  olora                      none       Lam1=0.3217 E_g=0.7796 Off_x=0.6156 D_g=0.1271 Psi_0x=1.9120
+  lora_one                   none       Lam1=0.1090 E_g=0.2596 Off_x=0.2792 D_g=0.1124 Psi_0x=3.3740
+  lora_one                   trace      Lam1=0.1090 E_g=0.2596 Off_x=0.2792 D_g=0.1124 Psi_0x=3.3740
+wrote /home/xiang/interesting/01-hidden-preconditioner/results/second_order_q8b.json (23 rows)

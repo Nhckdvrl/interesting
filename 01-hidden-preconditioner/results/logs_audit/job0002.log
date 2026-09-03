@@ -1,0 +1,21 @@
+# fvcrc20:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/second_order.py --model allenai/OLMo-2-0425-1B --no_atlas --every_layer 4 --probe_batches 4 --dtype float32 --out /home/xiang/interesting/01-hidden-preconditioner/results/second_order_olmo1b.json
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files:  50%|█████     | 1/2 [04:25<04:25, 265.43s/it]Fetching 2 files: 100%|██████████| 2/2 [09:06<00:00, 273.09s/it]Fetching 2 files: 100%|██████████| 2/2 [09:06<00:00, 273.09s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:01<00:01,  1.89s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.08it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.07s/it]
+28 sampled modules of 112
+probes done
+skipping the atlas cache
+0 cached atlas constructions
+  kaiming                    trace      Lam1=0.4153 E_g=0.8746 Off_x=0.4599 D_g=0.1529 Psi_0x=1.0070
+  left_gauge                 trace      Lam1=0.4075 E_g=0.8587 Off_x=0.4623 D_g=0.1529 Psi_0x=1.0070
+  nora                       trace      Lam1=0.4169 E_g=0.8769 Off_x=0.4668 D_g=0.1522 Psi_0x=1.0065
+  nora_unit                  none       Lam1=0.4169 E_g=0.8769 Off_x=0.4668 D_g=0.1522 Psi_0x=1.0065
+  nora_unit                  trace      Lam1=0.4169 E_g=0.8769 Off_x=0.4668 D_g=0.1522 Psi_0x=1.0065
+  bimi                       none       Lam1=0.3455 E_g=0.7438 Off_x=0.3293 D_g=0.1360 Psi_0x=1.0000
+  bimi                       trace      Lam1=0.3455 E_g=0.7438 Off_x=0.3293 D_g=0.1360 Psi_0x=1.0000
+  etf                        none       Lam1=0.4004 E_g=0.8445 Off_x=0.4577 D_g=0.1379 Psi_0x=1.0000
+  etf                        trace      Lam1=0.4004 E_g=0.8445 Off_x=0.4577 D_g=0.1379 Psi_0x=1.0000
+  flatspec_flatdiag          trace      Lam1=0.4108 E_g=0.8699 Off_x=0.4038 D_g=0.1555 Psi_0x=1.0000

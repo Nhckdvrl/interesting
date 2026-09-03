@@ -1,26 +1,3 @@
-# fvcrc20:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag dolly_frame --cond frame1 --lr 0.0002 --task dolly --steps 300 --grad_clip 1e9
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag rank --cond kaiming --lr 0.0007 --r 4 --alpha 8 --steps 300 --grad_clip 1e9
 
-Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
-Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-[W903 01:59:01.128812753 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 2097152 bytes (free: 68026368, total: 101971722240).
-[W903 01:59:01.129243098 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 2097152 bytes (free: 68026368, total: 101971722240).
-Traceback (most recent call last):
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
-    main()
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 321, in main
-    adapters = apply_lora(model, args.r, args.alpha, factory, targets=targets,
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/lora.py", line 93, in apply_lora
-    out = a_factory(name, r, d_in, d_out)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 266, in factory
-    A = IN.init_frame(base.cuda(), G[name].cuda(),
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/initializers.py", line 206, in init_frame
-    Q = frame_ladder(GA.T @ GA, [float(t)])[0]
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/intrinsic.py", line 524, in frame_ladder
-    Q0 = torch.linalg.eigh(Mg)[1].T.contiguous()
-         ^^^^^^^^^^^^^^^^^^^^^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 64.88 MiB is free. Process 1381976 has 13.35 GiB memory in use. Process 3520996 has 36.46 GiB memory in use. Process 3533105 has 29.40 GiB memory in use. Process 3533037 has 12.61 GiB memory in use. Including non-PyTorch memory, this process has 3.05 GiB memory in use. Of the allocated memory 2.32 GiB is allocated by PyTorch, and 36.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

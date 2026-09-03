@@ -1,0 +1,17 @@
+# fvcrc20:3 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/second_order.py --model mistralai/Mistral-7B-v0.3 --no_atlas --every_layer 8 --probe_batches 4 --dtype bfloat16 --out /home/xiang/interesting/01-hidden-preconditioner/results/second_order_mistral7b.json
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:10<00:21, 10.71s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:20<00:10, 10.46s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:29<00:00,  9.77s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:29<00:00,  9.98s/it]
+28 sampled modules of 224
+probes done
+skipping the atlas cache
+0 cached atlas constructions
+  kaiming                    trace      Lam1=0.3991 E_g=0.8918 Off_x=0.4545 D_g=0.1932 Psi_0x=1.0032
+  left_gauge                 trace      Lam1=0.3977 E_g=0.8930 Off_x=0.4574 D_g=0.1932 Psi_0x=1.0032
+  nora                       trace      Lam1=0.3995 E_g=0.8923 Off_x=0.4560 D_g=0.1916 Psi_0x=1.0030
+  nora_unit                  none       Lam1=0.3995 E_g=0.8923 Off_x=0.4560 D_g=0.1916 Psi_0x=1.0030
+  nora_unit                  trace      Lam1=0.3995 E_g=0.8923 Off_x=0.4560 D_g=0.1916 Psi_0x=1.0030
+  bimi                       none       Lam1=0.3731 E_g=0.8436 Off_x=0.3314 D_g=0.2077 Psi_0x=1.0000
+  bimi                       trace      Lam1=0.3731 E_g=0.8436 Off_x=0.3314 D_g=0.2077 Psi_0x=1.0000

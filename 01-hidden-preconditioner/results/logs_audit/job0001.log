@@ -1,28 +1,18 @@
 # fvcrc20:1 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/second_order.py --model Qwen/Qwen3-8B-Base --no_atlas --every_layer 8 --probe_batches 4 --out /home/xiang/interesting/01-hidden-preconditioner/results/second_order_q8b.json
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/second_order.py --model google/gemma-2-2b --no_atlas --every_layer 4 --probe_batches 4 --dtype float32 --out /home/xiang/interesting/01-hidden-preconditioner/results/second_order_gemma2b.json
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:02<00:10,  2.51s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:05<00:08,  2.80s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:07<00:04,  2.36s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:08<00:02,  2.03s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:09<00:00,  1.44s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:09<00:00,  1.86s/it]
-[W903 12:31:45.197860457 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 106954752 bytes (free: 161546240, total: 101971722240).
-[W903 12:31:47.317859998 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 123731968 bytes (free: 77660160, total: 101971722240).
-[W903 12:31:48.260528653 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1507852288 bytes (free: 1348534272, total: 101971722240).
-[W903 12:31:50.034446884 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 136314880 bytes (free: 207683584, total: 101971722240).
-[W903 12:31:51.231100695 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1033895936 bytes (free: 641794048, total: 101971722240).
-[W903 12:31:51.232487435 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1033895936 bytes (free: 734068736, total: 101971722240).
-Traceback (most recent call last):
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/second_order.py", line 206, in <module>
-    main()
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/second_order.py", line 75, in main
-    G = collect_grads(model, allm, ld, a.probe_batches)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 69, in collect_grads
-    (loss / n_batches).backward()
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/_tensor.py", line 623, in backward
-    torch.autograd.backward(
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/__init__.py", line 395, in backward
-    _engine_run_backward(
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/graph.py", line 979, in _engine_run_backward
-    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 986.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 700.06 MiB is free. Including non-PyTorch memory, this process has 94.26 GiB memory in use. Of the allocated memory 92.37 GiB is allocated by PyTorch, and 1.25 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files: 100%|██████████| 3/3 [08:29<00:00, 169.90s/it]Fetching 3 files: 100%|██████████| 3/3 [08:29<00:00, 169.90s/it]
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:08<00:17,  8.86s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:15<00:07,  7.81s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:17<00:00,  4.73s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:17<00:00,  5.67s/it]
+49 sampled modules of 182
+probes done
+skipping the atlas cache
+0 cached atlas constructions
+  kaiming                    trace      Lam1=0.3385 E_g=0.8264 Off_x=0.6032 D_g=0.1244 Psi_0x=1.0070
+  left_gauge                 trace      Lam1=0.3365 E_g=0.8164 Off_x=0.6150 D_g=0.1244 Psi_0x=1.0070
+  nora                       trace      Lam1=0.3384 E_g=0.8254 Off_x=0.6027 D_g=0.1237 Psi_0x=1.0069
+  nora_unit                  none       Lam1=0.3384 E_g=0.8254 Off_x=0.6027 D_g=0.1237 Psi_0x=1.0069
+  nora_unit                  trace      Lam1=0.3384 E_g=0.8254 Off_x=0.6027 D_g=0.1237 Psi_0x=1.0069
+  bimi                       none       Lam1=0.3078 E_g=0.7630 Off_x=0.5555 D_g=0.1145 Psi_0x=1.0000
+  bimi                       trace      Lam1=0.3078 E_g=0.7630 Off_x=0.5555 D_g=0.1145 Psi_0x=1.0000

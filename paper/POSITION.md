@@ -71,3 +71,43 @@ LoRA-RITE's 7-point GSM8K gain from making the optimizer gauge-invariant is
 independent evidence that the frame carries real signal. Our account says
 *why*, and asks whether most of it is available for free by choosing the frame
 once at initialisation instead of changing the optimizer.
+
+---
+
+# Scale calibration
+
+Two questions that look alike and are not: *how large are the models in
+comparable papers*, and *how broad is the evidence*.
+
+## For calibration: what NoRA runs
+
+Largest model **3B** (Llama-3.2-3B for SFT, DeepSeek-R1-Distill-Qwen-1.5B for
+RL, custom L24-D1024 stacks for pretraining). So parameter count is not where we
+are short — our 8B exceeds it. What NoRA has is **breadth**: three regimes,
+three data sources, ~15 benchmarks, all accuracy. Rows 5, 6 and 8 above are
+what close that, and they are chosen because the claim needs them, not because
+NoRA has them.
+
+## Deliberate omissions, stated not hidden
+
+**RL and pretraining-from-scratch.** NoRA covers both. We do not, under the
+standing constraint against large RL sweeps. The claim under test is derived
+rather than fitted and does not depend on the regime, so an RL arm would show
+that it transfers, not that it holds — but its absence is a limitation and is
+listed as one in `OUTLINE.md` §8.
+
+## The nearest comparable paper
+
+*Understanding Adam Requires Better Rotation Dependent Assumptions*
+(NeurIPS 2025) studies exactly our phenomenon -- Adam's dependence on the basis
+-- and runs **GPT-2 (124M), ViT/S (22M), ResNet-50 (25M)**. Its largest model is
+124M; ours is 8B, 65x larger.
+
+**Parameter count is not where this genre sets its bar.** It takes breadth from
+architecture and domain -- a language transformer, a vision transformer, a
+convnet -- and its headline effect (a 16% training slowdown) comes from rotating
+the *whole* parameter space, where ours rotates inside a rank-16 adapter.
+
+What that says for us: stop adding model sizes, add model families and check
+each claim on each of them. Three families in training (Qwen3, Llama-3.2,
+OLMo-2) and seven in the training-free audit.

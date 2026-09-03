@@ -1,78 +1,22 @@
-# fvcrc20:3 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag dolly_frame --cond frame0.5 --lr 0.0003 --task dolly --steps 300 --grad_clip 1e9
+# fvcrc20:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag rank --cond frame1 --lr 0.0015 --r 1 --alpha 2 --steps 300 --grad_clip 1e9
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-[W903 01:57:28.545883900 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 322961408 bytes (free: 276234240, total: 101971722240).
-[W903 01:57:28.818783043 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 20971520 bytes (free: 18284544, total: 101971722240).
-[W903 01:57:28.819621840 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 20971520 bytes (free: 20381696, total: 101971722240).
+    step 0/300 loss=1.1613 (1s)
+[W903 15:07:35.642138447 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3735027712 bytes (free: 1226244096, total: 101971722240).
+[W903 15:07:36.990450176 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 2306867200 bytes (free: 1129775104, total: 101971722240).
+[W903 15:07:36.991341390 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 2306867200 bytes (free: 1129775104, total: 101971722240).
 Traceback (most recent call last):
   File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
     main()
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 206, in main
-    G = collect_grads(model, mods, probe_ld, args.probe_batches)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 65, in collect_grads
-    out = model(input_ids=b["input_ids"], attention_mask=b["attention_mask"])
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 390, in main
+    log = train(model, adapters, params, trl, tel, cfg, callback=cb, log_every=5,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 170, in train
+    loss_sum = nn.functional.cross_entropy(logits[mask], labels[mask],
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/functional.py", line 3555, in cross_entropy
+    return torch._C._nn.cross_entropy_loss(
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/utils/generic.py", line 918, in wrapper
-    output = func(self, *args, **kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 480, in forward
-    outputs: BaseModelOutputWithPast = self.model(
-                                       ^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/utils/generic.py", line 1072, in wrapper
-    outputs = func(self, *args, **kwargs)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 410, in forward
-    hidden_states = decoder_layer(
-                    ^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/modeling_layers.py", line 94, in __call__
-    return super().__call__(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/utils/deprecation.py", line 172, in wrapped_func
-    return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 260, in forward
-    hidden_states, _ = self.self_attn(
-                       ^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/utils/deprecation.py", line 172, in wrapped_func
-    return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 200, in forward
-    query_states = self.q_norm(self.q_proj(hidden_states).view(hidden_shape)).transpose(1, 2)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 64, in forward
-    return self.weight * hidden_states.to(input_dtype)
-           ~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 19.44 MiB is free. Process 175498 has 12.81 GiB memory in use. Process 3511569 has 49.98 GiB memory in use. Process 3519481 has 23.35 GiB memory in use. Process 3527359 has 3.05 GiB memory in use. Including non-PyTorch memory, this process has 5.71 GiB memory in use. Of the allocated memory 4.79 GiB is allocated by PyTorch, and 283.21 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.15 GiB. GPU 0 has a total capacity of 94.97 GiB of which 1.05 GiB is free. Process 202071 has 26.00 GiB memory in use. Process 276564 has 40.17 GiB memory in use. Including non-PyTorch memory, this process has 27.72 GiB memory in use. Of the allocated memory 25.92 GiB is allocated by PyTorch, and 1.11 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
