@@ -194,6 +194,17 @@ across families and is not AdamW's floor. Qwen's and Llama's own floors come fro
 `gradsub@frame0`, an exact identity map under AdamW, and from the sister
 `llama_map` panel; OLMo's from its AdamW signed-permutation seeds.)
 
+> **Flag, under verification — see `01-hidden-preconditioner/FINDING_scale_attenuation.md`.**
+> The Llama row's 6× is not robust. The clean replication (`llama_map`, a larger
+> probe batch so the frames are constructed more accurately) gives 1.4× at the
+> same lr, not 6× — part of `llama_fp32`'s spread was probe noise, not frame
+> signal. Ordered by size the own-floor ratios read 0.6B 11×, 1B 10×, 3B 1.4–6×,
+> 8B marginal: the margin over the floor **attenuates with scale** (AdamW's
+> reduction-order floor grows, the frame signal does not). This does not touch the
+> §3 map, which is the *relative* gap AdamW ≫ blind; the decisive check is the
+> `llama_map` blind arm (running). Framing is the user's call; the number is
+> flagged, not yet rewritten.
+
 Five optimizers on the Qwen3-0.6B orbit, ordered by what the map in §3 predicts:
 
 | optimizer | spread | vs floor |
