@@ -1,16 +1,16 @@
 # LOCAL:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --tag olmo_zoo --cond gradsub --lr 0.0001 --match trace
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo_zoo --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond pissa --lr 1e-05 --match none --steps 300 --grad_clip 1e9 --optimizer muon --momentum 0.95 --warmup 0
 
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 102.66it/s]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 137.11it/s]
     step 0/300 loss=0.9991 (1s)
-    step 30/300 loss=0.4979 (38s)
-    step 60/300 loss=0.4392 (75s)
-    step 90/300 loss=0.5131 (111s)
-    step 120/300 loss=0.5409 (148s)
-    step 150/300 loss=0.5923 (185s)
-    step 180/300 loss=0.4327 (230s)
-    step 210/300 loss=0.5767 (266s)
-    step 240/300 loss=0.4318 (302s)
-    step 270/300 loss=0.4954 (337s)
-    step 299/300 loss=0.5834 (373s)
-[gradsub_lr0.0001_s0] base=0.91147 final=0.55062 (382s)
+    step 30/300 loss=0.5459 (21s)
+    step 60/300 loss=0.5226 (40s)
+    step 90/300 loss=0.5477 (60s)
+    step 120/300 loss=0.5739 (80s)
+    step 150/300 loss=0.5966 (100s)
+    step 180/300 loss=0.4616 (124s)
+    step 210/300 loss=0.5819 (143s)
+    step 240/300 loss=0.4539 (163s)
+    step 270/300 loss=0.5130 (182s)
+    step 299/300 loss=0.5951 (202s)
+[pissa_lr1e-05_s0_mnone_muon] base=0.91147 final=0.57117 (206s)
