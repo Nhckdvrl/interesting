@@ -293,6 +293,18 @@ Two pre-registered predictions of ours were falsified and one reading
 over-called; the prediction files are in the repository unedited with outcomes
 appended.
 
+**A scale boundary, measured.** The frame effect sits at ~10× AdamW's own floor
+on 0.6B, OLMo-1B and Llama-3B, but at Qwen3-8B in fp32 it *washes out*: the frame
+spread (0.00123) falls to 0.11× AdamW's own signed-permutation floor (0.011,
+n = 5), the three frame conditions interleaving with the gauge-equivalent seeds.
+The signal shrinks with scale while AdamW's reduction-order chaos grows, and by 8B
+the chaos overtakes it. This bounds where the *magnitude* is resolvable; it does
+not touch the map, which is a statement about which optimizers can see the frame
+(three families in training, seven by the training-free label) rather than how
+large the effect is at a given scale. It also retires a bf16 "reversal" at 8B as a
+precision artefact — bf16 raised the floor and compressed the conditions, and the
+apparent flip did not survive fp32.
+
 ---
 
 ## Narrative shape
@@ -347,7 +359,7 @@ hindsight, and this table is the thing to re-read *before* acting, not after.
 | **must NOT narrow because an experiment failed** | **structurally fixed** | The map is the contribution. The prescription's fragility, the accuracy null and the collinear mechanism cannot narrow it, because none of them is load-bearing. Previously all three forced a retreat. |
 | **no defensive experiments** | watch | Ban: further probe-size controls, further precision controls, further seed replication. Those exist and are enough. Any new panel must extend coverage or test a prediction. |
 | **main-line experiment volume** | ok | ~750 once the third family lands, plus the 582-run Stage-1 audit. Not 2348 — most of that is exploration the paper does not cite, and quoting it would be misleading. |
-| **model coverage** | **in progress** | Every main line now on three families {Qwen3-0.6B, OLMo-2-1B, Llama-3.2-3B}. The central map (§3) was the last on two; its third family (Llama-3.2-3B, five optimizers, true fp32) is read on the A100 pool and **the split holds** by the low-lr criterion (the clean one; the tuned-lr ratio is edge-chaos-inflated for the blind optimizers): at low lr the sighted optimizers hold nonzero frame spread (AdamW 0.0009, Lion 0.0012) while the blind ones **vanish** (muon 0.00001, matprec 0.00000) — a ~90× split, same as Qwen and OLMo. AdamW's *magnitude* attenuates with scale (≈2× its own floor here vs 10× on OLMo) but stays firmly sighted; an earlier read that compared AdamW to muon at muon's near-edge lr called it "into the blind range" and was wrong (sgd arm still filling in). Plus Qwen3-8B for scope: fp32 ladder + its own AdamW floor (three signed-permutation seeds) complete — the effect sits **at or below** that floor at 8B (ratio 0.2–1.2×), cleanly resolved only at 0.6B/1B; the frame signal is flat with scale and the floor grows toward the stability edge (see `01-hidden-preconditioner/FINDING_scale_attenuation.md`). Audit: seven families. |
+| **model coverage** | **in progress** | Every main line now on three families {Qwen3-0.6B, OLMo-2-1B, Llama-3.2-3B}. The central map (§3) was the last on two; its third family (Llama-3.2-3B, five optimizers, true fp32) is read on the A100 pool and **the split holds** by the low-lr criterion (the clean one; the tuned-lr ratio is edge-chaos-inflated for the blind optimizers): at low lr the sighted optimizers hold nonzero frame spread (AdamW 0.0009, Lion 0.0012) while the blind ones **vanish** (muon 0.00001, matprec 0.00000) — a ~90× split, same as Qwen and OLMo. AdamW's *magnitude* attenuates with scale (≈2× its own floor here vs 10× on OLMo) but stays firmly sighted; an earlier read that compared AdamW to muon at muon's near-edge lr called it "into the blind range" and was wrong (sgd arm still filling in). Plus Qwen3-8B for scope: fp32 ladder + its own AdamW floor (three signed-permutation seeds) complete — the effect **washes out** at 8B (frame spread 0.11× that floor, n=5; the frame conditions interleave with the gauge-equivalent seeds), cleanly resolved only at 0.6B/1B/3B; the frame signal is flat with scale and the floor grows toward the stability edge (see `01-hidden-preconditioner/FINDING_scale_attenuation.md`). Audit: seven families. |
 | **mother paper is NoRA** | ok | §5 explains NoRA's own ablation: its whole family sits at vanilla's frame value, which is why those five conditions are mutually indistinguishable. |
 
 **Standing rule.** Before adding any experiment, name which row of this table it

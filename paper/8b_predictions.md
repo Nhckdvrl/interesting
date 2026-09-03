@@ -109,3 +109,25 @@ floor. This is the ninth read held on the floor discipline, and the first where
 the held number is the difference between "we found a scale reversal" and "the
 effect washes out at 8B" -- both honest scope statements, and not a narrowing of
 the map, which stands on 0.6B/OLMo-1B/Llama-3B.
+
+### Resolved at n=5: washout, not reversal
+
+Two more signperm seeds settled it. The five AdamW floor seeds at 7e-4 are
+{0.38725, 0.39212, 0.39254, 0.39484, 0.39813} -- range 0.01088, and even the
+middle three span 0.0027. The three frame conditions {kaiming 0.39337, frame0
+0.39361, frame1 0.39461} fall *inside* that scatter, interleaved with the
+signed-permutation seeds; the best seed (sp4, 0.38725) beats the best frame by
+0.006. So a function-preserving relabeling of the rank index moves AdamW's 8B
+loss more than moving between frames does.
+
+Verdict: the frame effect washes out at 8B in fp32. Frame spread 0.00123 is 0.11x
+the full floor (0.45x even the conservative middle-3 range). The "kaiming best"
+ordering was within-floor noise, not a scale reversal; the earlier bf16 "reversal"
+was a precision artefact. The effect that is ~10x its floor on 0.6B/OLMo-1B/Llama-3B
+attenuates below its own floor by 8B -- the frame signal shrinks with scale while
+AdamW's reduction-order chaos grows, and by 8B the chaos overtakes it.
+
+This is a scope boundary, stated as one, and it does not narrow the map: the map is
+a statement about which optimizers can see the frame, established in training on
+three families and by the training-free label on seven. 8B tells us where the
+*magnitude* stops being resolvable, which is a different and honest axis.

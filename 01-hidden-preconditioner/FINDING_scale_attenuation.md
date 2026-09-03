@@ -164,3 +164,19 @@ attenuation is real but it is the second comparison, not the first.
 
 (Found by cross-check against a parallel analysis that used the low-lr criterion
 directly -- recording the error and its correction rather than quietly editing.)
+
+## Update 2026-09-04: the 8B floor is in (n=5), and it settles the boundary
+
+The "marginal, own floor running" 8B line above is now resolved. AdamW's five
+signed-permutation floor seeds at 7e-4 are {0.38725, 0.39212, 0.39254, 0.39484,
+0.39813} -- full range 0.01088, middle-three range 0.0027. The three frame
+conditions {kaiming 0.39337, frame0 0.39361, frame1 0.39461} fall *inside* that
+scatter, interleaved with the gauge-equivalent seeds; the best seed beats the best
+frame by 0.006. Frame spread 0.00123 is 0.11x the full floor (0.45x the middle-3).
+
+So at 8B the effect is **washed out**, not merely marginal, and the earlier "kaiming
+best" ordering was within-floor noise rather than a scale reversal. This confirms
+the mechanism this file proposed: the frame signal is flat with scale while AdamW's
+reduction-order floor grows (0.00021 -> 0.00016 -> 0.00040 -> ~0.006-0.011 at 8B),
+so the margin between the classes closes and the floor overtakes the signal by 8B.
+The map (relative separation) is untouched; this bounds the resolvable magnitude.

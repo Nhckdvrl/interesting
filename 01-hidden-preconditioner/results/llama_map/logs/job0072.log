@@ -11,3 +11,8 @@ Warning: Permanently added 'fvcrc11' (ED25519) to the list of known hosts.
     step 120/300 loss=5.7303 (448s)
     step 150/300 loss=5.9600 (664s)
     step 180/300 loss=5.8003 (923s)
+    step 210/300 loss=5.9131 (1133s)
+    step 240/300 loss=5.9385 (1342s)
+    step 270/300 loss=5.6173 (1550s)
+    step 299/300 loss=5.5243 (1760s)
+[frame0.5_lr0.3_s0_sgd] base=1.36287 final=5.59080 (1804s)
