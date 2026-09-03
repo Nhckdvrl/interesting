@@ -102,3 +102,34 @@ the ratio-to-own-floor is not the right lens for the blind optimizers anyway
 (their floor is near zero, so the ratio is unstable; read the raw spread). What
 scale changes is how far AdamW's own floor sits below its own signal, not the
 ordering of the classes.
+
+## Update 2026-09-04 (2): the Llama attenuation is AdamW-specific, not a class collapse
+
+The llama_map blind arm (muon done, matprec nearly, sgd filling in) lets the map
+be read on the third family by raw spread at each optimizer's stable operating
+point:
+
+    Lion     0.00422   sees, strongly (~11x the blind class)
+    AdamW    0.00057   attenuated -- into the blind range
+    Muon     0.00037   blind (2.4x its own floor; fp32 Newton-Schulz)
+    matprec  0.00009   blind, clean
+
+So on Llama-3B AdamW does NOT cleanly separate from Muon (0.00057 vs 0.00037,
+~1.5x), where on OLMo it was 0.00175 vs 0.00004 (~40x).  But **Lion, the other
+sighted optimizer, still sees strongly** (0.00422, similar to its OLMo 0.00388) --
+the sighted class is carried by Lion on this family, and only AdamW's magnitude
+has collapsed toward its floor.
+
+This matters for how the map's third family is stated.  The class BOUNDARIES are
+structural and proven analytically in float64 (12 orders, backbone-independent);
+what a training family tests is the observable magnitude.  On Llama-3B the sighted
+class is confirmed by Lion and the blind class by muon/matprec/sgd, but AdamW's
+observable frame-dependence has attenuated -- an effect-SIZE statement (AdamW's
+RMS normalization washes the frame out at scale where Lion's sign rule does not),
+not a boundary statement.  The honest third-family claim is therefore "Lion
+confirms the sighted class and the blind class is clean; AdamW's magnitude
+attenuates," not "the map holds identically on three families."
+
+Why AdamW and not Lion: AdamW divides by sqrt(v), and near the stability edge the
+second-moment estimate is itself frame-scrambled and noisy, so the ratio m/sqrt(v)
+loses the frame structure; Lion's sign(m) keeps it.  Testable, not yet tested.
