@@ -135,20 +135,40 @@ families**, with no training (`src/analyze_audit.py`):
 Moving *within* a class changes nothing; moving *between* them does.
 
 One gauge orbit of the vanilla draw, every logged preconditioner statistic equal
-to 1.5e-8, only the frame moving (`results/frame`, three model families):
+to 1.5e-8, only the frame moving. **Three model families, all in fp32, each
+carrying its own floor** — SGD is exactly gauge-covariant, so wherever it appears
+its spread *is* that panel's reproducibility floor, measured rather than
+imported:
 
-| optimizer | spread over the orbit |
-|---|---|
-| SGD | 0.00001 |
-| matrix-preconditioned Adam | 0.00022 |
-| Muon | 0.00026 |
-| Lion | 0.00068 |
-| **AdamW** | **0.00222** |
+| family | kaiming | frame0 | frame1 | AdamW spread | SGD floor | ratio |
+|---|---|---|---|---|---|---|
+| Qwen3-0.6B | 0.44551 | **0.44329** | 0.44506 | 0.00222 | 1.0e-05 | 200× |
+| Llama-3.2-3B | 0.51783 | **0.51615** | 0.51853 | 0.00239 | 2.6e-04 | 9× |
+| OLMo-2-1B | 0.54168 | **0.54004** | 0.54164 | 0.00165 | 2.6e-08 | 63000× |
 
-The `O(r)`-blind methods sit at their reproducibility floor; the frame-sighted
-ones do not. And the effect is **exactly zero at `r = 1`**, where `O(1)` *is*
-the signed-permutation group and the class collapses — growing through
-`r = 4, 16, 64, 128` as the quotient opens up.
+`frame0` is best on all three, with the same ordering. On OLMo the four
+gauge-related initialisations agree under SGD to **eight decimal places**
+(2.6e-08) while AdamW separates them by 0.00165.
+
+Five optimizers on the Qwen3-0.6B orbit, ordered by what the map in §3 predicts:
+
+| optimizer | spread | vs floor |
+|---|---|---|
+| SGD | 0.00001 | 1× |
+| matrix-preconditioned Adam | 0.00022 | 1.1× |
+| Muon | 0.00026 | 1.3× |
+| Lion | 0.00068 | 3.4× |
+| **AdamW** | **0.00222** | **11×** |
+
+**Precision is not neutral here, and we say so.** The same Llama ladder run with
+bf16 matmuls gives an AdamW spread of 0.00104 against an SGD floor of 0.00090 —
+a ratio of 1.2, i.e. nothing. bf16 raises the floor 3.5× *and* compresses the
+conditions, burying the effect from both ends. Any panel carrying a frame claim
+must be fp32 or carry its own floor.
+
+**Structural control:** the effect is exactly zero at `r = 1`, where `O(1)` *is*
+AdamW's own symmetry group and the class collapses, and grows through
+`r = 4, 16, 64, 128`.
 
 Rotating published initialisers within their own orbit (`results/rot`, three
 families) helps or is neutral 6/6 one way and hurts or is neutral 6/6 the other,
