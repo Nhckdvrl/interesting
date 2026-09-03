@@ -111,8 +111,16 @@ def probe(hosts=None, mem_min=None, per_gpu=1):
     return out
 
 
-def run(jobs, slots, logdir, py_key=None, dry=False, env_extra=""):
-    """jobs: list of command strings containing the literal token {PY}."""
+def run(jobs, slots, logdir, py_key=None, dry=False, env_extra="",
+        grow_every=None, arch=None, mem_min=None, per_gpu=1):
+    """jobs: list of command strings containing the literal token {PY}.
+
+    `grow_every` (seconds) re-probes for capacity that freed up after launch and
+    starts extra workers on it.  Without this the worker set is fixed at launch,
+    so a panel that starts while the cluster is busy keeps crawling on two GPUs
+    even after four others go idle -- which is exactly what happened to the Muon
+    zoo while fvcrc20 sat empty.
+    """
     os.makedirs(logdir, exist_ok=True)
     q = queue.Queue()
     for i, j in enumerate(jobs):
@@ -195,7 +203,8 @@ def main(jobs, tag, logdir, arch="a100", hosts=None, dry=False,
           + ", ".join(f"{h}:{g}" for h, g, _ in slots))
     if not slots:
         raise SystemExit(f"no free slots after {int(time.time()-t0)}s")
-    return run(jobs, slots, logdir, dry=dry)
+    return run(jobs, slots, logdir, dry=dry, grow_every=600, arch=arch,
+               mem_min=mem_min, per_gpu=per_gpu)
 
 
 if __name__ == "__main__":
