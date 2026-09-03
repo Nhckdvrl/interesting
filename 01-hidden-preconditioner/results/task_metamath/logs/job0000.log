@@ -1,18 +1,17 @@
 # fvcrc20:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag task_metamath --task metamath --cond kaiming --lr 0.0001 --steps 300 --grad_clip 1e9
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag task_metamath --task metamath --cond kaiming --lr 2e-05 --steps 300 --grad_clip 1e9
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
     step 0/300 loss=0.4100 (1s)
-    step 30/300 loss=0.2104 (23s)
-[W903 04:44:00.937134294 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3735027712 bytes (free: 1844969472, total: 101971722240).
-    step 60/300 loss=0.2495 (54s)
-    step 90/300 loss=0.1853 (86s)
-    step 120/300 loss=0.2427 (118s)
-    step 150/300 loss=0.2096 (148s)
-    step 180/300 loss=0.2043 (186s)
-    step 210/300 loss=0.2435 (218s)
-    step 240/300 loss=0.1906 (250s)
-    step 270/300 loss=0.1787 (280s)
-    step 299/300 loss=0.1920 (310s)
-[kaiming_lr0.0001_s0] base=0.26874 final=0.19455 (317s)
+    step 30/300 loss=0.2119 (18s)
+    step 60/300 loss=0.2484 (46s)
+    step 90/300 loss=0.1896 (78s)
+    step 120/300 loss=0.2457 (111s)
+    step 150/300 loss=0.2112 (143s)
+    step 180/300 loss=0.2044 (183s)
+    step 210/300 loss=0.2478 (215s)
+    step 240/300 loss=0.1916 (247s)
+    step 270/300 loss=0.1803 (278s)
+    step 299/300 loss=0.1937 (309s)
+[kaiming_lr2e-05_s0] base=0.26874 final=0.19603 (316s)
