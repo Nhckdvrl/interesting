@@ -293,15 +293,19 @@ Two pre-registered predictions of ours were falsified and one reading
 over-called; the prediction files are in the repository unedited with outcomes
 appended.
 
-**A scale boundary, measured.** The frame effect sits at ~10× AdamW's own floor
-on 0.6B, OLMo-1B and Llama-3B, but at Qwen3-8B in fp32 it *washes out*: the frame
-spread (0.00123) falls to 0.11× AdamW's own signed-permutation floor (0.011,
-n = 5), the three frame conditions interleaving with the gauge-equivalent seeds.
-The signal shrinks with scale while AdamW's reduction-order chaos grows, and by 8B
-the chaos overtakes it. This bounds where the *magnitude* is resolvable; it does
-not touch the map, which is a statement about which optimizers can see the frame
-(three families in training, seven by the training-free label) rather than how
-large the effect is at a given scale. It also retires a bf16 "reversal" at 8B as a
+**A scale boundary, measured.** Against AdamW's *own* floor the frame effect
+attenuates monotonically with scale: ~10× on 0.6B and OLMo-1B, already down to
+~1–2× on Llama-3B, and at Qwen3-8B in fp32 it *washes out* — the frame spread
+(0.00123) falls to 0.11× AdamW's own signed-permutation floor (0.011, n = 5), the
+three frame conditions interleaving with the gauge-equivalent seeds. The signal is
+flat with scale while AdamW's reduction-order chaos grows (floor 0.00021, 0.00016,
+0.00040, ~0.006–0.011), so the floor overtakes the signal by 8B. This bounds where
+the *magnitude* is resolvable against AdamW's own noise; it does **not** touch the
+map. The map is the split between the classes, read by whether the frame spread
+*vanishes* at low lr — and that split holds on all three training families
+(Llama's blind optimizers collapse to 0.00001/0.00000 while AdamW and Lion hold
+~0.001, a ~90× gap) and on seven by the training-free label. What scale bounds is
+how large the effect is over AdamW's own floor, not which optimizers can see it. It also retires a bf16 "reversal" at 8B as a
 precision artefact — bf16 raised the floor and compressed the conditions, and the
 apparent flip did not survive fp32.
 
