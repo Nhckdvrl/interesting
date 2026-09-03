@@ -1,0 +1,19 @@
+# fvcrc20:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/second_order.py --model unsloth/Llama-3.2-3B --no_atlas --every_layer 8 --probe_batches 4 --out /home/xiang/interesting/01-hidden-preconditioner/results/second_order_llama3b.json
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:04<00:04,  4.26s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.52s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.78s/it]
+28 sampled modules of 196
+probes done
+skipping the atlas cache
+0 cached atlas constructions
+  kaiming                    trace      Lam1=0.3993 E_g=0.9043 Off_x=0.3692 D_g=0.1977 Psi_0x=1.0040
+  left_gauge                 trace      Lam1=0.4015 E_g=0.9110 Off_x=0.3676 D_g=0.1977 Psi_0x=1.0040
+  nora                       trace      Lam1=0.4006 E_g=0.9065 Off_x=0.3639 D_g=0.2009 Psi_0x=1.0037
+  nora_unit                  none       Lam1=0.4006 E_g=0.9065 Off_x=0.3639 D_g=0.2009 Psi_0x=1.0037
+  nora_unit                  trace      Lam1=0.4006 E_g=0.9065 Off_x=0.3639 D_g=0.2009 Psi_0x=1.0037
+  bimi                       none       Lam1=0.3872 E_g=0.8769 Off_x=0.3581 D_g=0.1862 Psi_0x=1.0000
+  bimi                       trace      Lam1=0.3872 E_g=0.8769 Off_x=0.3581 D_g=0.1862 Psi_0x=1.0000
+  etf                        none       Lam1=0.3939 E_g=0.8818 Off_x=0.3910 D_g=0.1861 Psi_0x=1.0000
+  etf                        trace      Lam1=0.3939 E_g=0.8818 Off_x=0.3910 D_g=0.1861 Psi_0x=1.0000
