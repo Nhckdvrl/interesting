@@ -19,11 +19,11 @@ OURS = {"left_gauge", "geomspec_flatdiag0.5", "flatspec_flatdiag",
         "kaimingspec_flatdiag"}
 DATA_AWARE = {"lora_one", "gradsub", "pissa", "pissa_minor", "eva", "olora"}
 FILES = [("Qwen3-0.6B", "second_order.json"),
+         ("Gemma-2-2B", "second_order_gemma2b.json"),
+         ("Mistral-7B", "second_order_mistral7b.json"),
          ("Qwen3-1.7B", "second_order_qwen17b.json"),
          ("Llama-3.2-3B", "second_order_llama3b.json"),
-         ("Gemma-2-2B", "second_order_gemma2b.json"),
          ("OLMo-2-1B", "second_order_olmo1b.json"),
-         ("Mistral-7B", "second_order_mistral7b.json"),
          ("Qwen3-8B", "second_order_q8b.json")]
 
 

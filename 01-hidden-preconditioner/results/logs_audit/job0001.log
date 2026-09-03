@@ -18,3 +18,18 @@ skipping the atlas cache
   bimi                       trace      Lam1=0.3078 E_g=0.7630 Off_x=0.5555 D_g=0.1145 Psi_0x=1.0000
   etf                        none       Lam1=0.3227 E_g=0.7857 Off_x=0.6039 D_g=0.1175 Psi_0x=1.0000
   etf                        trace      Lam1=0.3227 E_g=0.7857 Off_x=0.6039 D_g=0.1175 Psi_0x=1.0000
+  flatspec_flatdiag          trace      Lam1=0.3325 E_g=0.8131 Off_x=0.5862 D_g=0.1196 Psi_0x=1.0000
+  geomspec_flatdiag0.5       trace      Lam1=0.1361 E_g=0.3294 Off_x=0.2282 D_g=0.0935 Psi_0x=5.1268
+  eva                        none       Lam1=0.1627 E_g=0.4228 Off_x=0.0000 D_g=0.1054 Psi_0x=1.0000
+  eva                        trace      Lam1=0.1627 E_g=0.4228 Off_x=0.0000 D_g=0.1054 Psi_0x=1.0000
+  eva                        trace_act  Lam1=0.1627 E_g=0.4228 Off_x=0.0000 D_g=0.1054 Psi_0x=1.0000
+  gradsub                    none       Lam1=0.1364 E_g=0.3404 Off_x=0.1712 D_g=0.1186 Psi_0x=0.9999
+  gradsub                    trace      Lam1=0.1364 E_g=0.3404 Off_x=0.1712 D_g=0.1186 Psi_0x=0.9999
+  gradsub                    trace_act  Lam1=0.1364 E_g=0.3404 Off_x=0.1712 D_g=0.1186 Psi_0x=0.9999
+  pissa                      none       Lam1=0.2036 E_g=0.5173 Off_x=0.3757 D_g=0.0921 Psi_0x=1.4315
+  pissa                      trace      Lam1=0.2036 E_g=0.5173 Off_x=0.3757 D_g=0.0921 Psi_0x=1.4315
+  pissa_minor                none       Lam1=0.2944 E_g=0.7398 Off_x=0.6488 D_g=0.1065 Psi_0x=0.9880
+  olora                      none       Lam1=0.2727 E_g=0.6890 Off_x=0.6495 D_g=0.0878 Psi_0x=2.1076
+  lora_one                   none       Lam1=0.0667 E_g=0.1755 Off_x=0.0949 D_g=0.0845 Psi_0x=5.8157
+  lora_one                   trace      Lam1=0.0667 E_g=0.1755 Off_x=0.0949 D_g=0.0845 Psi_0x=5.8157
+wrote /home/xiang/interesting/01-hidden-preconditioner/results/second_order_gemma2b.json (23 rows)

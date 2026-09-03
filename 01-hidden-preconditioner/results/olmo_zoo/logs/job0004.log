@@ -4,3 +4,15 @@ cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONT
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
 Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 48.08it/s]
+    step 0/300 loss=0.9991 (1s)
+    step 30/300 loss=0.5018 (43s)
+    step 60/300 loss=0.4460 (86s)
+    step 90/300 loss=0.5211 (127s)
+    step 120/300 loss=0.5451 (170s)
+    step 150/300 loss=0.5977 (214s)
+    step 180/300 loss=0.4359 (263s)
+    step 210/300 loss=0.5852 (306s)
+    step 240/300 loss=0.4339 (348s)
+    step 270/300 loss=0.4994 (389s)
+    step 299/300 loss=0.5890 (423s)
+[lora_one_lr0.0001_s0_mnone_muon] base=0.91147 final=0.55702 (427s)

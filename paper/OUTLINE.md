@@ -104,29 +104,31 @@ reachable range given the invariants, so the two labels are not independent.
 
 ## 5. Where the literature sits
 
-Applying the labels to 20 published configurations across four model families
-so far, with no training (`src/analyze_audit.py`):
+Applying the labels to 20 published configurations across **seven model
+families**, with no training (`src/analyze_audit.py`):
 
 | model | span | separation |
 |---|---|---|
 | Qwen3-0.6B | 4.3× | perfect |
+| Qwen3-1.7B | 4.5× | one pair crosses, by 0.0014 |
+| Gemma-2-2B | 5.1× | perfect |
 | Llama-3.2-3B | 3.0× | perfect |
+| OLMo-2-1B | 3.9× | one pair crosses, by 0.0147 |
+| Mistral-7B | 2.9× | perfect |
 | Qwen3-8B | 3.5× | perfect |
-| OLMo-2-1B | 3.9× | one adjacent pair crosses, by 0.015 |
 
-* the zoo spans the frame coordinate 3–4.3× on every backbone;
-* the separation between frame-based and data-aware methods is perfect on three
-  of four. Where it breaks it breaks at the **boundary pair** — OLoRA, the least
-  data-aware of that group (a QR of the pretrained weight, using neither
-  gradients nor activations), over BiMI, the most structured of the other. The
-  two categories are ours and they blur for exactly the methods on the line;
+* the zoo spans the frame coordinate **2.9–5.1×** on every backbone;
+* the separation between frame-based and data-aware methods is **perfect on five
+  of seven**, and in both exceptions the violation is the *same single adjacent
+  pair* — OLoRA over BiMI, by 0.0014 and 0.0147. That is the boundary pair by
+  construction: OLoRA is the least data-aware of its group (a QR of the
+  pretrained weight, using neither gradients nor activations) and BiMI the most
+  structured of the other. The two categories are ours and they blur for exactly
+  the methods on the line between them;
 * the coordinate is a property of the **method**, not the backbone: median
-  across-model CV **6.9%**, median Kendall τ between model pairs **+0.82**. So
-  one number per method, computable in a minute, characterises it.
-
-This is what the classification buys: a published initialiser now has a label,
-and the labels are informative — they recover the data-aware/frame-based
-distinction that the methods' own descriptions imply.
+  across-model CV **10.3%**, median Kendall τ over all **21 model pairs**
+  **+0.82**. One number per method, computable in a minute, characterises it —
+  across four vendors, four tokenizers and a 13× range in width.
 
 ## 6. The classes are real, not bookkeeping
 
