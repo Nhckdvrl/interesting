@@ -133,3 +133,34 @@ attenuates," not "the map holds identically on three families."
 Why AdamW and not Lion: AdamW divides by sqrt(v), and near the stability edge the
 second-moment estimate is itself frame-scrambled and noisy, so the ratio m/sqrt(v)
 loses the frame structure; Lion's sign(m) keeps it.  Testable, not yet tested.
+
+## Update 2026-09-04 (3): correction -- the split HOLDS on Llama; Update (2) used the wrong criterion
+
+Update (2) called AdamW "attenuated into the blind range" on Llama because it
+compared AdamW (0.00057 at 2e-4) to muon (0.00037 at 3e-4).  That was the wrong
+comparison: 3e-4 is near muon's OWN stability edge, where fp32 Newton-Schulz
+decoheres and inflates muon's spread; it is not where muon is blind.
+
+The clean criterion -- the same one that settles matprec on OLMo -- is whether the
+frame spread VANISHES at low, stable lr.  Per-lr on Llama:
+
+    adamw    1e-4: 0.00089   2e-4: 0.00057   3e-4: 0.00076   (holds; SEES)
+    lion     3e-5: 0.00122   1e-4: 0.00422                   (holds; SEES)
+    muon     1e-4: 0.00001   3e-4: 0.00037   1e-3: 0.00427   (vanishes at 1e-4; BLIND)
+    matprec  1e-3: 0.00000   3e-3: 0.00010   1e-2: 0.00147   (vanishes at 1e-3; BLIND)
+
+At the proper low lr the split is CLEAN: AdamW 0.00089 vs muon 0.00001 is ~90x,
+the same order as Qwen and OLMo.  So the map's third family holds -- sighted
+(adamw, lion) hold nonzero spread at low lr, blind (muon, matprec) vanish.
+
+Two comparisons were being conflated:
+  * AdamW vs the BLIND class (the map)         -> ~90x at low lr, holds cleanly;
+  * AdamW vs its OWN floor (the effect size)   -> ~2x here vs 10x on OLMo, attenuated.
+
+Both are true.  The MAP split is preserved on all three families; what attenuates
+with scale is the effect SIZE (AdamW's room over its own reproducibility floor),
+not the class boundary.  Update (2)'s "into the blind range" is retracted; the
+attenuation is real but it is the second comparison, not the first.
+
+(Found by cross-check against a parallel analysis that used the low-lr criterion
+directly -- recording the error and its correction rather than quietly editing.)

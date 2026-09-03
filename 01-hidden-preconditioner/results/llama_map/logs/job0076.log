@@ -7,3 +7,4 @@ Warning: Permanently added 'fvcrc12' (ED25519) to the list of known hosts.
     step 0/300 loss=1.4693 (3s)
     step 30/300 loss=8.3919 (157s)
     step 60/300 loss=7.0382 (309s)
+    step 90/300 loss=6.8971 (459s)
