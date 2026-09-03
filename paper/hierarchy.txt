@@ -1,14 +1,36 @@
 max |loss(transformed) - loss(original)| over 25 steps, float64, B_0 != 0
 
-                 optimizer    signed perms   O(r) rotation   GL(r) scaling
-                       SGD        2.22e-16        2.22e-16        9.82e-03
-                      Muon        2.48e-09        4.42e-09        1.20e-02
-       matrix-precond Adam        2.22e-16        2.22e-16        1.52e-02
-                     AdamW        0.00e+00        1.74e-03        3.18e-02
-       Lion (sign descent)        2.22e-16        1.32e-03        5.79e-02
+Signed permutations are EXACTLY invariant for every optimizer here,
+so that column is each optimizer's own float-noise floor at its own
+learning rate -- which is what a chaotic trajectory near the
+stability edge inflates.  The O(r) column is reported as a RATIO to
+that floor, so the comparison is not contaminated by how close an
+optimizer runs to divergence.
+
+                 optimizer   floor (perm)    O(r) raw  O(r)/floor  GL(r)/floor  loss drop      lr
+                       SGD       3.33e-16    1.11e-16     3.3e-01      6.1e+15     0.0453   1e+00  <- barely moves
+            SGD + momentum       1.11e-16    2.22e-16     2.0e+00      1.8e+14     0.0909   1e+00
+                      Muon       1.49e-03    3.44e-03     2.3e+00      6.3e+01     0.1082   1e-01
+       matrix-precond Adam       2.22e-16    3.33e-16     1.5e+00      6.2e+15     0.1116   1e+00
+                     AdamW       3.33e-16    6.56e-03     2.0e+13      7.1e+15     0.1136   1e-01
+       Lion (sign descent)       2.22e-16    1.32e-03     6.0e+12      2.6e+14     0.1027   1e-02
+                   RMSprop       3.33e-16    3.91e-03     1.2e+13      7.1e+15     0.1170   1e-02
+                   Adagrad       3.33e-16    3.84e-03     1.2e+13      7.1e+15     0.1173   1e-01
+                  Adadelta       2.22e-16    1.77e-04     8.0e+11      7.8e+13     0.0382   1e+00  <- barely moves
 
 (An `inf` in the GL(r) column means the transformed run diverged where
  the original did not -- non-invariance in its loudest form, not a bug.)
+
+Read the O(r)/floor column: methods with no preconditioner, an
+orthogonalised one, or a full matrix on the rank index sit at ~1
+(indistinguishable from their own float noise); diagonal methods sit
+many orders above it.
+
+The split is not adaptivity and not the norm.  It is whether the
+preconditioner is DIAGONAL in the coordinates the gauge acts on:
+  no preconditioner (SGD, SGD+m), orthogonalised (Muon), or a
+  full matrix on the rank index  ->  blind to O(r)
+  diagonal (AdamW, Lion, RMSprop, Adagrad, Adadelta)  ->  sees it
 
 Every optimizer is blind inside its group and sensitive outside it:
   signed perms  <  O(r)  <  GL(r)
