@@ -1,30 +1,15 @@
-# LOCAL:3 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag rot --cond eva --lr 0.003 --steps 300 --grad_clip 1e9 --match trace --optimizer muon --momentum 0.95 --warmup 0
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag rot --cond bimi --lr 0.0003 --steps 300 --grad_clip 1e9 --match trace --optimizer muon --momentum 0.95 --warmup 0
 
-Traceback (most recent call last):
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
-    main()
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 185, in main
-    model, tok = load_model(args.model, dtype=dict(
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 31, in load_model
-    m.to(device)
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/modeling_utils.py", line 4343, in to
-    return super().to(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
-    return self._apply(convert)
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
-    module._apply(fn)
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
-    module._apply(fn)
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
-    param_applied = fn(param)
-                    ^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
-    return t.to(
-           ^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/cuda/__init__.py", line 529, in _lazy_init
-    torch._C._cuda_init()
-RuntimeError: No CUDA GPUs are available
+    step 0/300 loss=1.1613 (0s)
+    step 30/300 loss=0.4550 (30s)
+    step 60/300 loss=0.5192 (58s)
+    step 90/300 loss=0.4113 (87s)
+    step 120/300 loss=0.4279 (116s)
+    step 150/300 loss=0.4603 (144s)
+    step 180/300 loss=0.3787 (179s)
+    step 210/300 loss=0.3987 (207s)
+    step 240/300 loss=0.3987 (235s)
+    step 270/300 loss=0.3729 (262s)
+    step 299/300 loss=0.3963 (289s)
+[bimi_lr0.0003_s0_muon] base=0.83113 final=0.44847 (295s)
