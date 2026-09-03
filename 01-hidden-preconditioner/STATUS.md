@@ -5,12 +5,23 @@
 > into rotation and scaling, and that optimizers form a strict hierarchy of what
 > they are blind to.
 >
+> **Coverage is complete (2026-09-04).** The optimizer-to-class map is in training
+> on three families {Qwen3-0.6B, OLMo-2-1B, Llama-3.2-3B} (five optimizers each,
+> true fp32, each against its own signed-permutation floor) and by the
+> training-free label on seven; Qwen3-8B pins the scale boundary. The
+> model-coverage requirement in `paper/OUTLINE.md` is closed.
+>
 > Two of our own results were corrected after being reported, and both
 > corrections are recorded rather than quietly folded in:
 >
-> * the 8B "reversal" (kaiming better by 0.00202) reverses back to frame0 better
->   by 0.00280 once the probe is 4x larger -- it was an estimation artefact, not
->   a scale effect;
+> * the 8B "reversal" (kaiming better by 0.00202) is now settled in true fp32
+>   with AdamW's own floor at n=5: the frame effect *washes out* at 8B -- the
+>   three frame conditions fall inside AdamW's signed-permutation floor scatter
+>   (frame spread 0.11x the floor), so there is neither a reversal nor survival,
+>   only attenuation below the floor at scale. The bf16 reading combined a raised
+>   floor with probe noise in the frame construction (a larger probe alone
+>   already returns frame0 to best). See `paper/8b_predictions.md` and
+>   `FINDING_scale_attenuation.md`;
 > * the r = 128 "sign reversal" was read off a grid whose bottom rung held
 >   frame0's optimum; extended, the ordering matches r = 1..64. See
 >   `PREDICTIONS_r128.md`, where the original reading is left in place above the
