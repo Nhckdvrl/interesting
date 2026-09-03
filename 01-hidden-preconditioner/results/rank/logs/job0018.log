@@ -1,32 +1,5 @@
-# fvcrc20:3 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag rank --cond frame0 --lr 0.0002 --r 128 --alpha 256 --steps 300 --grad_clip 1e9
+# fvcrc20:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag rank --cond frame0 --lr 0.0015 --r 4 --alpha 8 --steps 300 --grad_clip 1e9
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-[W903 02:01:45.935054372 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 622854144 bytes (free: 293076992, total: 101971722240).
-[W903 02:01:45.935711197 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 622854144 bytes (free: 293076992, total: 101971722240).
-Traceback (most recent call last):
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
-    main()
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 185, in main
-    model, tok = load_model(args.model, dtype=dict(
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 31, in load_model
-    m.to(device)
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/modeling_utils.py", line 4343, in to
-    return super().to(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
-    return self._apply(convert)
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
-    module._apply(fn)
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
-    module._apply(fn)
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
-    param_applied = fn(param)
-                    ^^^^^^^^^
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
-    return t.to(
-           ^^^^^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 594.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 279.50 MiB is free. Process 175498 has 12.81 GiB memory in use. Process 3527359 has 36.46 GiB memory in use. Process 3535788 has 40.14 GiB memory in use. Process 3535762 has 4.70 GiB memory in use. Including non-PyTorch memory, this process has 550.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

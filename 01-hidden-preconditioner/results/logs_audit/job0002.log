@@ -19,3 +19,10 @@ skipping the atlas cache
   etf                        none       Lam1=0.4004 E_g=0.8445 Off_x=0.4577 D_g=0.1379 Psi_0x=1.0000
   etf                        trace      Lam1=0.4004 E_g=0.8445 Off_x=0.4577 D_g=0.1379 Psi_0x=1.0000
   flatspec_flatdiag          trace      Lam1=0.4108 E_g=0.8699 Off_x=0.4038 D_g=0.1555 Psi_0x=1.0000
+  geomspec_flatdiag0.5       trace      Lam1=0.1642 E_g=0.3448 Off_x=0.0838 D_g=0.1153 Psi_0x=5.1225
+  eva                        none       Lam1=0.2966 E_g=0.6482 Off_x=0.0000 D_g=0.1287 Psi_0x=1.0000
+  eva                        trace      Lam1=0.2966 E_g=0.6482 Off_x=0.0000 D_g=0.1287 Psi_0x=1.0000
+  eva                        trace_act  Lam1=0.2966 E_g=0.6482 Off_x=0.0000 D_g=0.1287 Psi_0x=1.0000
+  gradsub                    none       Lam1=0.1947 E_g=0.4204 Off_x=0.5482 D_g=0.1567 Psi_0x=0.9999
+  gradsub                    trace      Lam1=0.1947 E_g=0.4204 Off_x=0.5482 D_g=0.1567 Psi_0x=0.9999
+  gradsub                    trace_act  Lam1=0.1947 E_g=0.4204 Off_x=0.5482 D_g=0.1567 Psi_0x=0.9999

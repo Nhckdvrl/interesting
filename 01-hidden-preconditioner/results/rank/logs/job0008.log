@@ -12,3 +12,4 @@ cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONT
     step 240/300 loss=0.4037 (203s)
     step 270/300 loss=0.3663 (227s)
     step 299/300 loss=0.3937 (251s)
+[frame1_lr0.0007_s0_r1_a2] base=0.83113 final=0.45289 (255s)
