@@ -80,10 +80,14 @@ def main():
          "down_proj")
     allm = {n: m for n, m in model.named_modules()
             if isinstance(m, nn.Linear) and n.split(".")[-1] in T}
-    G = collect_grads(model, allm, ld, a.probe_batches)
-    ACT = collect_act_cov(model, allm, ld, a.probe_batches)
+    # Decide which modules are sampled FIRST, then probe only those.  Probing
+    # all of them materialises a gradient for every adapted module -- 252 of
+    # them at 8B -- when only every_layer-th one is ever read.  That is what
+    # OOMed this script four times.
     mods = {n: m for n, m in allm.items()
             if int(n.split("layers.")[1].split(".")[0]) % a.every_layer == 0}
+    G = collect_grads(model, mods, ld, a.probe_batches)
+    ACT = collect_act_cov(model, mods, ld, a.probe_batches)
     print(f"{len(mods)} sampled modules of {len(allm)}", flush=True)
     s = a.alpha / a.r
 
