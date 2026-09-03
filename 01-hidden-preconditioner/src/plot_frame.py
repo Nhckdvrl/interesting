@@ -28,8 +28,10 @@ def main(out=None):
 
     fig, (ax, bx) = plt.subplots(1, 2, figsize=(11, 4.1))
     LAD = ["frame0", "frame0.25", "frame0.5", "frame0.75", "frame1"]
-    style = (("adamw", "AdamW  (elementwise max norm)", "#c0392b", "o", "-"),
+    style = (("adamw", "AdamW  (diagonal)", "#c0392b", "o", "-"),
+             ("lion", "Lion  (sign, diagonal)", "#e67e22", "v", "-"),
              ("muon", "Muon  (spectral norm)", "#2980b9", "s", "--"),
+             ("matprec", "matrix-precond Adam", "#8e44ad", "D", "--"),
              ("sgd", "SGD  (Frobenius norm)", "#27ae60", "^", ":"))
     for opt, lab, col, mk, ls in style:
         pts = []
@@ -55,35 +57,48 @@ def main(out=None):
     ax.legend(fontsize=8, frameon=False)
     ax.spines[["top", "right"]].set_visible(False)
 
-    R = json.load(open(os.path.join(RES, "frame_reach.json")))
-    E = collections.defaultdict(dict)
-    for f in glob.glob(os.path.join(RES, "rank", "*.json")):
-        r = json.load(open(f)); a = r["args"]
-        E[(a["r"], a["cond"])][a["lr"]] = r["log"]["eval_loss"][-1]
-    xs, ys, rs = [], [], []
-    for rk in sorted({k[0] for k in E}):
-        a0, a1 = E.get((rk, "frame0")), E.get((rk, "frame1"))
-        if not (a0 and a1 and 1e-4 in a0 and 1e-4 in a1):
+    # The reach law was falsified at r = 128 (PREDICTIONS_r128.md), so plotting
+    # it would show a fitted line with its own counterexample sitting 2
+    # millinats below it.  This panel carries a live claim instead: the same
+    # ladder on three model families, each against ITS OWN floor measured from
+    # SGD, which is exactly gauge-covariant.
+    FAMS = [("Qwen3-0.6B", "frame", 1.0e-05), ("Llama-3.2-3B", "llama_fp32", 2.6e-04),
+            ("OLMo-2-1B", "olmo", 2.6e-08)]
+    xs, names = [], []
+    for i, (fam, tag, fl) in enumerate(FAMS):
+        E = collections.defaultdict(dict)
+        base = None
+        for f in glob.glob(os.path.join(RES, tag, "*.json")):
+            r = json.load(open(f)); a = r["args"]
+            if a.get("seed", 0) or a.get("r", 16) != 16:
+                continue
+            base = r["base_eval_loss"]
+            E[(a.get("optimizer", "adamw"), a["cond"])][a["lr"]] = \
+                r["log"]["eval_loss"][-1]
+        vs = []
+        for c in ("kaiming", "frame0", "frame1"):
+            cur = {l: v for l, v in E.get(("adamw", c), {}).items() if v < base}
+            if len(cur) >= 2:
+                vs.append(min(cur.values()))
+        if len(vs) < 2:
             continue
-        xs.append(math.log(R[str(rk)]["reach"]))
-        ys.append((a1[1e-4] - a0[1e-4]) * 1e3)
-        rs.append(rk)
-    if xs:
-        sl = sum(x * y for x, y in zip(xs, ys)) / sum(x * x for x in xs)
-        gx = [0, max(xs) * 1.15]
-        bx.plot(gx, [sl * x for x in gx], color="0.55", lw=1.2, ls="--",
-                label=f"$0.00184\\,\\log\\,$reach   ($R^2$ = 0.975)")
-        bx.scatter(xs, ys, s=52, color="#c0392b", zorder=3)
-        for x, y, rk in zip(xs, ys, rs):
-            bx.annotate(f"r={rk}", (x, y), textcoords="offset points",
-                        xytext=(7, -3), fontsize=8)
-    bx.axhline(0, color="0.8", lw=0.8)
-    bx.set_xlabel(r"$\log$ of the training-free frame reach"
-                  "\n(one probe pass, no training)")
-    bx.set_ylabel("frame1 $-$ frame0 at lr = 1e-4  (millinats)")
-    bx.set_title(r"Zero when $O(r)$ is Adam's own symmetry group",
+        xs.append(((max(vs) - min(vs)) * 1e3, fl * 1e3)); names.append(fam)
+    w = 0.34
+    bx.bar([i - w/2 for i in range(len(xs))], [a for a, _ in xs], w,
+           color="#c0392b", label="AdamW spread")
+    bx.bar([i + w/2 for i in range(len(xs))], [b for _, b in xs], w,
+           color="#27ae60", label="SGD floor (this panel)")
+    bx.set_yscale("log")
+    bx.set_xticks(range(len(xs)))
+    bx.set_xticklabels(names, fontsize=8.5)
+    for i, (a, b) in enumerate(xs):
+        bx.annotate(f"{a/b:.0f}x", (i, max(a, b)), ha="center",
+                    textcoords="offset points", xytext=(0, 4), fontsize=9)
+    bx.set_ylabel("millinats  (log scale)")
+    bx.set_title("Each family against its own floor\n"
+                 "(SGD is exactly gauge-covariant, so its spread IS the floor)",
                  fontsize=10)
-    bx.legend(fontsize=8, frameon=False, loc="upper left")
+    bx.legend(fontsize=8, frameon=False)
     bx.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
     out = out or os.path.join(REPO, "paper", "fig_frame.png")
