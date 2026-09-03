@@ -18,17 +18,25 @@ prescription simply is not part of it.
 
 ## Title
 
-**What Is a LoRA Initialization?**
-*An equivalence-class answer, and why it depends on your optimizer*
+**Which Reparameterizations Can Your Optimizer See?**
+*A map for LoRA's factorization group, and what it costs to ignore it*
 
-## The claim, positively
+*(Rejected as too large: "What Is a LoRA Initialization?" — that promises a
+complete characterisation of the equivalence classes. We do not have one: the
+nine invariants label the `O(r)` class only to order ≤ 2, and `Λ₁` is a single
+scalar summarising an `r(r−1)/2`-dimensional frame. A reviewer would catch the
+gap between the title and the delivery.)*
 
-An initialization is not the pair `(A, B)`. It is an **equivalence class**, and
-*which* class depends on the optimizer that will consume it. We give the
-classes, the invariants that label them, a training-free label for the part that
-distinguishes them, and the map from optimizer to class.
+## The claim, sized to what we deliver
 
-Everything else in the paper is a consequence of that answer, not a caveat to it.
+LoRA's factorisation carries a `GL(r)` redundancy. **Optimizers do not all see
+the same part of it**, and which part they see is decided by one structural
+property of the update rule. We give the map — nine optimizers, three subgroups,
+verified — a training-free label for the part that separates them, and the
+consequence for how LoRA initialisations are compared.
+
+The **map** is the contribution, and the map is complete. Everything else
+follows from it.
 
 ---
 
@@ -189,3 +197,28 @@ quoting that as "experiment volume" would be misleading.
 
 Main-line total once the third family lands: **~750**, plus the Stage-1 audit
 (582) cited in §5.
+
+---
+
+## Requirements check — re-read before every step
+
+The user's stated criteria, verbatim in substance, with an honest self-assessment.
+This exists because the work drifted four times; each drift was visible only in
+hindsight, and this table is the thing to re-read *before* acting, not after.
+
+| requirement | status | evidence / what would break it |
+|---|---|---|
+| **topic breadth — not too large** | **fixed** | "What Is a LoRA Initialization?" was rejected as over-promising: we do not fully label the classes. The map is complete and the title claims only the map. |
+| **topic breadth — not too small** | ok | Nine optimizers, three subgroups, seven model families in the audit. Not "we found a knob". |
+| **novelty vs related work** | ok, and located precisely | NOT novel: Adam sees the basis (NeurIPS'25); LoRA has a gauge (four papers). NOVEL: the map across nine optimizers; that the redundancy is *exact* (zero function-space content) rather than a generic rotation; the labels; the seven-family audit; the 30% transfer number. |
+| **main-claim novelty** | ok | "Optimizers see different parts of the group, and one structural property decides which" — nobody has stated or mapped this. |
+| **narrative novelty** | ok | Constructive classification, not a critique of a subfield. |
+| **narrative advances, does not defend** | **fixed** | Seven sections, each a step in one construction. Previous version had two defensive sections and three consecutive negations; both removed. |
+| **must NOT narrow because an experiment failed** | **structurally fixed** | The map is the contribution. The prescription's fragility, the accuracy null and the collinear mechanism cannot narrow it, because none of them is load-bearing. Previously all three forced a retreat. |
+| **no defensive experiments** | watch | Ban: further probe-size controls, further precision controls, further seed replication. Those exist and are enough. Any new panel must extend coverage or test a prediction. |
+| **main-line experiment volume** | ok | ~750 once the third family lands, plus the 582-run Stage-1 audit. Not 2348 — most of that is exploration the paper does not cite, and quoting it would be misleading. |
+| **model coverage** | **in progress** | Training: Qwen3-0.6B, Llama-3.2-3B, OLMo-2-1B (running), plus Qwen3-8B for scope. Audit: seven families. The three core claims were single-model, which was the real gap. |
+| **mother paper is NoRA** | ok | §5 explains NoRA's own ablation: its whole family sits at vanilla's frame value, which is why those five conditions are mutually indistinguishable. |
+
+**Standing rule.** Before adding any experiment, name which row of this table it
+moves. If it moves none, it is defensive and does not get run.
