@@ -83,3 +83,29 @@ an interior optimum.
 The 8B optimum turned out to be above the grid carried over from 0.6B
 (5e-4 beat 3e-4 for `kaiming`, where 0.6B peaked at 3e-4), so the grid was
 extended upward to 1e-3 and 2e-3.
+
+### fp32 rerun (the bf16 panel was precision-masked)
+
+The bf16 8B panel gave AdamW spread 0.00256 against a bf16 SGD floor of ~9e-4
+(ratio ~3) and an apparent reversal -- but bf16 raises the floor and compresses
+the conditions, so it was rerun in true fp32 (amp=none). The fp32 ladder is
+complete (18/18) with its own SGD covariance floor (6.3e-5) and AdamW
+signed-permutation floor.
+
+At 7e-4 -- AdamW's optimum, and the one rung where all three frames survive
+(kaiming and frame1 diverge at 1e-3) -- the fp32 numbers are:
+
+    kaiming 0.39337   frame0 0.39361   frame1 0.39461     spread 0.00123
+
+kaiming is **best**, the reverse of the frame0-best ordering on 0.6B/OLMo/Llama.
+That is a candidate scale reversal. But AdamW's own floor at 7e-4, from three
+signed-permutation seeds, is {0.39212, 0.39813, 0.39254}: two cluster at 0.00042,
+one lands 0.00601 out. The frame spread is 2.95x the tight floor (reversal real)
+or 0.21x the full floor (washed into noise) depending entirely on whether the
+third seed is a rare edge-catch -- 7e-4 sits near the divergence edge, where
+AdamW's reduction-order chaos amplifies. n=3 cannot tell. Two more seeds
+(signperm4/5 @ 7e-4) are running; the verdict is held until n=5 stabilises the
+floor. This is the ninth read held on the floor discipline, and the first where
+the held number is the difference between "we found a scale reversal" and "the
+effect washes out at 8B" -- both honest scope statements, and not a narrowing of
+the map, which stands on 0.6B/OLMo-1B/Llama-3B.
