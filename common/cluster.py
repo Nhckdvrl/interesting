@@ -46,7 +46,10 @@ def _usable(host, gpu):
     key = (host, gpu)
     if key in _HEALTH:
         return _HEALTH[key]
-    py = PY["blackwell"] if host == "LOCAL" else PY["a100"]
+    # the venv must match the HOST's architecture, not whether it is local:
+    # fvcrc20 is a blackwell node, and testing it with the a100 venv fails with
+    # "no kernel image available", which marked four healthy GPUs as dead.
+    py = PY[POOL[host][0]]
     code = "import torch; torch.zeros(8, device='cuda')"
     cmd = f"CUDA_VISIBLE_DEVICES={gpu} {py} -c \"{code}\""
     try:
