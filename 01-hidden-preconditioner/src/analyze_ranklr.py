@@ -92,9 +92,23 @@ def main():
         print(f"    log-log slope {sxy/sxx:+.3f}, r = {r_:+.3f}")
         print(f"    spread by rank: " +
               ", ".join(f"r={rk}: {sp:.2f}x" for rk, sp in good))
-        if max(sp for _, sp in good) < 1.15:
-            print("    -> the frame does NOT measurably move lr*; "
-                  "the hypothesis fails and we say so.")
+        # r = 1 is the control: the gauge quotient is EMPTY there, so frame0 and
+        # frame1 are the same run and any spread is the noise of locating lr*.
+        floor = dict(good).get(1)
+        if floor:
+            print(f"\n  CONTROL: at r = 1 the gauge quotient is empty -- there"
+                  f" is no rotation to\n  make -- yet the measured spread is"
+                  f" {floor:.2f}x.  That is the resolution of this\n"
+                  f"  measurement, not an effect.")
+            above = [(rk, sp) for rk, sp in good if rk > 1 and sp > floor]
+            print(f"  Ranks above that floor: "
+                  + (", ".join(f"r={rk} ({sp:.2f}x)" for rk, sp in above)
+                     if above else "NONE"))
+            if len(above) <= 1:
+                print("  -> the frame does not measurably move lr*.  The"
+                      " hypothesis is not supported,\n     and the r = 1"
+                      " control is what makes that conclusion safe rather than"
+                      "\n     a failure to look hard enough.")
     else:
         print(f"\n  only {len(good)} ranks bracketed; no verdict.")
 

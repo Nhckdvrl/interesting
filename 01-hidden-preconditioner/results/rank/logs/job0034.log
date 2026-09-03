@@ -3,3 +3,15 @@ cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONT
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (1s)
+    step 30/300 loss=0.4490 (17s)
+    step 60/300 loss=0.5047 (34s)
+    step 90/300 loss=0.3989 (53s)
+    step 120/300 loss=0.4276 (71s)
+    step 150/300 loss=0.4502 (89s)
+    step 180/300 loss=0.3694 (111s)
+    step 210/300 loss=0.3874 (131s)
+    step 240/300 loss=0.3970 (148s)
+    step 270/300 loss=0.3594 (166s)
+    step 299/300 loss=0.3883 (183s)
+[kaiming_lr7e-05_s0_r64_a128] base=0.83113 final=0.44477 (187s)

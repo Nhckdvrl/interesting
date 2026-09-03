@@ -15,3 +15,13 @@ skipping the atlas cache
   nora_unit                  trace      Lam1=0.3995 E_g=0.8923 Off_x=0.4560 D_g=0.1916 Psi_0x=1.0030
   bimi                       none       Lam1=0.3731 E_g=0.8436 Off_x=0.3314 D_g=0.2077 Psi_0x=1.0000
   bimi                       trace      Lam1=0.3731 E_g=0.8436 Off_x=0.3314 D_g=0.2077 Psi_0x=1.0000
+  etf                        none       Lam1=0.4000 E_g=0.8927 Off_x=0.4384 D_g=0.1960 Psi_0x=1.0000
+  etf                        trace      Lam1=0.4000 E_g=0.8927 Off_x=0.4384 D_g=0.1960 Psi_0x=1.0000
+  flatspec_flatdiag          trace      Lam1=0.4006 E_g=0.8909 Off_x=0.4222 D_g=0.2070 Psi_0x=1.0000
+  geomspec_flatdiag0.5       trace      Lam1=0.1518 E_g=0.3396 Off_x=0.1438 D_g=0.1244 Psi_0x=4.9999
+  eva                        none       Lam1=0.2884 E_g=0.6617 Off_x=0.0000 D_g=0.1641 Psi_0x=1.0000
+  eva                        trace      Lam1=0.2884 E_g=0.6617 Off_x=0.0000 D_g=0.1641 Psi_0x=1.0000
+  eva                        trace_act  Lam1=0.2884 E_g=0.6617 Off_x=0.0000 D_g=0.1641 Psi_0x=1.0000
+  gradsub                    none       Lam1=0.2305 E_g=0.5115 Off_x=0.4447 D_g=0.2093 Psi_0x=0.9999
+  gradsub                    trace      Lam1=0.2305 E_g=0.5115 Off_x=0.4447 D_g=0.2093 Psi_0x=0.9999
+  gradsub                    trace_act  Lam1=0.2305 E_g=0.5115 Off_x=0.4447 D_g=0.2093 Psi_0x=0.9999
