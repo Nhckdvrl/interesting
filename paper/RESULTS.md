@@ -71,11 +71,11 @@ What the ladder can move is `O(r)` modulo AdamW's own symmetry group, the signed
 
 | r | dim `O(r)`/signed perms | `frame1 − frame0` at lr=1e-4 | tuned gap |
 |---|---|---|---|
-| 1 | 0 | -0.00000 | 0.00011 (0.4×) |
+| 1 | 0 | -0.00000 | 0.00146 (5.4×) |
 | 4 | 6 | +0.00044 | 0.00094 (3.5×) |
 | 16 | 120 | +0.00160 | 0.00157 (5.8×) |
-| 64 | 2016 | +0.00402 | 0.00402 (14.9×) |
-| 128 | 8128 | -0.00194 | 0.00161 (6.0×) |
+| 64 | 2016 | +0.00402 | 0.00302 (11.2×) |
+| 128 | 8128 | -0.00194 | 0.00197 (7.3×) |
 
 No confound of the frame ladder — learning-rate scale, initialisation magnitude, data order, gradient noise — is zero at rank 1 and monotone in `r(r−1)/2` thereafter.
 

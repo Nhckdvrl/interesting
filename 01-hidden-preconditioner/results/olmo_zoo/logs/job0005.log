@@ -1,16 +1,11 @@
 # LOCAL:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model unsloth/Llama-3.2-3B --tag llama_zoo --micro_bs 4 --probe_bs 8 --probe_batches 4 --amp bf16 --cond gradsub --lr 3e-05 --match trace --steps 300 --grad_clip 1e9 --optimizer muon --momentum 0.95 --warmup 0
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo_zoo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond lora_one@frame1 --lr 0.0001 --match none
 
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.64s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.64s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.79s/it]
-    step 0/300 loss=1.4704 (1s)
-    step 30/300 loss=0.5418 (24s)
-    step 60/300 loss=0.5411 (47s)
-    step 90/300 loss=0.6172 (69s)
-    step 120/300 loss=0.5690 (93s)
-    step 150/300 loss=0.4793 (117s)
-    step 180/300 loss=0.5296 (143s)
-    step 210/300 loss=0.6319 (167s)
-    step 240/300 loss=0.4293 (190s)
-    step 270/300 loss=0.4719 (214s)
-    step 299/300 loss=0.5616 (237s)
-[gradsub_lr3e-05_s0_muon] base=1.36334 final=0.54107 (239s)
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 145.72it/s]
+    step 0/300 loss=0.9991 (0s)
+    step 30/300 loss=0.5051 (18s)
+    step 60/300 loss=0.4489 (36s)
+    step 90/300 loss=0.5362 (54s)
+    step 120/300 loss=0.5570 (71s)
+    step 150/300 loss=0.6002 (89s)
+    step 180/300 loss=0.4575 (111s)
