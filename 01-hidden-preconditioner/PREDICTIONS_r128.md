@@ -56,7 +56,35 @@ the effect grows into exactly the rank range people now deploy.
 
 ---
 
-## Outcome: falsified
+## Outcome: falsified as stated, but I over-called it
+
+**Correction, written after extending the grid.** The reading below was taken
+off a grid whose bottom rung was 5e-5, and `frame0`'s optimum sat exactly
+there. Extending to 1e-5 and 2e-5 brackets it, and changes what the panel says:
+
+| r = 128 | 1e-5 | 2e-5 | 5e-5 | 1e-4 | 2e-4 | 3e-4 | tuned |
+|---|---|---|---|---|---|---|---|
+| frame0 | 0.45900 | 0.44918 | **0.43984** | 0.44339 | 0.46042 | 0.49014 | 0.43984 @ 5e-5 |
+| frame1 | 0.45977 | 0.45260 | 0.44324 | **0.44145** | 0.45584 | 0.48767 | 0.44145 @ 1e-4 |
+| kaiming | 0.45878 | 0.45167 | 0.44255 | **0.44154** | 0.45362 | 0.48097 | 0.44154 @ 1e-4 |
+
+At **tuned** learning rates: `frame0 - kaiming = -0.00170` and
+`frame1 - frame0 = +0.00161`. Both have the *same sign as r = 1..64*: frame0
+best, frame1 worst. The frame ordering does **not** reverse at r = 128.
+
+What is genuinely falsified is the prediction as literally written -- it named
+`frame1 - frame0` **at lr = 1e-4**, and there the value is -0.00194 against a
+predicted +0.00477, outside the stated bounds. That happens because `frame0`
+peaks at 5e-5 while the other two peak at 1e-4, so a fixed-learning-rate
+comparison catches frame0 past its optimum.
+
+So: the single-parameter reach law does not predict the magnitude an octave out,
+and a fixed-lr contrast is the wrong statistic when conditions have different
+optimal learning rates. But my report that "the sign is wrong at every learning
+rate" was **wrong** -- it described a truncated grid, and I should have said so
+was possible before drawing it.
+
+## Original outcome, as recorded before the grid was extended
 
 Measured `frame1 - frame0` at r = 128, on the grid actually run
 (5e-5, 1e-4, 2e-4, 3e-4):
