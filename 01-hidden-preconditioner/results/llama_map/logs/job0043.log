@@ -14,3 +14,5 @@ Warning: Permanently added 'fvcrc11' (ED25519) to the list of known hosts.
     step 210/300 loss=0.6365 (763s)
     step 240/300 loss=0.4446 (867s)
     step 270/300 loss=0.4613 (971s)
+    step 299/300 loss=0.5611 (1075s)
+[frame1_lr0.0001_s0_muon] base=1.36287 final=0.54450 (1095s)

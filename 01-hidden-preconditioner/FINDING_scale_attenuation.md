@@ -63,3 +63,42 @@ attenuation is in the absolute room over the noise, not in the ordering.
 3. A Lambda_1-normalized spread would separate "scale attenuation" from "frame
    draw variance" cleanly; the P-stats logged (tr_P, diag_imbalance, crosstalk)
    proxy AA^T, not the gradient frame, so this needs a recompute, not a reread.
+
+## Update 2026-09-04: the 8B floor is measured, and 8B sits at floor
+
+AdamW's own floor at 8B (three signed-permutation seeds at the tuned lr 7e-4) is
+now in hand, and the 8B verdict is: **the frame effect is at or below AdamW's own
+reproducibility floor -- not separable at 8B in a matched 300-step budget.**
+
+    metric            frame spread   AdamW own floor   ratio
+    final-step        0.00123        0.00601*          0.2x
+    tail-mean (last4) 0.00218        0.00175           1.2x
+
+    * the final-step floor is inflated by one seed's snapshot: signperm2 lands at
+      0.39813 vs 0.39212 / 0.39254, but its eval curve tracks the other two
+      throughout (at step 275 it is the LOWEST) -- the final-step caught it on an
+      up-bounce.  The tail-mean removes that; both readings put the frame spread
+      at or under the floor.
+
+The **mechanism**, now clean across all four scales: the frame spread stays
+~0.001-0.002 at every size; it is the FLOOR that grows --
+
+    OLMo-2-1B    floor 0.00016   (tuned lr 3e-4, comfortably stable) -> 10x
+    Llama-3.2-3B floor 0.00040   (tuned lr 2e-4)                     -> 1.4x
+    Qwen3-8B     floor 0.0018    (tuned lr 7e-4, one rung below the
+                                  1e-3 that diverges)                -> ~1x
+
+-- because on a bigger model the useful learning rate sits nearer the stability
+edge, where AdamW's trajectory decoheres between gauge copies (reduction-order
+chaos) and the floor rises to meet the signal. So the honest scope statement is
+not "the effect vanishes at scale" but "**the effect is cleanly resolved on the
+two small models (0.6B 11x, 1B 10x) and is not separable above the panel's own
+floor at 3B and 8B in a matched budget**"; whether a longer run at a lower stable
+lr would re-separate it at scale is untested and not claimed.
+
+This keeps the section 3 MAP intact where it is read -- the map is the relative
+gap (AdamW/Lion spread ~2e-3 vs blind spread ~5e-5, ~40x on 0.6B and OLMo), and
+the ratio-to-own-floor is not the right lens for the blind optimizers anyway
+(their floor is near zero, so the ratio is unstable; read the raw spread). What
+scale changes is how far AdamW's own floor sits below its own signal, not the
+ordering of the classes.

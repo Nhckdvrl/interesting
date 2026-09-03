@@ -19,7 +19,7 @@ optimizers, never a claim read off a grid edge.
 
     python analyze_map.py <tag>      # e.g. olmo, llama_map, q8b_fp32
 """
-import glob, json, os, sys
+import glob, json, os, sys, statistics as st
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 FRAMES = ["kaiming", "frame0", "frame0.5", "frame1"]
@@ -27,9 +27,28 @@ OPTS = {"adamw": "", "lion": "_lion", "matprec": "_matprec",
         "muon": "_muon", "sgd": "_sgd"}
 
 
-def loss(f):
+def loss(f, denoise=False, k=4):
+    """Final eval loss (default), or the mean of the last k eval points if
+    denoise=True.
+
+    Default is the final-step snapshot, to stay consistent with the numbers in
+    the paper sections.  The tail-mean is a cross-check for one specific failure:
+    near a stability edge a single gauge seed's final snapshot can sit on an
+    up-bounce and inflate the *floor* (at 8B, signperm2's snapshot alone swung the
+    AdamW floor 0.0006 -> 0.006; the tail-mean brings it to 0.0018).  The
+    condition *spreads* are common-mode in the eval noise and barely move either
+    way -- so denoise is diagnostic for the floor, not a metric change.  Note the
+    ratio-to-own-floor is itself unreliable when the floor is near zero (a blind
+    optimizer whose gauge copies cohere to 1e-6): read the map from the raw spread
+    (sees ~2e-3 vs blind ~5e-5), not the ratio, for those."""
     try:
-        v = json.load(open(f))["log"]["final_eval_loss"]
+        log = json.load(open(f))["log"]
+        if denoise:
+            c = log.get("eval_loss") or []
+            if len(c) >= k:
+                v = st.mean(c[-k:])
+                return v if v == v else None
+        v = log["final_eval_loss"]
         return v if v == v else None          # drop NaN
     except Exception:
         return None
