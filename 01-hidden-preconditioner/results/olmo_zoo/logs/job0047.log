@@ -1,0 +1,16 @@
+# LOCAL:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo_zoo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond kaiming@frame1 --lr 0.0005 --match trace
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 110.77it/s]
+    step 0/300 loss=0.9991 (0s)
+    step 30/300 loss=0.4944 (19s)
+    step 60/300 loss=0.4365 (37s)
+    step 90/300 loss=0.5089 (54s)
+    step 120/300 loss=0.5301 (72s)
+    step 150/300 loss=0.5906 (90s)
+    step 180/300 loss=0.4363 (111s)
+    step 210/300 loss=0.5725 (129s)
+    step 240/300 loss=0.4120 (147s)
+    step 270/300 loss=0.4935 (164s)
+    step 299/300 loss=0.5821 (181s)
+[kaiming@frame1_lr0.0005_s0] base=0.91147 final=0.54425 (185s)

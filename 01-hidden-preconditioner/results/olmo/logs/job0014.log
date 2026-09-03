@@ -1,33 +1,4 @@
-# fvcrc20:1 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --tag olmo --cond frame0.5 --lr 0.0003
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond kaiming --lr 0.01 --optimizer matprec --warmup 0
 
-Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
-Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 40.68it/s]
-[W903 15:54:34.748370088 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 367001600 bytes (free: 101515264, total: 101971722240).
-[W903 15:54:34.843395350 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 128778240, total: 101971722240).
-[W903 15:54:34.872974774 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 86835200, total: 101971722240).
-[W903 15:54:34.888702769 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 128778240, total: 101971722240).
-[W903 15:54:34.914986513 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 124583936, total: 101971722240).
-[W903 15:54:35.934062588 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 112001024, total: 101971722240).
-[W903 15:54:35.947225239 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 114098176, total: 101971722240).
-[W903 15:54:35.958723140 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 74252288, total: 101971722240).
-[W903 15:54:35.966491292 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 114098176, total: 101971722240).
-[W903 15:54:35.973171068 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 78446592, total: 101971722240).
-[W903 15:54:35.976857345 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 120389632, total: 101971722240).
-Traceback (most recent call last):
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
-    main()
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 206, in main
-    G = collect_grads(model, mods, probe_ld, args.probe_batches)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 69, in collect_grads
-    (loss / n_batches).backward()
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/_tensor.py", line 623, in backward
-    torch.autograd.backward(
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/__init__.py", line 395, in backward
-    _engine_run_backward(
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/graph.py", line 979, in _engine_run_backward
-    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 114.81 MiB is free. Process 202071 has 26.00 GiB memory in use. Process 410256 has 44.68 GiB memory in use. Process 429579 has 3.75 GiB memory in use. Including non-PyTorch memory, this process has 10.83 GiB memory in use. Process 514095 has 9.56 GiB memory in use. Of the allocated memory 9.67 GiB is allocated by PyTorch, and 529.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 126.61it/s]

@@ -1,18 +1,18 @@
 # fvcrc20:3 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --tag olmo --cond frame0.5 --lr 0.0002
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond frame0 --lr 0.0001 --optimizer muon --momentum 0.95 --warmup 0
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 47.82it/s]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 49.02it/s]
     step 0/300 loss=0.9991 (1s)
-    step 30/300 loss=0.4896 (22s)
-    step 60/300 loss=0.4325 (42s)
-    step 90/300 loss=0.5125 (62s)
-    step 120/300 loss=0.5383 (82s)
-    step 150/300 loss=0.5882 (103s)
-    step 180/300 loss=0.4336 (128s)
-    step 210/300 loss=0.5670 (148s)
-    step 240/300 loss=0.4251 (168s)
-    step 270/300 loss=0.4975 (188s)
-    step 299/300 loss=0.5788 (207s)
-[frame0.5_lr0.0002_s0] base=0.91147 final=0.54484 (212s)
+    step 30/300 loss=0.5227 (29s)
+    step 60/300 loss=0.4887 (58s)
+    step 90/300 loss=0.5340 (86s)
+    step 120/300 loss=0.5535 (114s)
+    step 150/300 loss=0.5925 (142s)
+    step 180/300 loss=0.4479 (174s)
+    step 210/300 loss=0.5741 (202s)
+    step 240/300 loss=0.4445 (230s)
+    step 270/300 loss=0.5086 (258s)
+    step 299/300 loss=0.5869 (286s)
+[frame0_lr0.0001_s0_muon] base=0.91147 final=0.56001 (290s)

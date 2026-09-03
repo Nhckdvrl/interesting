@@ -170,11 +170,29 @@ must be fp32 or carry its own floor.
 AdamW's own symmetry group and the class collapses, and grows through
 `r = 4, 16, 64, 128`.
 
-Rotating published initialisers within their own orbit (`results/rot`) helps or
-is neutral 6/6 one way and hurts or is neutral 6/6 the other, with `BA`, `P` and
-all nine invariants preserved to 1e-15. **This one is currently Qwen3-0.6B
-only** — a second family is running, and until it lands the causal claim in this
-section rests on a single model while the ladder above it rests on three.
+Rotating published initialisers within their own orbit, on **two families**,
+with `BA`, `P` and all nine invariants preserved to 1e-15:
+
+| | `@frame0` helps or neutral | `@frame1` hurts or neutral |
+|---|---|---|
+| Qwen3-0.6B | 5/6 | 6/6 |
+| OLMo-2-1B | 6/6 | 4/6 |
+
+**11 of 12** rotations toward the gradient-metric eigenframe help or do nothing.
+
+Two floors are in play here and they measure different things, which matters for
+reading the near-boundary cases:
+
+* **SGD's spread** (1.1e-05 on Qwen, 2.6e-08 on OLMo) is how far two
+  gauge-related runs drift under an *exactly covariant* optimizer;
+* **an identity rotation under AdamW** (~2e-04) is how far two
+  signed-permutation-equivalent runs drift under AdamW itself, which adds the
+  reduction-order chaos its nonlinearity amplifies.
+
+Judging an AdamW rotation needs the second. We have it for free: gradsub is
+*already* at the `M_g` eigenframe, so `gradsub@frame0` is the identity map, and
+its measured +0.00021 on Qwen **is** that floor rather than a result. That is
+also the one cell keeping Qwen at 5/6 instead of 6/6.
 
 ## 7. The consequence: which initialiser is best depends on the optimizer
 
