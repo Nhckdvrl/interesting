@@ -3,3 +3,16 @@ cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONT
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 37.79it/s]
+[W903 15:53:55.138477441 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 171966464 bytes (free: 141361152, total: 101971722240).
+[W903 15:53:55.144329130 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 171966464 bytes (free: 162332672, total: 101971722240).
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 206, in main
+    G = collect_grads(model, mods, probe_ld, args.probe_batches)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 68, in collect_grads
+    loss = nn.functional.cross_entropy(lg[msk], lb[msk])
+                                       ~~^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 164.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 154.81 MiB is free. Process 202071 has 26.00 GiB memory in use. Process 410256 has 44.68 GiB memory in use. Process 429579 has 3.74 GiB memory in use. Including non-PyTorch memory, this process has 10.01 GiB memory in use. Process 509535 has 10.35 GiB memory in use. Of the allocated memory 8.81 GiB is allocated by PyTorch, and 570.29 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

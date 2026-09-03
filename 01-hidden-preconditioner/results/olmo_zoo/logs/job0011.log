@@ -1,0 +1,5 @@
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --tag olmo_zoo --cond pissa --lr 0.0001 --match none --optimizer muon --momentum 0.95 --warmup 0
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 147.63it/s]
+    step 0/300 loss=0.9991 (1s)

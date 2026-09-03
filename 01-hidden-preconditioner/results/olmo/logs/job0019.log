@@ -1,0 +1,76 @@
+# fvcrc20:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --tag olmo --cond frame1 --lr 0.0002
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 35.32it/s]
+[W903 15:55:39.244830152 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 117571584, total: 101971722240).
+[W903 15:55:39.551252912 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 33554432 bytes (free: 75628544, total: 101971722240).
+[W903 15:55:39.551965293 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 33554432 bytes (free: 75628544, total: 101971722240).
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 206, in main
+    G = collect_grads(model, mods, probe_ld, args.probe_batches)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 65, in collect_grads
+    out = model(input_ids=b["input_ids"], attention_mask=b["attention_mask"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/utils/generic.py", line 918, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/olmo2/modeling_olmo2.py", line 441, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/utils/generic.py", line 1072, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/olmo2/modeling_olmo2.py", line 377, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/modeling_layers.py", line 94, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/utils/deprecation.py", line 172, in wrapped_func
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/olmo2/modeling_olmo2.py", line 255, in forward
+    hidden_states = self.mlp(hidden_states)
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/models/olmo2/modeling_olmo2.py", line 213, in forward
+    down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+                                           ^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 134, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 72.12 MiB is free. Process 202071 has 26.00 GiB memory in use. Process 410256 has 44.68 GiB memory in use. Process 520668 has 11.89 GiB memory in use. Including non-PyTorch memory, this process has 12.29 GiB memory in use. Of the allocated memory 11.21 GiB is allocated by PyTorch, and 444.54 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

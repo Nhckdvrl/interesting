@@ -1,0 +1,34 @@
+# fvcrc20:1 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --tag olmo --cond frame0.5 --lr 0.03 --optimizer sgd --momentum 0 --warmup 0
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 37.64it/s]
+Traceback (most recent call last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 185, in main
+    model, tok = load_model(args.model, dtype=dict(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 31, in load_model
+    m.to(device)
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/transformers/modeling_utils.py", line 4343, in to
+    return super().to(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+    return t.to(
+           ^^^^^
+torch.AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+For more detailed error information, run with CUDA_LOG_FILE=stderr
+

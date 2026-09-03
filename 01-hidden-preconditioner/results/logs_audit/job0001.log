@@ -16,3 +16,5 @@ skipping the atlas cache
   nora_unit                  trace      Lam1=0.3384 E_g=0.8254 Off_x=0.6027 D_g=0.1237 Psi_0x=1.0069
   bimi                       none       Lam1=0.3078 E_g=0.7630 Off_x=0.5555 D_g=0.1145 Psi_0x=1.0000
   bimi                       trace      Lam1=0.3078 E_g=0.7630 Off_x=0.5555 D_g=0.1145 Psi_0x=1.0000
+  etf                        none       Lam1=0.3227 E_g=0.7857 Off_x=0.6039 D_g=0.1175 Psi_0x=1.0000
+  etf                        trace      Lam1=0.3227 E_g=0.7857 Off_x=0.6039 D_g=0.1175 Psi_0x=1.0000
