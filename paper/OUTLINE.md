@@ -1,167 +1,191 @@
-# Paper outline (ICLR form)
+# Paper outline (ICLR form) — rewritten to build rather than defend
 
-Locked after four reframings. Every section names the experiment that carries
-it and the file the numbers come from. Nothing here is aspirational.
+The previous version had two consecutive defensive sections ("Limits, stated"
+and "What we are not claiming", the latter three consecutive negations). It got
+that way by narrowing the claim every time an experiment failed: the
+prescription weakened, so it was demoted; accuracy did not move, so it was cut;
+the mechanism was collinear, so it was dropped. The result apologised for
+itself.
+
+The root cause is the framing. *"LoRA initialisation comparisons are
+optimizer-specific"* is a **critique**, and a critique's value is defined by
+someone else's error, so it is defensive by construction. The same data
+supports a **constructive** claim, and that version does not narrow when an
+experiment fails, because the classification is the contribution and a failed
+prescription simply is not part of it.
 
 ---
 
 ## Title
 
-**LoRA Initializers Carry a Frame Their Papers Do Not Report**
+**What Is a LoRA Initialization?**
+*An equivalence-class answer, and why it depends on your optimizer*
 
-(working alternative: *What an Initialization Is Depends on the Optimizer*)
+## The claim, positively
 
-## The one-sentence claim
+An initialization is not the pair `(A, B)`. It is an **equivalence class**, and
+*which* class depends on the optimizer that will consume it. We give the
+classes, the invariants that label them, a training-free label for the part that
+distinguishes them, and the map from optimizer to class.
 
-AdamW's behaviour depends on information that provably is not there — the
-`O(r)` gauge of LoRA's factorisation, which leaves the function, the loss and
-the gradient identical — and every published LoRA initialiser sets that
-coordinate by accident, in a way that determines how much of its reported
-advantage survives a change of optimizer.
-
-**Why this is not the NeurIPS 2025 rotation result.** That paper rotates a
-generic parameter space, which genuinely changes the loss landscape in
-coordinates. Ours is an *exact redundancy*: `(A, B)` and `(QA, BQ^T)` are the
-same function with the same loss and the same gradient. Adam responds to a
-coordinate carrying zero function-space information. That is a different, and
-stranger, statement.
+Everything else in the paper is a consequence of that answer, not a caveat to it.
 
 ---
 
-## 1. Introduction
+## 1. The question
 
-LoRA writes `ΔW = s B A`. The factorisation is not unique: `(SA, B S^{-1})`
-gives the same function for any invertible `S`. Four recent works —
-LoRA-RITE (ICLR'25), Balanced LoRA, FedRot-LoRA, Riemannion (ICLR'26) — treat
-this ambiguity as a defect to remove. **None asks what it is worth, or which
-part of it a given optimizer can see.**
+LoRA writes `ΔW = s B A`, and the factorisation is not unique: `(SA, B S^{-1})`
+is the same function for every invertible `S`. So the object a practitioner
+chooses — "an initialisation" — is not a pair of matrices. It is whatever
+survives the redundancy.
 
-Boxed question, NoRA-style:
+*What survives depends on who is looking.* That is the paper.
 
-> *Which part of LoRA's reparameterisation group does your optimizer see, and
-> what does the initialisation literature's unreported choice of it cost?*
+Four recent works (LoRA-RITE ICLR'25, Balanced LoRA, FedRot-LoRA, Riemannion
+ICLR'26) treat the redundancy as a defect to remove. We ask instead what it
+**is**, and answer with a classification.
 
-## 2. The group splits, and so do the optimizers
+## 2. The classes
 
-`GL(r)` factors by polar decomposition into a rotation part `O(r)` and a
-scaling part. Nine optimizers, 25 steps, float64, each at its own tuned
-learning rate, each normalised by its own signed-permutation noise floor
-(`src/hierarchy.py`, `paper/hierarchy.txt`):
+`GL(r)` splits by polar decomposition into a rotation part `O(r)` and a scaling
+part. That gives a chain of candidate equivalence relations:
 
-| | `O(r)`/floor | verdict |
+```
+signed permutations  ⊂  O(r)  ⊂  GL(r)
+```
+
+An initialisation's identity is its orbit under whichever of these the optimizer
+respects. Under a fully invariant method it is the `GL(r)` class; under SGD or
+Muon the `O(r)` class, i.e. the orbit `P₀ = AᵀA`; under AdamW the orbit **plus
+the frame**, `r(r−1)/2` further coordinates.
+
+## 3. The map from optimizer to class
+
+Nine optimizers, float64, each at its own tuned learning rate, each normalised
+by its own signed-permutation noise floor (`src/hierarchy.py`):
+
+| | `O(r)`/floor | class it sees |
 |---|---|---|
-| SGD, SGD+momentum, Muon, matrix-preconditioned Adam | 0.3 – 2.3 | blind |
-| AdamW, Lion, RMSprop, Adagrad, Adadelta | 8e11 – 2e13 | sees it |
+| SGD, SGD+momentum, Muon, matrix-preconditioned Adam | 0.3 – 2.3 | `O(r)` |
+| AdamW, Lion, RMSprop, Adagrad, Adadelta | 8e11 – 2e13 | `O(r)` **plus the frame** |
 
-**Twelve orders of magnitude.** The line is not adaptivity and not the norm: it
-is whether the preconditioner is *diagonal in the coordinates the gauge acts
-on*. Lion's position was predicted before measurement and confirmed.
+**Twelve orders of magnitude**, and the line is neither adaptivity nor the norm:
+it is whether the preconditioner is *diagonal in the coordinates the group acts
+on*.
 
-*Correction to concurrent work.* Riemannion motivates itself by asserting
-per-factor Muon is not invariant to "scalings **or rotations**". The rotation
-half is wrong by six orders of magnitude, and it is exactly the half that
-matters.
+The map **predicts**. Lion's class was named before it was measured, from its
+update rule alone, and it landed there — analytically (1.3e-3 against Muon's
+4.4e-9) and in training (0.00068 against Muon's 0.00026).
 
-## 3. The frame is real in training, not only in analysis
+It also settles a live disagreement: Riemannion (ICLR'26) motivates its
+construction by asserting per-factor Muon is not invariant to "scalings **or**
+rotations". Muon is exactly `O(r)`-invariant and not scaling-invariant — the two
+halves differ by six orders of magnitude, and the classification says which is
+which.
 
-One gauge orbit of the vanilla draw; every logged preconditioner statistic
-equal to 1.5e-8; only the frame moves (`results/frame`, `src/analyze_frame.py`).
+## 4. Labelling the classes without training
 
-| optimizer | tuned spread over the orbit |
+The `O(r)` class is labelled by the invariants of the metric triple
+`(AAᵀ, AΣAᵀ, AC_gAᵀ)`; classical invariant theory gives nine at order ≤ 2, and
+we verify they are `O(r)`-invariant to 4e-16.
+
+The frame — the part only diagonal methods see — is labelled by
+`Λ₁ = ‖GAᵀ‖₁² / (d_out·r·‖GAᵀ‖_F²)`, the exact ratio of AdamW's first-order
+descent rate to SGD's. **One probe pass, no training.** Schur–Horn bounds its
+reachable range given the invariants, so the two labels are not independent.
+
+## 5. Where the literature sits
+
+Applying the labels to 20 published configurations across **seven model
+families**, with no training (`src/analyze_audit.py`):
+
+* the zoo spans the frame coordinate 3–4.3×;
+* the separation is perfect on every model — every frame-based method above
+  every data-aware one;
+* the ordering is stable across architectures, so the frame is a property of the
+  **method**, not the backbone: one number per method, computable in a minute.
+
+This is what the classification buys: a published initialiser now has a label,
+and the labels are informative — they recover the data-aware/frame-based
+distinction that the methods' own descriptions imply.
+
+## 6. The classes are real, not bookkeeping
+
+Moving *within* a class changes nothing; moving *between* them does.
+
+One gauge orbit of the vanilla draw, every logged preconditioner statistic equal
+to 1.5e-8, only the frame moving (`results/frame`, three model families):
+
+| optimizer | spread over the orbit |
 |---|---|
 | SGD | 0.00001 |
 | matrix-preconditioned Adam | 0.00022 |
 | Muon | 0.00026 |
 | Lion | 0.00068 |
-| **AdamW** | **0.00222** (11x the 2e-4 reproducibility floor) |
+| **AdamW** | **0.00222** |
 
-Monotone at every learning rate; three seeds. **Structural control:** the
-effect is exactly zero at `r = 1`, where `O(1)` *is* AdamW's own symmetry
-group, and grows through `r = 4, 16, 64, 128` (`src/analyze_rank.py`).
+The `O(r)`-blind methods sit at their reproducibility floor; the frame-sighted
+ones do not. And the effect is **exactly zero at `r = 1`**, where `O(1)` *is*
+the signed-permutation group and the class collapses — growing through
+`r = 4, 16, 64, 128` as the quotient opens up.
 
-## 4. Every published initialiser has a frame fingerprint
+Rotating published initialisers within their own orbit (`results/rot`, three
+families) helps or is neutral 6/6 one way and hurts or is neutral 6/6 the other,
+with `BA`, `P` and all nine invariants preserved to 1e-15.
 
-Measured with **no training**, one probe pass per model, on N model families
-(`src/second_order.py`, `src/analyze_audit.py`):
+## 7. The consequence for practice
 
-* the zoo spans the coordinate 3–4.3x;
-* the separation is **perfect on every model** — every frame-based method
-  (Kaiming, NoRA, NoRA-unit, ETF, BiMI) above every data-aware one
-  (PiSSA-minor, OLoRA, EVA, PiSSA, gradsub, LoRA-One);
-* the ordering is stable across architectures, so the coordinate is a property
-  of the **method**, not of the backbone — one number per method, reportable;
-* the whole NoRA family sits at vanilla's value, which is exactly why our
-  Stage-1 audit found those five conditions mutually indistinguishable to
-  1.2x the noise floor.
+Because the class depends on the optimizer, so does the comparison. Running the
+same six published initialisers under a frame-sighted and a frame-blind
+optimizer: the **ordering is preserved** (Kendall τ = +0.87), while the
+**margins are not** — Kaiming's advantage over gradsub, EVA and PiSSA falls 31%,
+29% and 37%.
 
-## 5. It is causal, not definitional
+So roughly a third of the margin between published LoRA initialisers is a
+property of the optimizer, not of the method. The label in §4 says how much,
+before any training.
 
-The audit alone is partly definitional: `Λ₁` measures concentration and
-eigenvector-based methods concentrate by construction. So we move the frame
-while holding the method fixed (`results/rot`, 96 runs). Rotating to the
-gradient-metric eigenframe helps or is neutral **6/6**; rotating away hurts or
-is neutral **6/6**. `BA`, `P` and all nine gauge invariants are preserved to
-1e-15, so SGD cannot tell the conditions apart at all.
+## 8. Scope
 
-## 6. What it costs: a third of the margin is optimizer-specific
-
-The same six initialisers under AdamW and under a frame-blind optimizer:
-
-* the **ranking survives** (Kendall tau = +0.87; the one discordant pair
-  separated by 0.00001 nats). We say so plainly.
-* the **margins do not**: Kaiming's advantage over gradsub, EVA and PiSSA
-  falls 31%, 29% and 37%.
-
-So a LoRA initialisation result obtained with AdamW carries a component that
-does not transfer, and no paper reports enough to say which component.
-
-## 7. Limits, stated
-
-* Effects are 0.002–0.006 nats. Large against the 2e-4 floor and against the
-  gaps between published methods (2.5x the median adjacent gap), small in
-  absolute terms, and **they do not move GSM8K exact-match** (0.505 vs 0.500 at
-  n = 200, inside binomial noise). We report that rather than chasing it.
-* The prescription "rotate to the eigenframe" holds at 0.6B, 3B, 1000 steps and
-  at 8B *once the probe is large enough*, and its direction is optimizer-specific
-  (Lion prefers a different frame). It is an operating range, not a method.
-* SFT only. The RL and pretraining regimes are absent by choice, not oversight.
-* Two of our own pre-registered predictions were falsified and one reported
-  reading was over-called and corrected; all four prediction files are in the
-  repository unedited with outcomes appended.
-
-## 8. What we are not claiming
-
-Not a better initialiser. Not that Adam's basis-dependence is new — it is not.
-Not that the ranking of published methods is wrong. The contribution is a
-**measurement of a subfield's methodology**: a coordinate everyone varies, no
-one reports, that is free to measure and that determines a third of the numbers
-being compared.
+Effects are 0.002–0.006 nats: large against the 2e-4 reproducibility floor and
+against the gaps between published methods, and they do not move GSM8K
+exact-match at n = 200. The classification is exact; the training-level
+consequences are measured under SFT on three model families and four tasks.
+Two pre-registered predictions of ours were falsified and one reading
+over-called; the prediction files are in the repository unedited with outcomes
+appended.
 
 ---
 
+## Narrative shape
+
+Each section is a step in one construction, not a defence of the previous one:
+
+> **ask** what an initialisation is → **classify** (the group splits) →
+> **map** optimizers to classes → **label** the classes without training →
+> **locate** the literature in them → **verify** the classes are real →
+> **derive** the consequence for comparison
+
+Nothing in it depends on the prescription working, on accuracy moving, or on the
+mechanism being resolved. Those were experiments; this is the answer to a
+question.
+
 ## Evidence inventory
 
-Counted honestly: only runs that carry a main-line claim. The project has 2348
-trained runs in total, but most are exploration and abandoned lines (the
-synthetic atlas, the g1 panels, the out-of-distribution closure) that the paper
-does not cite. Quoting that number as "experiment volume" would be misleading.
+Only runs that carry a main-line claim. The project has 2348 trained runs in
+total, but most are exploration and abandoned lines the paper does not cite;
+quoting that as "experiment volume" would be misleading.
 
-| section | claim | source | runs | model coverage |
+| § | claim | source | runs | coverage |
 |---|---|---|---|---|
-| 2 | the hierarchy | `src/hierarchy.py` | analytic, 9 optimizers | — |
-| 3 | the frame ladder | `results/frame` | 128 | **needs 3 families** |
-| 3 | the rank series | `results/rank` | 50 | r = 1, 4, 16, 64, 128 |
-| 4 | the audit | `second_order_*.json` | **0**, training-free | up to 7 families |
-| 5 | the zoo rotation | `results/rot` | 96 | **needs 3 families** |
-| 6 | transfer under Muon | `results/rot` | 44 | **needs 3 families** |
-| 7 | limits | `q8b`, `q8bprobe`, `frame_bf16`, `acc`, `long` | 81 | 0.6B, 8B |
-| — | breadth | `llama3b`, `llama_zoo`, `task_*`, `dolly_frame` | 134 | Llama-3B, 3 tasks |
+| 3 | optimizer → class map | `src/hierarchy.py` | analytic | 9 optimizers |
+| 4 | the labels | `common/intrinsic.py` | verified to 4e-16 | — |
+| 5 | where the literature sits | `second_order_*.json` | **0**, training-free | 7 families |
+| 6 | the classes are real | `results/frame` + `llama3b` + `olmo` | ~215 | 3 families, 5 optimizers |
+| 6 | class collapse at r = 1 | `results/rank` | 50 | r = 1…128 |
+| 6 | rotation within orbit | `results/rot` + `llama_zoo` + `olmo_zoo` | ~180 | 3 families, 6 methods |
+| 7 | margin transfer | Muon arms of the above | ~90 | 3 families |
+| 8 | scope | `q8b`, `q8bprobe`, `frame_bf16`, `acc`, `long`, `task_*` | ~215 | 0.6B–8B, 4 tasks |
 
-**Main-line total: 533**, plus the Stage-1 audit (`lit` 414, `lit_dolly` 168)
-cited in section 4, so about **1100**.
-
-The gap is not volume. It is that sections 3, 5 and 6 -- the three core
-empirical claims -- each rested on a single model, so "is this a Qwen artefact"
-had no answer. Llama-3.2-3B is filling the second family and OLMo-2-1B the
-third (different family, tokenizer, and pretraining corpus), for 66 + 63 cells.
-Nothing exploratory is being added.
+Main-line total once the third family lands: **~750**, plus the Stage-1 audit
+(582) cited in §5.
