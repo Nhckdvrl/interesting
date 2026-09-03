@@ -1,26 +1,16 @@
-# LOCAL:0 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond signperm2 --lr 0.003 --optimizer matprec --warmup 0
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond kaiming --lr 0.0003 --optimizer lion --warmup 0
 
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 162.43it/s]
-[W903 21:59:45.978232454 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1247805440 bytes (free: 95420416, total: 101971591168).
-[W903 21:59:45.536523791 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 2082471936 bytes (free: 1244659712, total: 101971591168).
-[W903 21:59:47.344694167 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 2082471936 bytes (free: 1211105280, total: 101971591168).
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 116.25it/s]
     step 0/300 loss=0.9991 (1s)
-[W903 21:59:48.469338705 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 463470592 bytes (free: 409993216, total: 101971591168).
-[W903 21:59:48.471047488 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 463470592 bytes (free: 445644800, total: 101971591168).
-Traceback (most recent call last):
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
-    main()
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 390, in main
-    log = train(model, adapters, params, trl, tel, cfg, callback=cb, log_every=5,
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/xiang/interesting/01-hidden-preconditioner/src/../../common/train.py", line 172, in train
-    (loss_sum / max(ntok, 1) / accum).backward()
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/_tensor.py", line 623, in backward
-    torch.autograd.backward(
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/__init__.py", line 395, in backward
-    _engine_run_backward(
-  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/graph.py", line 979, in _engine_run_backward
-    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 442.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 425.00 MiB is free. Process 11994 has 7.55 GiB memory in use. Including non-PyTorch memory, this process has 11.46 GiB memory in use. Process 2634482 has 75.50 GiB memory in use. Of the allocated memory 10.25 GiB is allocated by PyTorch, and 541.41 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+    step 30/300 loss=0.4884 (40s)
+    step 60/300 loss=0.4160 (78s)
+    step 90/300 loss=0.5102 (115s)
+    step 120/300 loss=0.5477 (154s)
+    step 150/300 loss=0.6236 (192s)
+    step 180/300 loss=0.4715 (239s)
+    step 210/300 loss=0.6505 (277s)
+    step 240/300 loss=0.4520 (314s)
+    step 270/300 loss=0.5678 (350s)
+    step 299/300 loss=0.6726 (389s)
+[kaiming_lr0.0003_s0_lion] base=0.91147 final=0.61450 (397s)

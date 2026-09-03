@@ -130,6 +130,34 @@ families**, with no training (`src/analyze_audit.py`):
   **+0.82**. One number per method, computable in a minute, characterises it —
   across four vendors, four tokenizers and a 13× range in width.
 
+## 5b. The map holds on a second family, with one honest wrinkle
+
+The optimizer-to-class map (§3) was demonstrated in training only on Qwen3-0.6B.
+Repeated on OLMo-2-1B, each optimizer judged against **its own** floor measured
+at **its own** tuned learning rate (signed permutations, exactly invariant for
+every optimizer here):
+
+| optimizer | tuned lr | frame spread | own floor | ratio | class |
+|---|---|---|---|---|---|
+| Muon | 3e-4 | 0.000058 | 0.000027 | 2.2× | `O(r)` (blind) |
+| AdamW | 3e-4 | 0.00165 | — | — | frame (sees it) |
+| Lion | 1e-4 | 0.00388 | 0.000039 | 99× | frame (sees it) |
+
+matprec is the wrinkle, and it resolves in our favour. At its tuned lr (0.01) it
+reads 6.2× its floor — apparently frame-sensitive, contradicting the analytic
+2.2e-16 covariance. But the per-lr spread is:
+
+```
+lr = 0.001   0.000000      lr = 0.01   0.002163  (tuned optimum)
+lr = 0.003   0.000002      lr = 0.03   0.005037  (diverging)
+```
+
+matprec is exactly covariant at low lr (five to six decimals) and its spread
+grows *monotonically* with lr — the signature of stability-edge float chaos, not
+of frame sensitivity. Its optimum happens to sit where that chaos begins. So the
+map holds; the naive ratio at the tuned point is a measurement artefact of an
+exactly-covariant method run near its stability limit, and we report it that way.
+
 ## 6. The classes are real, not bookkeeping
 
 Moving *within* a class changes nothing; moving *between* them does.

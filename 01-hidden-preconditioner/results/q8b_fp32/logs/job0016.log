@@ -1,0 +1,7 @@
+# fvcrc20:0 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8b_fp32 --steps 300 --grad_clip 1e9 --micro_bs 1 --probe_bs 4 --probe_batches 4 --cond frame1 --lr 0.03 --optimizer sgd --momentum 0 --warmup 0
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:01<00:07,  1.86s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:03<00:05,  1.91s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:05<00:03,  1.99s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:07<00:01,  1.85s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:07<00:00,  1.32s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:07<00:00,  1.58s/it]
+    step 0/300 loss=0.5116 (7s)

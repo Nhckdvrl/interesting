@@ -1,17 +1,18 @@
-# LOCAL:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond signperm3 --lr 0.0003 
+# fvcrc20:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond frame1 --lr 0.3 --optimizer sgd --momentum 0 --warmup 0
 
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 121.19it/s]
-[W903 22:01:32.578167910 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 67108864 bytes (free: 124977152, total: 101971591168).
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 45.41it/s]
     step 0/300 loss=0.9991 (1s)
-    step 30/300 loss=0.4866 (19s)
-    step 60/300 loss=0.4320 (38s)
-    step 90/300 loss=0.5096 (56s)
-    step 120/300 loss=0.5306 (75s)
-    step 150/300 loss=0.5818 (105s)
-    step 180/300 loss=0.4321 (151s)
-    step 210/300 loss=0.5681 (188s)
-    step 240/300 loss=0.4166 (225s)
-    step 270/300 loss=0.4967 (261s)
-    step 299/300 loss=0.5808 (298s)
-[signperm3_lr0.0003_s0] base=0.91147 final=0.54198 (306s)
+    step 30/300 loss=0.4986 (37s)
+    step 60/300 loss=0.4683 (78s)
+    step 90/300 loss=0.5350 (113s)
+    step 120/300 loss=0.5570 (148s)
+    step 150/300 loss=0.5944 (184s)
+    step 180/300 loss=0.4539 (229s)
+    step 210/300 loss=0.5753 (266s)
+    step 240/300 loss=0.4579 (302s)
+    step 270/300 loss=0.5125 (341s)
+    step 299/300 loss=0.5975 (378s)
+[frame1_lr0.3_s0_sgd] base=0.91147 final=0.57021 (385s)

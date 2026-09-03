@@ -1,18 +1,18 @@
 # fvcrc20:2 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond frame0 --lr 0.003 --optimizer matprec --warmup 0
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --tag olmo --steps 300 --grad_clip 1e9 --micro_bs 8 --probe_bs 8 --probe_batches 4 --cond signperm2 --lr 0.0001 --optimizer lion --warmup 0
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 49.28it/s]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 48.15it/s]
     step 0/300 loss=0.9991 (1s)
-    step 30/300 loss=0.4983 (29s)
-    step 60/300 loss=0.4627 (57s)
-    step 90/300 loss=0.5298 (84s)
-    step 120/300 loss=0.5444 (112s)
-    step 150/300 loss=0.5929 (140s)
-    step 180/300 loss=0.4473 (172s)
-    step 210/300 loss=0.5754 (200s)
-    step 240/300 loss=0.4496 (227s)
-    step 270/300 loss=0.5068 (254s)
-    step 299/300 loss=0.5883 (282s)
-[frame0_lr0.003_s0_matprec] base=0.91147 final=0.56074 (286s)
+    step 30/300 loss=0.4871 (41s)
+    step 60/300 loss=0.4337 (79s)
+    step 90/300 loss=0.5068 (116s)
+    step 120/300 loss=0.5248 (152s)
+    step 150/300 loss=0.5853 (189s)
+    step 180/300 loss=0.4262 (234s)
+    step 210/300 loss=0.5643 (271s)
+    step 240/300 loss=0.4119 (312s)
+    step 270/300 loss=0.4918 (348s)
+    step 299/300 loss=0.5848 (385s)
+[signperm2_lr0.0001_s0_lion] base=0.91147 final=0.53533 (392s)

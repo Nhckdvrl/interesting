@@ -1,0 +1,28 @@
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model Qwen/Qwen3-8B-Base --tag q8b_fp32 --steps 300 --grad_clip 1e9 --micro_bs 1 --probe_bs 4 --probe_batches 4 --cond frame1 --lr 0.001
+
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:00<00:03,  1.01it/s]Loading checkpoint shards:  40%|████      | 2/5 [00:02<00:03,  1.07s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:03<00:02,  1.06s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:04<00:00,  1.02it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:04<00:00,  1.46it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:04<00:00,  1.20it/s]
+[W903 22:59:57.654401681 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 201326592 bytes (free: 112394240, total: 101971591168).
+[W903 22:59:57.668857582 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 201326592 b    step 120/300 loss=0.1782 (551s)
+    step 150/300 loss=0.1817 (687s)
+    step 180/300 loss=0.2181 (845s)
+    step 210/300 loss=0.2497 (978s)
+    step 240/300 loss=0.2373 (1112s)
+    step 270/300 loss=0.1972 (1245s)
+    step 299/300 loss=0.2300 (1375s)
+ last):
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 409, in <module>
+    main()
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 206, in main
+    G = collect_grads(model, mods, probe_ld, args.probe_batches)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py", line 69, in collect_grads
+    (loss / n_batches).backward()
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/_tensor.py", line 623, in backward
+    torch.autograd.backward(
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/__init__.py", line 395, in backward
+    _engine_run_backward(
+  File "/home/xiang/miniconda3/envs/dlm_clean/lib/python3.12/site-packages/torch/autograd/graph.py", line 979, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 192.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 209.19 MiB is free. Process 25307 has 7.55 GiB memory in use. Process 2684527 has 48.24 GiB memory in use. Including non-PyTorch memory, this process has 38.94 GiB memory in use. Of the allocated memory 37.38 GiB is allocated by PyTorch, and 939.53 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
