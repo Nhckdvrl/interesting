@@ -170,9 +170,11 @@ must be fp32 or carry its own floor.
 AdamW's own symmetry group and the class collapses, and grows through
 `r = 4, 16, 64, 128`.
 
-Rotating published initialisers within their own orbit (`results/rot`, three
-families) helps or is neutral 6/6 one way and hurts or is neutral 6/6 the other,
-with `BA`, `P` and all nine invariants preserved to 1e-15.
+Rotating published initialisers within their own orbit (`results/rot`) helps or
+is neutral 6/6 one way and hurts or is neutral 6/6 the other, with `BA`, `P` and
+all nine invariants preserved to 1e-15. **This one is currently Qwen3-0.6B
+only** — a second family is running, and until it lands the causal claim in this
+section rests on a single model while the ladder above it rests on three.
 
 ## 7. The consequence: which initialiser is best depends on the optimizer
 
