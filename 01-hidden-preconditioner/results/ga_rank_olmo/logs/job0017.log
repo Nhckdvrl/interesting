@@ -1,0 +1,6 @@
+# fvcrc10:2 (a100)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --micro_bs 8 --probe_bs 8 --steps 300 --grad_clip 1e9 --probe_batches 4 --tag ga_rank_olmo --cond eva --lr 0.0002 --match trace --optimizer groupadam --group_b 4
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc10' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 107.02it/s]

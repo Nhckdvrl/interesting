@@ -1,0 +1,17 @@
+# fvcrc20:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag ga_stair --steps 300 --grad_clip 1e9 --probe_batches 4 --cond blockrot4 --lr 0.0003 --optimizer groupadam --group_b 8
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
+    step 0/300 loss=1.1613 (1s)
+    step 30/300 loss=0.4515 (20s)
+    step 60/300 loss=0.5087 (46s)
+    step 90/300 loss=0.4001 (72s)
+    step 120/300 loss=0.4284 (100s)
+    step 150/300 loss=0.4527 (128s)
+    step 180/300 loss=0.3693 (162s)
+    step 210/300 loss=0.3954 (189s)
+    step 240/300 loss=0.3944 (217s)
+    step 270/300 loss=0.3589 (244s)
+    step 299/300 loss=0.3901 (271s)
+[blockrot4_lr0.0003_s0_groupadam8] base=0.83113 final=0.44537 (276s)

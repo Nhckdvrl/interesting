@@ -1,0 +1,15 @@
+# LOCAL:2 (blackwell)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag ga_stair --steps 300 --grad_clip 1e9 --probe_batches 4 --cond blockrot1 --lr 0.0003 --optimizer groupadam --group_b 4
+
+    step 0/300 loss=1.1613 (1s)
+    step 30/300 loss=0.4514 (26s)
+    step 60/300 loss=0.5056 (52s)
+    step 90/300 loss=0.4002 (78s)
+    step 120/300 loss=0.4271 (105s)
+    step 150/300 loss=0.4533 (130s)
+    step 180/300 loss=0.3701 (162s)
+    step 210/300 loss=0.3953 (188s)
+    step 240/300 loss=0.3935 (213s)
+    step 270/300 loss=0.3574 (238s)
+    step 299/300 loss=0.3912 (262s)
+[blockrot1_lr0.0003_s0_groupadam4] base=0.83113 final=0.44549 (268s)

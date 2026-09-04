@@ -124,10 +124,47 @@ def ranking(tag, inits=("gradsub", "eva", "pissa"),
                                   if found else "not measured yet"))
 
 
+def collapse(tag="ga_stair", lr=3e-4):
+    """Section 6's frame ladder as a function of the optimizer's symmetry group.
+
+    frame0/frame1 are full O(r) gauge moves, so they are visible to GroupAdam_b
+    for every b < r and must be EXACTLY invisible at b = r.  The floor is the
+    same panel's blockrot1 cell (a sign flip, invisible to every rung) at the
+    same lr, so nothing is imported.
+    """
+    d = os.path.join(RES, tag)
+    print(f"\n=== {tag}: does the frame ladder collapse as b grows? ===")
+    print("spread over {kaiming, frame0, frame1} vs each rung's own "
+          "sign-flip floor\n")
+    print(f"{'b':>4s} {'kaiming':>10s} {'frame0':>10s} {'frame1':>10s} "
+          f"{'spread':>10s} {'floor':>10s} {'ratio':>8s}")
+    for b in BS:
+        vals = {}
+        for c in ("kaiming", "frame0", "frame1"):
+            v = L(os.path.join(d, f"{c}_lr{lr:g}_s0_groupadam{b}.json"))
+            if v is not None:
+                vals[c] = v
+        if len(vals) < 3:
+            print(f"{b:>4d} " + "  incomplete "
+                  f"({len(vals)}/3 cells)"); continue
+        spread = max(vals.values()) - min(vals.values())
+        base = vals["kaiming"]
+        rot = L(os.path.join(d, f"blockrot1_lr{lr:g}_s0_groupadam{b}.json"))
+        fl = None if rot is None else abs(rot - base)
+        ratio = f"{spread / fl:.1f}x" if fl else "--"
+        print(f"{b:>4d} {vals['kaiming']:>10.5f} {vals['frame0']:>10.5f} "
+              f"{vals['frame1']:>10.5f} {spread:>10.2e} "
+              f"{(f'{fl:.2e}' if fl else '--'):>10s} {ratio:>8s}")
+    print("\nprediction: spread stays ~2e-3 for b < 16 and collapses to the "
+          "floor at b = 16,\nwhere the whole gauge group is invisible.")
+
+
 if __name__ == "__main__":
     which = sys.argv[1] if len(sys.argv) > 1 else "all"
     if which in ("all", "stair"):
         staircase()
+    if which in ("all", "stair", "collapse"):
+        collapse()
     if which in ("all", "rank"):
         for t in ("ga_rank_olmo", "ga_rank_llama"):
             if os.path.isdir(os.path.join(RES, t)):
