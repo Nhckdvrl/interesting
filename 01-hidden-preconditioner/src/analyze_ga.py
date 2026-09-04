@@ -81,7 +81,8 @@ def staircase(tag="ga_stair", lr=3e-4):
 
 def ranking(tag, inits=("gradsub", "eva", "pissa"),
             match={"gradsub": "trace", "eva": "trace", "pissa": "none"},
-            bs=(1, 4, 16), lrs=(1e-4, 2e-4, 3e-4, 5e-4)):
+            bs=(1, 4, 16),
+            lrs=(3e-5, 5e-5, 1e-4, 2e-4, 3e-4, 5e-4, 7e-4, 1e-3)):
     d = os.path.join(RES, tag)
     print(f"\n=== {tag}: initializer ranking vs symmetry resolution ===")
     print("each initialiser tuned separately; optimum must be INTERIOR\n")
