@@ -1,0 +1,18 @@
+# fvcrc10:2 (a100)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=2 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --micro_bs 8 --probe_bs 8 --steps 300 --grad_clip 1e9 --probe_batches 4 --tag ga_rank_olmo --cond pissa --lr 0.0005 --match none --optimizer groupadam --group_b 16
+
+Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
+Warning: Permanently added 'fvcrc10' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 50.21it/s]
+    step 0/300 loss=0.9991 (2s)
+    step 30/300 loss=0.6924 (97s)
+    step 60/300 loss=0.5530 (192s)
+    step 90/300 loss=0.6543 (287s)
+    step 120/300 loss=0.6828 (380s)
+    step 150/300 loss=0.7411 (476s)
+    step 180/300 loss=0.5854 (590s)
+    step 210/300 loss=0.7842 (685s)
+    step 240/300 loss=0.5179 (777s)
+    step 270/300 loss=0.6561 (869s)
+    step 299/300 loss=0.7594 (961s)
+[pissa_lr0.0005_s0_mnone_groupadam16] base=0.91147 final=0.68012 (981s)

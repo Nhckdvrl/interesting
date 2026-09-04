@@ -14,3 +14,5 @@ Warning: Permanently added 'fvcrc11' (ED25519) to the list of known hosts.
     step 210/300 loss=0.6086 (947s)
     step 240/300 loss=0.4077 (1159s)
     step 270/300 loss=0.4701 (1371s)
+    step 299/300 loss=0.5513 (1556s)
+[kaiming_lr0.0003_s0_groupadam1] base=1.36287 final=0.51906 (1575s)
