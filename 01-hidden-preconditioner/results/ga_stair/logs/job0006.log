@@ -1,17 +1,17 @@
 # fvcrc20:3 (blackwell)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag ga_stair --steps 300 --grad_clip 1e9 --probe_batches 4 --cond kaiming --lr 0.0003 --optimizer groupadam --group_b 2
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --tag ga_stair --steps 300 --grad_clip 1e9 --probe_batches 4 --cond frame0 --lr 0.0003 --optimizer groupadam --group_b 8
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
 Warning: Permanently added 'fvcrc20' (ED25519) to the list of known hosts.
     step 0/300 loss=1.1613 (1s)
-    step 30/300 loss=0.4511 (28s)
-    step 60/300 loss=0.5062 (54s)
-    step 90/300 loss=0.4001 (81s)
-    step 120/300 loss=0.4266 (108s)
-    step 150/300 loss=0.4536 (135s)
-    step 180/300 loss=0.3711 (167s)
-    step 210/300 loss=0.3959 (194s)
-    step 240/300 loss=0.3946 (220s)
-    step 270/300 loss=0.3568 (247s)
-    step 299/300 loss=0.3890 (274s)
-[kaiming_lr0.0003_s0_groupadam2] base=0.83113 final=0.44511 (279s)
+    step 30/300 loss=0.4477 (28s)
+    step 60/300 loss=0.5042 (54s)
+    step 90/300 loss=0.3999 (81s)
+    step 120/300 loss=0.4269 (109s)
+    step 150/300 loss=0.4516 (136s)
+    step 180/300 loss=0.3673 (168s)
+    step 210/300 loss=0.3940 (196s)
+    step 240/300 loss=0.3935 (224s)
+    step 270/300 loss=0.3582 (251s)
+    step 299/300 loss=0.3937 (271s)
+[frame0_lr0.0003_s0_groupadam8] base=0.83113 final=0.44554 (274s)

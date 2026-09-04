@@ -169,7 +169,10 @@ def main():
     args = ap.parse_args()
 
     cell = (f"{args.cond}_lr{args.lr:g}_s{args.seed}"
-            + (f"_g{args.gauge_seed}" if args.cond == "left_gauge" else "")
+            + (f"_g{args.gauge_seed}"
+               if (args.cond == "left_gauge"
+                   or (args.cond.startswith("blockrot") and args.gauge_seed))
+               else "")
             + ("" if args.match == "trace" else f"_m{args.match}")
             + ("" if args.subtract else "_nosub")
             + (f"_{args.optimizer}{args.group_b}" if args.optimizer == "groupadam"

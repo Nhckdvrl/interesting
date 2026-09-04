@@ -148,9 +148,17 @@ def collapse(tag="ga_stair", lr=3e-4):
             print(f"{b:>4d} " + "  incomplete "
                   f"({len(vals)}/3 cells)"); continue
         spread = max(vals.values()) - min(vals.values())
-        base = vals["kaiming"]
-        rot = L(os.path.join(d, f"blockrot1_lr{lr:g}_s0_groupadam{b}.json"))
-        fl = None if rot is None else abs(rot - base)
+        # floor = spread over gauge-EQUIVALENT runs: kaiming and its sign-flip
+        # draws (blockrot1, which lies in O(1)^r and is invisible to every
+        # rung).  Same lr, same optimizer, measured inside the panel.
+        eq = [vals["kaiming"]]
+        for gs in (0, 1, 2):
+            suf = "" if gs == 0 else f"_g{gs}"
+            v = L(os.path.join(d,
+                               f"blockrot1_lr{lr:g}_s0{suf}_groupadam{b}.json"))
+            if v is not None:
+                eq.append(v)
+        fl = (max(eq) - min(eq)) if len(eq) >= 2 else None
         ratio = f"{spread / fl:.1f}x" if fl else "--"
         print(f"{b:>4d} {vals['kaiming']:>10.5f} {vals['frame0']:>10.5f} "
               f"{vals['frame1']:>10.5f} {spread:>10.2e} "
