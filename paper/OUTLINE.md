@@ -91,6 +91,60 @@ rotations". Muon is exactly `O(r)`-invariant and not scaling-invariant — the t
 halves differ by six orders of magnitude, and the classification says which is
 which.
 
+## 3b. The map is an axis, not a table: an exact subgroup ladder
+
+§3 classifies optimizers people already use, which invites the answer "those
+optimizers differ in many ways besides symmetry". So we built the axis instead.
+
+`GroupAdam_b` shares one second-moment scalar across blocks of `b` rank
+coordinates, `v^A_{J,j} = EMA[(1/b)‖G^A_{J,j}‖²]`. Under the gauge, `G^A → QG^A`
+and `G^B → G^BQᵀ`; for block-diagonal `Q = diag(Q_1..Q_{r/b})` with `Q_k ∈ O(b)`
+the block norm is invariant and the first moment is covariant, so the update
+commutes with the gauge **exactly**:
+
+> **Theorem.** `GroupAdam_b` is exactly equivariant to `H_b = O(b)^{r/b}`.
+
+That is a subgroup *chain* `O(1)^r ⊂ O(2)^{r/2} ⊂ … ⊂ O(r)`, exact at every
+rung — not a smooth anisotropy interpolation whose interior points are
+equivariant to nothing. It blocks the **rank index only**, so per-input-coordinate
+adaptivity is untouched and `b` is not a proxy for "how adaptive". Visible frame
+dimension is `r(r−b)/2` = 120, 112, 96, 64, 0 for `r = 16`.
+
+**Verified before any GPU time** (`src/groupadam_staircase.py`, float64, a
+synthetic gauge-invariant two-factor problem): `GroupAdam_1 = torch.AdamW` to
+**3.5e-16** — the ladder *contains* AdamW — and a rotation confined to `k`-blocks
+is at the float64 floor iff `k ≤ b`, in **25/25** cells, with fourteen orders of
+separation (≤3.7e-16 vs ~1e-2).
+
+**The consequence, on a real model.** §6's frame ladder run under `GroupAdam_b`
+at fixed lr, everything else held:
+
+| b | spread over {kaiming, frame0, frame1} | rel. to b=1 |
+|---|---|---|
+| 1 (=AdamW) | 2.08e-03 | 1.00 |
+| 2 | 1.47e-03 | 0.71 |
+| 4 | 1.68e-03 | 0.81 |
+| 8 | 4.91e-04 | 0.24 |
+| 16 (=`O(r)`-blind) | 4.72e-04 | 0.23 |
+
+b = 1 reproduces §6's AdamW 0.00222 as it must; by b = 8 the spread is at the
+fp32 accumulation floor (independently measured as 1.9e-4–7.0e-4 by the b=16 row
+of the staircase panel, which the theorem forces to be exactly blind). **The
+frame coordinate stops existing as the optimizer's symmetry group grows.** Honest
+limit: the floor also *grows* with b (2.9e-4 → 2.3e-3, plausibly because
+averaging `v` over a block lets small-gradient coordinates take relatively larger
+steps), so the effect is resolved above noise only at b = 1 (7.2×) and marginally
+b = 2 (2.4×).
+
+**What the ladder does *not* buy.** It does not reproduce §7's reversal — see
+the correction there. What it does show, on both families, is a *magnitude*
+effect: PiSSA's deficit to the leader grows monotonically with `b` (OLMo 0.00758
+→ 0.01077 → 0.01302; Llama 0.00686 → 0.00656 → 0.01132 at b = 1, 4, 16), a
+change of 4.5–5.4e-3 against in-panel floors of 2e-5–2.2e-4. The frame-based
+initialiser loses ground as the optimizer stops resolving the frame — but not
+enough to reorder the triple, and PiSSA also differs in scale, so we report this
+as a magnitude trend and not as a clean causal isolation.
+
 ## 4. Labelling the classes without training
 
 The `O(r)` class is labelled by the invariants of the metric triple
@@ -284,6 +338,22 @@ its floor; there the ordering is stable (τ = +0.87). What travels is not "the
 ranking always reverses" but "the ranking is not safe to quote without naming
 the optimizer" — on two of three families it does reverse, reproducibly and in
 the same place.
+
+**And the reversal is *not* attributable to the frame — we tested it and it
+failed.** The obvious objection to this section is that AdamW and Muon differ in
+many ways besides which gauge freedom they resolve, so the reversal need not be
+about the frame at all. §3b settles that with a controlled test: GroupAdam_b
+moves the symmetry group and nothing else (b = 1 *is* AdamW, to 3e-16). If the
+frame channel carried the reversal, the ranking would migrate as b goes 1 → 4 →
+16. It does not. On Llama-3.2-3B the order is `gradsub < eva < pissa` at **all
+three** rungs; on OLMo-2-1B the only change is an eva/gradsub swap at b = 4 that
+reverses back at b = 16, on a pair separated by 1.4e-4 — about 3× that panel's
+floor, and less than the loss moves between adjacent learning-rate rungs. So the
+AdamW↔Muon reversal is carried by something else about Muon (its spectral
+normalisation and the geometry that follows), not by its gauge-blindness. This
+was pre-registered with both outcomes written down before the runs, and it came
+out on the negative side; the section keeps the measured reversal and drops the
+causal reading.
 
 ## 8. Scope
 

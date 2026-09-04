@@ -1,18 +1,18 @@
-# fvcrc10:3 (a100)
-cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=3 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model allenai/OLMo-2-0425-1B --micro_bs 8 --probe_bs 8 --steps 300 --grad_clip 1e9 --probe_batches 4 --tag ga_rank_olmo --cond pissa --lr 0.0001 --match none --optimizer groupadam --group_b 4
+# fvcrc11:1 (a100)
+cd /home/xiang/interesting && CUDA_VISIBLE_DEVICES=1 HF_HUB_OFFLINE=0 PYTHONDONTWRITEBYTECODE=1  /home/xiang/interesting/.venv-a100/bin/python /home/xiang/interesting/01-hidden-preconditioner/src/run_lit.py --model unsloth/Llama-3.2-3B --micro_bs 4 --probe_bs 8 --amp none --steps 300 --grad_clip 1e9 --probe_batches 4 --tag ga_rank_llama --cond eva --lr 0.0007 --match trace --optimizer groupadam --group_b 16
 
 Warning: Permanently added 'fvcrc00' (ED25519) to the list of known hosts.
-Warning: Permanently added 'fvcrc10' (ED25519) to the list of known hosts.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 93.22it/s]
-    step 0/300 loss=0.9991 (2s)
-    step 30/300 loss=0.5168 (99s)
-    step 60/300 loss=0.4299 (198s)
-    step 90/300 loss=0.5254 (294s)
-    step 120/300 loss=0.5557 (391s)
-    step 150/300 loss=0.6006 (487s)
-    step 180/300 loss=0.4404 (606s)
-    step 210/300 loss=0.6033 (703s)
-    step 240/300 loss=0.4231 (763s)
-    step 270/300 loss=0.5160 (811s)
-    step 299/300 loss=0.6076 (855s)
-[pissa_lr0.0001_s0_mnone_groupadam4] base=0.91147 final=0.56486 (864s)
+Warning: Permanently added 'fvcrc11' (ED25519) to the list of known hosts.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.95s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.76s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.94s/it]
+    step 0/300 loss=1.4693 (5s)
+    step 30/300 loss=0.5359 (228s)
+    step 60/300 loss=0.5319 (449s)
+    step 90/300 loss=0.6104 (669s)
+    step 120/300 loss=0.5747 (889s)
+    step 150/300 loss=0.4579 (1112s)
+    step 180/300 loss=0.5235 (1380s)
+    step 210/300 loss=0.6450 (1598s)
+    step 240/300 loss=0.4381 (1749s)
+    step 270/300 loss=0.4837 (1846s)
+    step 299/300 loss=0.5801 (1944s)
+[eva_lr0.0007_s0_groupadam16] base=1.36287 final=0.55694 (1963s)
