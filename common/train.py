@@ -79,7 +79,7 @@ def adapter_diagnostics(adapters, sample_layers=None):
 
 def make_optimizer(params, kind, lr, wd=0.0, betas=(0.9, 0.999), eps=1e-8,
                    momentum=0.0, b_lr_ratio=1.0, adapters=None,
-                   a_lr_ratio=1.0):
+                   a_lr_ratio=1.0, group_b=1):
     """b_lr_ratio > 1 reproduces LoRA+ (Hayou et al., ICML 2024).
     a_lr_ratio scales the DOWN-projection's learning rate independently, which
     is the knob that sets how fast Adam rewrites the initial A scaffold:
@@ -110,6 +110,14 @@ def make_optimizer(params, kind, lr, wd=0.0, betas=(0.9, 0.999), eps=1e-8,
         # rather than adaptivity or the norm.
         from common.matprec import MatPrecAdam
         return MatPrecAdam(params, lr=lr, betas=betas, eps=eps, wd=wd)
+    if kind == "groupadam":
+        # Adam with the second moment shared across blocks of b rank
+        # coordinates: exactly equivariant to O(b)^{r/b}, so b moves the
+        # symmetry group and nothing else.  b = 1 IS AdamW (verified to 3e-16),
+        # b = r is fully O(r)-blind, and the rungs between are an exact
+        # subgroup chain rather than a smooth anisotropy interpolation.
+        from common.groupadam import GroupAdam
+        return GroupAdam(params, lr=lr, b=group_b, betas=betas, eps=eps, wd=wd)
     if kind == "muon":
         # steepest descent under the SPECTRAL norm, which is orthogonally
         # invariant -- so Muon, like SGD and unlike AdamW, is exactly covariant
@@ -131,6 +139,7 @@ def train(model, adapters, params, train_loader, eval_loader, cfg, device="cuda"
                          momentum=cfg.get("momentum", 0.0),
                          b_lr_ratio=cfg.get("b_lr_ratio", 1.0),
                          a_lr_ratio=cfg.get("a_lr_ratio", 1.0),
+                         group_b=cfg.get("group_b", 1),
                          adapters=adapters)
     base_lrs = [g["lr"] for g in opt.param_groups]
     steps = cfg["steps"]; accum = cfg.get("accum", 1)

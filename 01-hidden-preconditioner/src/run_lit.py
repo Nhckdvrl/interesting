@@ -136,6 +136,10 @@ def main():
                          "off the GPU; at 7B the down_proj covariance alone is "
                          "822 MB per layer")
     ap.add_argument("--optimizer", default="adamw")
+    ap.add_argument("--group_b", type=int, default=1,
+                    help="GroupAdam block size on the rank index: the optimizer "
+                         "is exactly O(b)^{r/b}-equivariant, so b=1 is AdamW and "
+                         "b=r is gauge-blind.")
     ap.add_argument("--momentum", type=float, default=0.0)
     ap.add_argument("--warmup", type=int, default=10)
     ap.add_argument("--grad_clip", type=float, default=1.0)
@@ -168,7 +172,8 @@ def main():
             + (f"_g{args.gauge_seed}" if args.cond == "left_gauge" else "")
             + ("" if args.match == "trace" else f"_m{args.match}")
             + ("" if args.subtract else "_nosub")
-            + (f"_{args.optimizer}" if args.optimizer != "adamw" else "")
+            + (f"_{args.optimizer}{args.group_b}" if args.optimizer == "groupadam"
+               else (f"_{args.optimizer}" if args.optimizer != "adamw" else ""))
             + ("" if args.dtype == "float32" else f"_{args.dtype}")
             + ("" if args.scaling == "standard" else f"_{args.scaling}")
             + ("" if args.b_lr_ratio == 1.0 else f"_bl{args.b_lr_ratio:g}")
@@ -258,6 +263,20 @@ def main():
             _k = name.rsplit(".", 1)[0] + "." + ACT_GROUP[name.split(".")[-1]]
             A = IN.init_frame(base.cuda(), G[name].cuda(), float(c[6:]),
                               Sigma=ACT[_k].cuda()).cpu().double()
+        elif c.startswith("blockrot"):
+            # pure gauge move CONFINED to contiguous k-blocks of the rank
+            # index: A -> Q_k A with Q_k in O(k)^{r/k} <= O(r).  Same
+            # invariants as `kaiming` (P bit-identical), but the frame moves
+            # only inside k-blocks, so GroupAdam_b is exactly blind to it when
+            # k <= b and sees it when k > b.  k = 1 is a sign flip, which every
+            # optimizer here respects, so that column IS the panel's own floor.
+            from common.groupadam import block_rotation
+            _k = int(c[8:])
+            g2 = torch.Generator().manual_seed(
+                int(hashlib.md5(f"blockrot{_k}:{args.gauge_seed}:{name}"
+                                .encode()).hexdigest()[:12], 16))
+            Q = block_rotation(r, _k, dtype=torch.float64, generator=g2)
+            A = (Q @ base.double()).double()
         elif c.startswith("frame"):
             # pure gauge move on the vanilla draw: A -> Q(t) A_0, so P and
             # every gauge invariant are bit-identical to `kaiming` and only the
@@ -325,7 +344,7 @@ def main():
     cfg = dict(steps=args.steps, accum=accum, optimizer=args.optimizer, lr=args.lr,
                wd=0.0, warmup=args.warmup, sched=args.sched,
                grad_clip=args.grad_clip, momentum=args.momentum,
-               b_lr_ratio=args.b_lr_ratio)
+               b_lr_ratio=args.b_lr_ratio, group_b=args.group_b)
     acc_set = gsm8k_eval_set(args.acc_n) if args.acc_n else None
     base_acc = None
 
